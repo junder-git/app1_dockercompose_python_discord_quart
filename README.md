@@ -30,5 +30,5 @@ RISK WIP - protect and make private the currently publicly accesible api flask e
 Features TWITCH BOT  add a twitch channel points song request to get music playing in stream   
 Features looping tracks / playlists  
 Feature add the array of popular playlist urls to simply click on, upto 10playlists per server  
-Security feature prevent large playlists with 100+ tracks being added only allow for a queue size of 50 as well as 1 instance of jbot per server limiter  
+Security feature prevent large playlists with 100+ tracks being added only allow for a queue size of 50 as well as 1 instance of jbot per server limiter is gd enuff so far    
   
