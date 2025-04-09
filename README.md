@@ -8,7 +8,8 @@
 (N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)    
   
 4) INSTALL DOCKER AND DOCKER-COMPOSE  
-   (For run and stop to work below be sure to navigate to the correct path where you extracted the repository, so if you extracted it to C:/User/Documents open command prompt or power shell and ```cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager```)  
+   (For bot to run and stop succesfully with ```docker-compose``` be sure to navigate to the correct path where you extracted the repository in command prompt i.e.e cmd.exe or powershell, so if you extracted it to C:/User/Documents open command prompt or power shell and:
+   ```cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager```)  
    Run) ```docker-compose up -d```  
    Stop) ```docker-compose -v```  
      
