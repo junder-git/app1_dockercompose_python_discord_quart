@@ -33,7 +33,7 @@ Locate the `.env` file in the extracted directory and configure:
 Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
 
 ```bash
-cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager/source
+cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager/source
 ```
 
 **Start the bot**:
