@@ -24,7 +24,7 @@ Example flask webplayer manager view:
   
 ## Other notes  
 
-RISK WIP - protect and make private the currently publicly accesible api flask endpoints cus i could use these urls to not be present in vc to manipulate the queue of other servers, discord api is running on the docker net so is oinly accesible by containers on it    
+RISK WIP - protect and make private the currently publicly accesible api flask endpoints cus i could use these urls to not be present in vc to manipulate the queue of other servers, discord api is running on the docker net so is only accesible by containers on it    
 ![Webplayer Image 2](READMEresources/flask_endpoints.png) 
   
 Features TWITCH BOT  add a twitch channel points song request to get music playing in stream   
