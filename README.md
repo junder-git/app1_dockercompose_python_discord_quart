@@ -18,8 +18,10 @@ Locate the `.env` file in the extracted directory and configure:
 #### Discord API Setup
 1. Visit [Discord Developer Portal](https://discord.com/developers)
 2. Create a new application
-3. Copy the OAuth2 Secret Key and Client Key to the `.env` file
-
+3. Add the redirect url http://localhost:5000/callback  
+5. Copy the OAuth2 Secret Key and Client Key to the `.env` file  
+6. Invite the bot to the server from discord dev portal with bot scope and admin permissions.  
+  
 #### YouTube Data API Setup
 1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)
 2. Create a new application
@@ -74,4 +76,12 @@ docker-compose down -v
 - Keep the last input in the search query box  
     
 ### Current Security Features
-- Limit of one bot instance per Discord server for any number of voice channels it may have.  
+- Limit of one bot instance per Discord server for any number of voice channels it may have.
+  
+##### Lind  
+-Keep Playlist results until you submit a new search  
+-Keep the last input in the search bar  
+-Option to loop song or playlist  
+-Commmand to add first search result of a qry to the playlist  
+-Cache last 2 songs or so?  
+-Give option to go back?   
