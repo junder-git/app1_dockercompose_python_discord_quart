@@ -1,7 +1,6 @@
 # Setup/installation and running mantainance guide  
   
-1) Download the whole git repo with git clone or download as zip.  
-(If downloaded as zip maybe extract it to your 'Documents' folder: https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip)  
+1) Download the whole git repo with git clone or download as zip: https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip)  
   
 3) REPLACE => .env file envs  
   2a ) Go to discord dev portal and create your application then sub the oauth2 secret key and client keys into the ```.env``` file: https://discord.com/developers  
