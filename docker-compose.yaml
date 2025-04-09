@@ -1,0 +1,39 @@
+services:
+  flask-app:
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile.flask
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+    networks:
+      - app-network
+    depends_on:
+      - discord-bot
+  discord-bot:
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile.discord
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,30 @@
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY requirementsFLASK.txt .
+
+# Install any needed dependencies
+RUN pip install --no-cache-dir -r requirementsFLASK.txt
+
+# Copy application files and shared services
+COPY Service_FlaskApp.py .
+COPY Class_DiscordBotAPI.py .
+COPY Class_YouTube.py .
+COPY Class_MusicPlayer.py .
+COPY templates ./templates
+COPY static ./static
+
+# Expose port 5000 for Flask
+EXPOSE 5000
+
+# Define environment variables
+ENV PYTHONUNBUFFERED=1
+ENV FLASK_APP=FlaskApp.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Run the application unbuffered
+CMD ["python", "-u", "Service_FlaskApp.py"]
