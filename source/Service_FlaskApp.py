@@ -13,7 +13,7 @@ load_dotenv()
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over http
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
-IPC_SECRET_KEY = 'dev-secret-key-change-in-production'
+IPC_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 
 # Initialize the services
 youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
