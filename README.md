@@ -4,8 +4,8 @@
 
 ### Prerequisites
 - If not downloading as zip then you need Git (for cloning the repository) 
-- Docker and Docker Compose
-
+- Must have Docker. Download and install from [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows).  
+  
 ### Step 1: Download the Repository
 ```bash
 git clone https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager.git
@@ -29,10 +29,7 @@ Locate the `.env` file in the extracted directory and configure:
 
 **Important**: If a parameter has a default value of "NONE" in Python files, a substitution might occur in some cases.
 
-### Step 3: Install Docker and Docker Compose
-Download and install from [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows).
-
-### Step 4: Run the Application
+### Step 3: Run the Application
 Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
 
 ```bash
