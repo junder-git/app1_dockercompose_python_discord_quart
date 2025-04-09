@@ -5,9 +5,10 @@
 2) REPLACE => .env file envs  
   2a ) Go to discord dev portal and sub your application oauth2 secret key and client keys into .env file  
   2b ) Go to youtube data api portal and sub your application key into .env file  
-(N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)    
+(N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)
+(Tip: You can ignore the two 'redirect url' envs if you just want to use the discord chat model manager view without ever going to the flask webplayer)  
   
-3) INSTALL DOCKER AND DOCKER-COMPOSE  
+4) INSTALL DOCKER AND DOCKER-COMPOSE  
    (For bot to run and stop succesfully with ```docker-compose``` be sure to navigate to the correct path where you extracted the repository in command prompt i.e.e cmd.exe or powershell, so if you extracted it to ```C:/User/Documents``` open command prompt or power shell and with keybinds ```Win+R``` type ```cmd``` and then naviate to where you extracted the zip with:  
    ```cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager```)  
      
