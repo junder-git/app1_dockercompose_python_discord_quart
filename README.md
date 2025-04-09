@@ -73,4 +73,6 @@ docker-compose down -v
 - Quick access to popular playlists (up to 10 per server)
 - Protection against large playlists (100+ tracks)
 - Queue size limit of 50 tracks
+    
+### Current Security Features
 - Limit of one bot instance per Discord server
