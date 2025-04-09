@@ -75,4 +75,4 @@ docker-compose down -v
 - Queue size limit of 50 tracks
     
 ### Current Security Features
-- Limit of one bot instance per Discord server
+- Limit of one bot instance per Discord server for any number of voice channels it may have.  
