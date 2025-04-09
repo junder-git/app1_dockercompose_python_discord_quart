@@ -69,7 +69,9 @@ docker-compose down -v
 - Track and playlist looping functionality
 - Quick access to popular playlists (up to 10 per server)
 - Protection against large playlists (100+ tracks)
-- Queue size limit of 50 tracks
+- Queue size limit of 50 tracks  
+- Make sure after clicking add to queue in the flask webplayer search it doesnt clear the search and let it add more to queue  
+- Keep the last input in the search query box  
     
 ### Current Security Features
 - Limit of one bot instance per Discord server for any number of voice channels it may have.  
