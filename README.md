@@ -1,35 +1,76 @@
-# Setup/installation and running mantainance guide  
-  
-1) Download the whole git repo with ```git clone``` or download as zip: https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip then extract zip to your users documents folder)  
-  
-2) REPLACE => ```.env``` file envs  
-  - 2a ) Go to discord dev portal and create your application then sub the oauth2 secret key and client keys into the ```.env``` file: https://discord.com/developers  
-  - 2b ) Go to youtube data api portal and create your application then sub the key into the ```.env``` file: https://developers.google.com/youtube/v3    
-(N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)  
-(Tip: You can ignore the two 'redirect url' envs if you just want to use the discord chat model manager view without ever going to the flask webplayer view in your browser to control the bot and music playback)  
-  
-3) INSTALL DOCKER AND DOCKER-COMPOSE::: https://www.docker.com/products/docker-desktop/ => for windows  
-   (For bot to run and stop succesfully with ```docker-compose``` be sure to navigate to the correct path where you extracted the repository in command prompt i.e. cmd.exe or powershell, so if you extracted it to ```C:/User/Documents``` open command prompt or power shell with keybinds ```Win+R``` type ```cmd``` and then naviate to where you extracted the zip with:  
-   ```cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager/source```)  
-     
-   - 3a. Now run bot with) ```docker-compose up -d```  
-   - 3b. Or stop bot with) ```docker-compose down -v```  
-     
-Example dicord "chat model" manager view:  
-![Model Image 1](READMEresources/discord_chat_model_example.png)  
-  
-Example flask webplayer manager view:  
-![Webplayer Image 1](READMEresources/flask_webapp_example.png)    
-  
-  
-## Other notes  
-  
-RISK WIP - protect and make private the currently publicly accesible api flask endpoints cus i could use these urls to not be present in vc to manipulate the queue of other servers, to riterate 
-FLASK needs semi protected endpoints to be accesible but private methods e.g. self_musicplaymethod() tro call its own private music player and endpoints, some reson i have two endpoints that could mrge into the if-elif-else block as well. However, discord api is running on the docker net so is only accesible by containers on it, np there      
-![Webplayer Image 2](READMEresources/flask_endpoints.png) 
-  
-Features TWITCH BOT  add a twitch channel points song request to get music playing in stream   
-Features looping tracks / playlists  
-Feature add the array of popular playlist urls to simply click on, upto 10playlists per server  
-Security feature prevent large playlists with 100+ tracks being added only allow for a queue size of 50 as well as 1 instance of jbot per server limiter is gd enuff so far    
-  
+# JBot - Discord Bot & Flask Manager
+
+## Setup & Installation Guide
+
+### Prerequisites
+- Git (for cloning the repository)
+- Docker and Docker Compose
+
+### Step 1: Download the Repository
+```bash
+git clone https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager.git
+```
+**Alternative**: Download the [ZIP file](https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip) and extract to your Documents folder.
+
+### Step 2: Configure Environment Variables
+Locate the `.env` file in the extracted directory and configure:
+
+#### Discord API Setup
+1. Visit [Discord Developer Portal](https://discord.com/developers)
+2. Create a new application
+3. Copy the OAuth2 Secret Key and Client Key to the `.env` file
+
+#### YouTube Data API Setup
+1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)
+2. Create a new application
+3. Copy the API key to the `.env` file
+
+**Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
+
+**Important**: If a parameter has a default value of "NONE" in Python files, a substitution might occur in some cases.
+
+### Step 3: Install Docker and Docker Compose
+Download and install from [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows).
+
+### Step 4: Run the Application
+Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
+
+```bash
+cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager/source
+```
+
+**Start the bot**:
+```bash
+docker-compose up -d
+```
+
+**Stop the bot**:
+```bash
+docker-compose down -v
+```
+
+## Application Interfaces
+
+### Discord Chat Model Manager
+![Discord Chat Interface](READMEresources/discord_chat_model_example.png)
+
+### Flask Webplayer Manager
+![Flask Webplayer Interface](READMEresources/flask_webapp_example.png)
+
+## Development Notes
+
+### Security Considerations
+- **Current Risk**: Flask API endpoints are publicly accessible
+- **Issue**: These endpoints could be used to manipulate queues on other servers without being in the voice channel
+- **Solution in Progress**: Implement authentication for Flask endpoints while maintaining necessary accessibility
+- **Note**: Discord API is only accessible within the Docker network, so it's protected
+
+![Flask Endpoints](READMEresources/flask_endpoints.png)
+
+### Planned Features
+- Twitch bot integration with channel points for song requests
+- Track and playlist looping functionality
+- Quick access to popular playlists (up to 10 per server)
+- Protection against large playlists (100+ tracks)
+- Queue size limit of 50 tracks
+- Limit of one bot instance per Discord server
