@@ -38,7 +38,7 @@ cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_armv7_discordbo
 
 **Start the bot**:
 ```bash
-docker-compose up -d
+docker-compose up --build -d
 ```
 
 **Stop the bot**:
