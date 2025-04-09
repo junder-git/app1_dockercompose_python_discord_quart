@@ -8,9 +8,10 @@
 (N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)    
   
 4) INSTALL DOCKER AND DOCKER-COMPOSE  
-   Run cmd.exe) '''docker-compose up -d'''  
-   Stop cmd.exe) '''docker-compose -v'''  
-  
+   Run the bot in command prompt i.e. cmd.exe) '''docker-compose up -d'''  
+   Stop the bot in command prompt i.e. cmd.exe) '''docker-compose -v'''
+   (For run and stop above be sure to navigate to the correct path where you extracted the repository, so if you extracted it to C:/User/Documents open command prompt or power shell and '''cd C:/User/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager''')
+     
 Example dicord "chat model" manager view  
 ![Model Image 1](READMEresources/discord_chat_model_example.png)  
   
