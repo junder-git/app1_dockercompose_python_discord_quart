@@ -4,10 +4,10 @@
   
 2) REPLACE => .env file envs  
   2a) Go to discord dev portal and sub your application oauth2 secret key and client keys into .env file  
-  2b) Go to youtube data api portal and sub your application key into .env file  
+  2b) Go to youtube data api portal and sub your application key into .env file
 (N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)    
   
-3) INSTALL DOCKER AND DOCKER-COMPOSE
+4) INSTALL DOCKER AND DOCKER-COMPOSE
    Run cmd.exe) '''docker-compose up -d'''  
    Stop cmd.exe) '''docker-compose -v'''  
   
