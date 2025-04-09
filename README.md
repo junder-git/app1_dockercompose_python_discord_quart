@@ -3,7 +3,7 @@
 ## Setup & Installation Guide
 
 ### Prerequisites
-- Git (for cloning the repository)
+- If not downloading as zip then you need Git (for cloning the repository) 
 - Docker and Docker Compose
 
 ### Step 1: Download the Repository
