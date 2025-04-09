@@ -1,11 +1,21 @@
-REPLACE ---> .env file envs, and some inline envs in the py files, sometimes it runs a default env if NONE in param for functions...  
+# Setup/installation and running mantainance guide  
   
-INSTALL DOCKER AND DOCKER-COMPOSE ---> docker-compose up -d /// docker-compose up /// docker-compose down -v  
+1) Download the whole git repo with git clone or download as zip. (If downloaded as zip extract it somewhere)  
   
-EXAMPLE MODEL  
+2) REPLACE => .env file envs  
   
+===> 2a) Go to discord dev portal and sub your application oauth2 secret key and client keys into .env file  
+===> 2b) Go to youtube data api portal and sub your application key into .env file  
+   
+(N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)    
+  
+3) INSTALL DOCKER AND DOCKER-COMPOSE
+
+===> Run) docker-compose up -d  
+===> Stop) docker-compose -v  
+  
+Example dicord "chat model" manager view  
 ![Model Image 1](READMEresources/discord_chat_model_example.png)  
   
-EXAMPLE WEBPLAYER  
-  
-![Webplayer Image 1](READMEresources/flask_webapp_example.png)  
+Example flask webplayer manager view  
+![Webplayer Image 1](READMEresources/flask_webapp_example.png)    
