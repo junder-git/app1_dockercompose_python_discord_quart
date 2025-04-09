@@ -20,3 +20,15 @@ Example dicord "chat model" manager view:
   
 Example flask webplayer manager view:  
 ![Webplayer Image 1](READMEresources/flask_webapp_example.png)    
+  
+  
+## Other notes  
+
+RISK WIP - protect and make private the currently publicly accesible api flask endpoints cus i could use these urls to not be present in vc to manipulate the queue of other servers, discord api is running on the docker net so is oinly accesible by containers on it    
+![Webplayer Image 2](READMEresources/flask_endpoints.png) 
+  
+Features TWITCH BOT  add a twitch channel points song request to get music playing in stream   
+Features looping tracks / playlists  
+Feature add the array of popular playlist urls to simply click on, upto 10playlists per server  
+Security feature prevent large playlists with 100+ tracks being added only allow for a queue size of 50 as well as 1 instance of jbot per server limiter  
+  
