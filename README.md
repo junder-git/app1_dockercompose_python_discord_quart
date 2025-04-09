@@ -7,7 +7,7 @@
   2b) Go to youtube data api portal and sub your application key into .env file  
 (N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)    
   
-4) INSTALL DOCKER AND DOCKER-COMPOSE
+4) INSTALL DOCKER AND DOCKER-COMPOSE  
    Run cmd.exe) '''docker-compose up -d'''  
    Stop cmd.exe) '''docker-compose -v'''  
   
