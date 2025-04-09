@@ -1,6 +1,6 @@
 # Setup/installation and running mantainance guide  
   
-1) Download the whole git repo with git clone or download as zip. (If downloaded as zip extract it somewhere)  
+1) Download the whole git repo with git clone or download as zip. (If downloaded as zip extract it to your 'Documents' folder)  
   
 2) REPLACE => .env file envs  
   2a) Go to discord dev portal and sub your application oauth2 secret key and client keys into .env file  
