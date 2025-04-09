@@ -3,8 +3,8 @@
 1) Download the whole git repo with git clone or download as zip. (If downloaded as zip maybe extract it to your 'Documents' folder)  
   
 2) REPLACE => .env file envs  
-  2a https://discord.com/developers ) Go to discord dev portal and create your application then sub the oauth2 secret key and client keys into the ```.env``` file  
-  2b https://developers.google.com/youtube/v3 ) Go to youtube data api portal and create your application then sub the key into the ```.env``` file  
+  2a ) Go to discord dev portal and create your application then sub the oauth2 secret key and client keys into the ```.env``` file: https://discord.com/developers  
+  2b ) Go to youtube data api portal and create your application then sub the key into the ```.env``` file: https://developers.google.com/youtube/v3    
 (N.B. if a default env is NONE when provided in param for functions a sub might be made in some places in python files...)  
 (Tip: You can ignore the two 'redirect url' envs if you just want to use the discord chat model manager view without ever going to the flask webplayer view in your browser to control the bot and music playback)  
   
