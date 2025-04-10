@@ -33,7 +33,7 @@ Locate the `.env` file in the extracted directory and configure:
 
 **Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
 
-**Important**: Add in the .env for FLASK_SECRET_KEY and SECRET_KEY the same random value of your choosing for both.    
+**Important**: Add in the .env for FLASK_SECRET_KEY and SECRET_KEY the same random value of your choosing for both (so they are essentially the same key).    
   
 ### Step 3: Run the Application
 Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
@@ -45,8 +45,9 @@ cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_armv7_discordbo
 **Start the bot**:
 ```bash
 docker-compose up --build -d
-```
-
+```  
+Go to http://localhost:5000 for the webplayer and/or join a voice chat channel in discord and type `jbot` for any of the servers text channels to get the discord interface to pop up in there. I recommend doing this in a `#bot-channel` or some dedicated text channel.    
+  
 **Stop the bot**:
 ```bash
 docker-compose down -v
