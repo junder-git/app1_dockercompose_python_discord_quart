@@ -11,10 +11,10 @@
 Download the [ZIP file](https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip) and extract to your Documents folder.  
   
 **Alternative**:
-```bash 
+```bash
 git clone https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager.git
-```
-
+```  
+  
 ### Step 2: Configure Environment Variables
 Locate the `.env` file in the extracted directory and configure:
 
