@@ -29,7 +29,7 @@ Locate the `.env` file in the extracted directory and configure:
 1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)  
 2. Create a new application.  
 3. Enable the youtube data v3 api for the project.  
-4. Copy the API key to the `.env` file  
+4. Create and copy the `API key` to the `.env` file  
 
 **Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
 
