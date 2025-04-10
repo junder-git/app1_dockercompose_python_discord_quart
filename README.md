@@ -25,10 +25,11 @@ Locate the `.env` file in the extracted directory and configure:
 5. Copy the OAuth2 Secret Key and Client Key to the `.env` file  
 6. Invite the bot to the server from discord dev portal with `bot` scope and `admin` permissions.  
   
-#### YouTube Data API Setup
-1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)
-2. Create a new application
-3. Copy the API key to the `.env` file
+#### YouTube Data API Setup  
+1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)  
+2. Create a new application.  
+3. Enable the youtube data v3 api for the project.  
+4. Copy the API key to the `.env` file  
 
 **Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
 
