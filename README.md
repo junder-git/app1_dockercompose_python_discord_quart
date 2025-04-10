@@ -23,7 +23,7 @@ Locate the `.env` file in the extracted directory and configure:
 2. Create a new application
 3. Add the redirect url http://localhost:5000/callback to the dev portal    
 5. Copy the OAuth2 Secret Key and Client Key to the `.env` file  
-6. Invite the bot to the server from discord dev portal with bot scope and admin permissions.  
+6. Invite the bot to the server from discord dev portal with `bot` scope and `admin` permissions.  
   
 #### YouTube Data API Setup
 1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)
