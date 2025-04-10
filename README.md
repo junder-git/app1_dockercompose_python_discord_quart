@@ -3,14 +3,16 @@
 ## Setup & Installation Guide
 
 ### Prerequisites
-- If not downloading as zip then you need Git (for cloning the repository) 
+- If not downloading as zip, then youl need Git (for cloning the repository) 
 - Must have Docker. Download and install from [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows).  
   
 ### Step 1: Download the Repository
+
+Download the [ZIP file](https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip) and extract to your Documents folder.  
+**Alternative**:
 ```bash
 git clone https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager.git
 ```
-**Alternative**: Download the [ZIP file](https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager/archive/refs/heads/main.zip) and extract to your Documents folder.
 
 ### Step 2: Configure Environment Variables
 Locate the `.env` file in the extracted directory and configure:
