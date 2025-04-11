@@ -8,6 +8,33 @@ from Class_DiscordBotAPI import DiscordBotAPI
 from Class_YouTube import YouTubeService
 from Class_MusicPlayer import MusicService
 
+    # First try loading .env.local, then fall back to .env if needed
+    load_dotenv()
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over http
+    DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
+    YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+    IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
+
+
+    # Initialize the services
+    youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
+    music_service = MusicService(api_key=YOUTUBE_API_KEY)
+
+    # Initialize the Bot API client
+    bot_api = DiscordBotAPI(
+        host="discord-bot",  # Docker service name
+        port=5001,           # Port exposed in docker-compose
+        secret_key=IPC_SECRET_KEY
+    )
+
+    app = Quart(__name__)
+    app.config["SECRET_KEY"] = IPC_SECRET_KEY
+    app.config["DISCORD_CLIENT_ID"] = os.environ.get('DISCORD_CLIENT_ID')
+    app.config["DISCORD_CLIENT_SECRET"] = os.environ.get('DISCORD_CLIENT_SECRET')
+    app.config["DISCORD_REDIRECT_URI"] = os.environ.get('DISCORD_REDIRECT_URI')
+
+    discord = DiscordOAuth2Session(app)
+
 # Add cleanup on app exit
 @app.teardown_appcontext
 async def shutdown_session(exception=None):
@@ -933,31 +960,4 @@ async def before_serving():
     # Nothing to initialize yet
 
 if __name__ == "__main__":
-    # First try loading .env.local, then fall back to .env if needed
-    load_dotenv()
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over http
-    DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-    YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
-    IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
-
-
-    # Initialize the services
-    youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
-    music_service = MusicService(api_key=YOUTUBE_API_KEY)
-
-    # Initialize the Bot API client
-    bot_api = DiscordBotAPI(
-        host="discord-bot",  # Docker service name
-        port=5001,           # Port exposed in docker-compose
-        secret_key=IPC_SECRET_KEY
-    )
-
-    app = Quart(__name__)
-    app.config["SECRET_KEY"] = IPC_SECRET_KEY
-    app.config["DISCORD_CLIENT_ID"] = os.environ.get('DISCORD_CLIENT_ID')
-    app.config["DISCORD_CLIENT_SECRET"] = os.environ.get('DISCORD_CLIENT_SECRET')
-    app.config["DISCORD_REDIRECT_URI"] = os.environ.get('DISCORD_REDIRECT_URI')
-
-    discord = DiscordOAuth2Session(app)
-
     app.run(debug=True, host="0.0.0.0", port=5000)
