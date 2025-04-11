@@ -948,6 +948,9 @@ class MyBot(commands.Bot):
 
 # BOT COMMANDS
 
+# Set up intents
+intents = discord.Intents.default()
+intents.message_content = True
 # Create the bot instance
 bot = MyBot(command_prefix="jbot ", intents=intents)
 
