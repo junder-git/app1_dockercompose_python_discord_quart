@@ -14,7 +14,7 @@ from Class_DiscordView import MusicControlView
 load_dotenv()
 
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-IPC_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
+IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 
 # Initialize shared services
