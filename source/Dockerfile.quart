@@ -18,8 +18,8 @@ COPY Class_MusicPlayer.py .
 COPY templates ./templates
 COPY static ./static
 
-# Expose port 5000 for Flask
-EXPOSE 5000
+# Expose port 80 for Quart
+EXPOSE 80
 
 # Define environment variables
 ENV PYTHONUNBUFFERED=1
