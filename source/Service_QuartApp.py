@@ -358,13 +358,13 @@ async def add_to_queue(guild_id):
     else:
         return redirect(url_for('server_dashboard', guild_id=guild_id))
 
-# Update the youtube_search route to use the shared services
 @app.route('/server/<guild_id>/search', methods=['GET', 'POST'])
 @login_required
 async def youtube_search(guild_id):
-    """Handle YouTube search requests for videos and playlists with pagination"""
+    """Handle YouTube search requests for videos, playlists, and artists with pagination"""
     search_results = []
     playlist_results = []
+    artist_results = []  # New list for artist results
     playlist_videos = []
     selected_playlist_id = None
     playlist_details = None
@@ -414,12 +414,48 @@ async def youtube_search(guild_id):
         if 'query' in form:
             query = form.get('query')
             if query:
-                if search_type == 'video':
-                    # Use the YouTube service for video search
-                    search_results = await youtube_service.search_videos(query)
-                elif search_type == 'playlist':
-                    # Use the YouTube service for playlist search
-                    playlist_results = await youtube_service.search_playlists(query)
+                # Check if the query is a YouTube URL
+                video_id = youtube_service.extract_video_id(query)
+                playlist_id = youtube_service.extract_playlist_id(query)
+                
+                if video_id:
+                    # If it's a video URL, get the video details and redirect to add to queue
+                    video_details = await youtube_service.get_video_details(video_id)
+                    video_title = video_details.get('title', 'Unknown Video')
+                    
+                    # Add to queue and redirect
+                    result = await bot_api.add_to_queue(guild_id, user_voice_channel['id'], video_id, video_title)
+                    if result.get('success'):
+                        flash(f"Added '{video_title}' to queue", "success")
+                    else:
+                        flash(f"Error adding to queue: {result.get('error')}", "error")
+                    
+                    return redirect(url_for('server_dashboard', guild_id=guild_id))
+                    
+                elif playlist_id:
+                    # If it's a playlist URL, redirect to the playlist view
+                    return redirect(url_for('youtube_search', guild_id=guild_id, playlist_id=playlist_id))
+                    
+                else:
+                    # Regular search based on search type
+                    if search_type == 'video':
+                        # Use the YouTube service for video search only
+                        search_results = await youtube_service.search_videos(query)
+                    elif search_type == 'playlist':
+                        # Use the YouTube service for playlist search only
+                        playlist_results = await youtube_service.search_playlists(query)
+                    elif search_type == 'artist':
+                        # Use the YouTube service for artist search only
+                        artist_results = await youtube_service.search_artists(query)
+                    elif search_type == 'both':
+                        # Search for both videos and playlists
+                        search_results = await youtube_service.search_videos(query, max_results=5)
+                        playlist_results = await youtube_service.search_playlists(query, max_results=5)
+                    elif search_type == 'comprehensive':
+                        # Search for videos, playlists, and artists
+                        search_results = await youtube_service.search_videos(query, max_results=5)
+                        playlist_results = await youtube_service.search_playlists(query, max_results=5)
+                        artist_results = await youtube_service.search_artists(query, max_results=5)
     elif request.method == 'POST' and not user_voice_channel:
         flash("You must join a voice channel in Discord before searching for music", "warning")
     
@@ -456,6 +492,7 @@ async def youtube_search(guild_id):
         voice_channels=all_voice_channels,
         search_results=search_results,
         playlist_results=playlist_results,
+        artist_results=artist_results,  # Add artist results to the template
         playlist_videos=playlist_videos,
         playlist_details=playlist_details,
         selected_playlist_id=selected_playlist_id,

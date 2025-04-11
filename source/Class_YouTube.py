@@ -119,6 +119,54 @@ class YouTubeService:
         self._add_to_cache(cache_key, search_results)
         return search_results
     
+    async def search_artists(self, query, max_results=10):
+        """Search for YouTube channels (artists) based on a query
+        
+        Args:
+            query (str): The search query
+            max_results (int): Maximum number of results to return
+            
+        Returns:
+            list: List of channel results with id, title, and thumbnail
+        """
+        try:
+            # Build the search request
+            search_response = await self.youtube_client.search().list(
+                q=query,
+                part="snippet",
+                maxResults=max_results,
+                type="channel"  # Search for channels only
+            ).execute()
+            
+            # Process the results
+            channel_results = []
+            for item in search_response.get("items", []):
+                snippet = item.get("snippet", {})
+                channel_id = item.get("id", {}).get("channelId")
+                
+                if not channel_id:
+                    continue
+                    
+                # Get the best thumbnail available
+                thumbnails = snippet.get("thumbnails", {})
+                thumbnail_url = (
+                    thumbnails.get("high", {}).get("url") or
+                    thumbnails.get("medium", {}).get("url") or
+                    thumbnails.get("default", {}).get("url")
+                )
+                
+                channel_results.append({
+                    "id": channel_id,
+                    "title": snippet.get("title", "Unknown Channel"),
+                    "description": snippet.get("description", ""),
+                    "thumbnail": thumbnail_url
+                })
+                
+            return channel_results
+        except Exception as e:
+            print(f"Error searching for artists: {e}")
+            return []
+
     async def get_playlist_details(self, playlist_id):
         """
         Get details about a YouTube playlist
