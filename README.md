@@ -12,7 +12,7 @@ Download the [ZIP file](https://github.com/junder-git/app1_dockercompose_discord
   
 **Alternative**:
 ```bash
-git clone https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flaskmanager.git
+git clone git@github.com:junder-git/app1_dockercompose_discordbot_quartmanager.git
 ```  
   
 ### Step 2: Configure Environment Variables
