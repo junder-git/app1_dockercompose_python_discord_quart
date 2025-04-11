@@ -5,13 +5,13 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY requirementsFLASK.txt .
+COPY requirementsQUART.txt .
 
 # Install any needed dependencies
-RUN pip install --no-cache-dir -r requirementsFLASK.txt
+RUN pip install --no-cache-dir -r requirementsQUART.txt
 
 # Copy application files and shared services
-COPY Service_FlaskApp.py .
+COPY Service_QuartApp.py .
 COPY Class_DiscordBotAPI.py .
 COPY Class_YouTube.py .
 COPY Class_MusicPlayer.py .
@@ -27,4 +27,4 @@ ENV FLASK_APP=FlaskApp.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # Run the application unbuffered
-CMD ["python", "-u", "Service_FlaskApp.py"]
+CMD ["python", "-u", "Service_QuartApp.py"]
