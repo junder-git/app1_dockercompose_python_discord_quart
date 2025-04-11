@@ -39,7 +39,7 @@ Locate the `.env.example` file in the extracted directory and rename it `.env` t
 Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
 
 ```bash
-cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_armv7_discordbot_flaskmanager/source
+cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_discordbot_quartmanager/source
 ```
 
 **Start the bot**:
