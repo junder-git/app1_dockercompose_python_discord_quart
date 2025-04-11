@@ -16,8 +16,8 @@ git clone https://github.com/junder-git/app1_dockercompose_armv7_discordbot_flas
 ```  
   
 ### Step 2: Configure Environment Variables
-Locate the `.env` file in the extracted directory and configure:
-
+Locate the `.env.example` file in the extracted directory and rename it `.env` then configure it as follows:  
+  
 #### Discord API Setup
 1. Visit [Discord Developer Portal](https://discord.com/developers)
 2. Create a new application
