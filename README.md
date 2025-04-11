@@ -27,7 +27,7 @@ Locate the `.env` file in the extracted directory and configure:
 
 **Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
 
-**Important**: Add in the .env for FLASK_SECRET_KEY and SECRET_KEY the same random value of your choosing for both.    
+**Important**: Add in the .env for FLASK_SECRET_KEY    
   
 ### Step 3: Run the Application
 Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
