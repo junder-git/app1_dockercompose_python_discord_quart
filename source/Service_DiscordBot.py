@@ -14,7 +14,7 @@ from Class_DiscordView import MusicControlView
 load_dotenv()
 
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 
 # Initialize shared services
@@ -26,9 +26,9 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 class MyBot(commands.Bot):
-    def __init__(self, *args, ipc_secret_key=None, **kwargs):
+    def __init__(self, *args, SECRET_KEY=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.ipc_secret_key = ipc_secret_key
+        self.SECRET_KEY = SECRET_KEY
         self.api_server = None
         # Music queue handling - rename attribute to avoid conflicts
         self.music_queues = defaultdict(list)  # Queue ID -> list of tracks
@@ -599,7 +599,7 @@ class MyBot(commands.Bot):
     async def handle_join(self, request):
         """Handle join voice channel requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -647,7 +647,7 @@ class MyBot(commands.Bot):
     async def handle_guild_count(self, request):
         """Handle guild count requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         return web.json_response({"count": len(self.guilds)})
@@ -655,7 +655,7 @@ class MyBot(commands.Bot):
     async def handle_guild_ids(self, request):
         """Handle guild IDs requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         guild_ids = [str(guild.id) for guild in self.guilds]
@@ -664,7 +664,7 @@ class MyBot(commands.Bot):
     async def handle_add_to_queue(self, request):
         """Handle adding a track to the queue"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -692,7 +692,7 @@ class MyBot(commands.Bot):
     async def handle_get_queue(self, request):
         """Return the current queue for a guild/channel"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -724,7 +724,7 @@ class MyBot(commands.Bot):
     async def handle_skip(self, request):
         """Handle skip track requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -750,7 +750,7 @@ class MyBot(commands.Bot):
     async def handle_pause(self, request):
         """Handle pause playback requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -783,7 +783,7 @@ class MyBot(commands.Bot):
     async def handle_resume(self, request):
         """Handle resume playback requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -816,7 +816,7 @@ class MyBot(commands.Bot):
     async def handle_disconnect(self, request):
         """Handle disconnect from voice channel requests"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -843,7 +843,7 @@ class MyBot(commands.Bot):
     async def handle_get_user_voice_state(self, request):
         """Handle requests to get a user's voice state"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -888,7 +888,7 @@ class MyBot(commands.Bot):
     async def handle_clear_queue(self, request):
         """Handle requests to clear a queue"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -911,7 +911,7 @@ class MyBot(commands.Bot):
     async def handle_shuffle_queue(self, request):
         """Handle requests to shuffle the queue"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -937,7 +937,7 @@ class MyBot(commands.Bot):
     async def handle_reorder_queue(self, request):
         """Handle requests to reorder tracks in the queue"""
         # Check authorization
-        if request.headers.get('Authorization') != f'Bearer {self.ipc_secret_key}':
+        if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
             return web.json_response({"error": "Unauthorized"}, status=401)
         
         try:
@@ -969,7 +969,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 cleartimer=10
 # Create the bot instance
-bot = MyBot(command_prefix="jbot ", intents=intents, ipc_secret_key=IPC_SECRET_KEY)
+bot = MyBot(command_prefix="jbot ", intents=intents, SECRET_KEY=SECRET_KEY)
 
 @bot.command(name="hello")
 async def hello(ctx):

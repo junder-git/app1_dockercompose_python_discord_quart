@@ -13,7 +13,7 @@ load_dotenv()
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over http
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
-IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 # Initialize the services
@@ -24,11 +24,11 @@ music_service = MusicService(api_key=YOUTUBE_API_KEY)
 bot_api = DiscordBotAPI(
     host="discord-bot",  # Docker service name
     port=5001,           # Port exposed in docker-compose
-    secret_key=IPC_SECRET_KEY
+    secret_key=os.environ.get('SECRET_KEY')
 )
 
 app = Quart(__name__)
-app.config["SECRET_KEY"] = IPC_SECRET_KEY
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 app.config["DISCORD_CLIENT_ID"] = os.environ.get('DISCORD_CLIENT_ID')
 app.config["DISCORD_CLIENT_SECRET"] = os.environ.get('DISCORD_CLIENT_SECRET')
 app.config["DISCORD_REDIRECT_URI"] = os.environ.get('DISCORD_REDIRECT_URI')
