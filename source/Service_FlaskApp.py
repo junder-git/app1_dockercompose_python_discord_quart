@@ -20,7 +20,7 @@ youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
 music_service = MusicService(api_key=YOUTUBE_API_KEY)
 
 app = Quart(__name__)
-app.config["FLASK_SECRET_KEY"] = os.environ.get('FLASK_SECRET_KEY')
+app.config["SECRET_KEY"] = os.environ.get('FLASK_SECRET_KEY')
 app.config["DISCORD_CLIENT_ID"] = os.environ.get('DISCORD_CLIENT_ID')
 app.config["DISCORD_CLIENT_SECRET"] = os.environ.get('DISCORD_CLIENT_SECRET')
 app.config["DISCORD_REDIRECT_URI"] = os.environ.get('DISCORD_REDIRECT_URI')
