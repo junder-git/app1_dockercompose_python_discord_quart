@@ -8,7 +8,7 @@ from Class_DiscordBotAPI import DiscordBotAPI
 from Class_YouTube import YouTubeService
 from Class_MusicPlayer import MusicService
 
-# Load environment variables from .env file
+# First try loading .env.local, then fall back to .env if needed
 load_dotenv()
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over http
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')

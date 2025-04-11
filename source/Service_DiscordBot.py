@@ -10,7 +10,7 @@ from Class_MusicPlayer import MusicService
 from Class_YouTube import YouTubeService
 from Class_DiscordView import MusicControlView
 
-# Load environment variables from .env file
+# First try loading .env.local, then fall back to .env if needed
 load_dotenv()
 
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
