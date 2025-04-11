@@ -10,21 +10,6 @@ from Class_MusicPlayer import MusicService
 from Class_YouTube import YouTubeService
 from Class_DiscordView import MusicControlView
 
-# First try loading .env.local, then fall back to .env if needed
-load_dotenv()
-
-DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
-IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
-YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
-
-# Initialize shared services
-youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
-music_service = MusicService(api_key=YOUTUBE_API_KEY)
-
-# Set up intents
-intents = discord.Intents.default()
-intents.message_content = True
-
 class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1121,4 +1106,18 @@ async def search_command(ctx, *, query):
         await ctx.send(f"An error occurred while searching: {str(e)}", delete_after=10)
 
 if __name__ == "__main__":
+    # First try loading .env.local, then fall back to .env if needed
+    load_dotenv()
+
+    DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
+    IPC_SECRET_KEY = os.environ.get('QUART_SECRET_KEY')
+    YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+
+    # Initialize shared services
+    youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
+    music_service = MusicService(api_key=YOUTUBE_API_KEY)
+
+    # Set up intents
+    intents = discord.Intents.default()
+    intents.message_content = True
     bot.run(DISCORD_BOT_TOKEN)
