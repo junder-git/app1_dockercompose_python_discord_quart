@@ -1,4 +1,4 @@
-# JBot - Discord Bot & Flask Manager
+# JBot - Discord Bot & Quart Website Manager
 
 ## Setup & Installation Guide
 
