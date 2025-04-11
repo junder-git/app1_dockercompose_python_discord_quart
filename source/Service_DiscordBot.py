@@ -139,7 +139,7 @@ class MyBot(commands.Bot):
                 # Create a response with UI controls
                 await self.join_and_show_controls(message.channel, voice_channel, message.guild.id)
             else:
-                await message.channel.send("You need to be in a voice channel first!", delete_after=10)
+                await message.channel.send("You need to be in a voice channel first!", delete_after=cleartimer)
     
     # SHARED UTILITY METHODS
     
@@ -410,14 +410,14 @@ class MyBot(commands.Bot):
             if queue_id not in self.voice_connections or not self.voice_connections[queue_id].is_connected():
                 voice_client = await voice_channel.connect()
                 self.voice_connections[queue_id] = voice_client
-                await text_channel.send(f"Joined **{voice_channel.name}**", delete_after=10)
+                await text_channel.send(f"Joined **{voice_channel.name}**", delete_after=cleartimer)
             
             # Create and send control panel
             await self.send_control_panel(text_channel, voice_channel, guild_id)
             
         except Exception as e:
             print(f"Error joining voice channel: {e}")
-            await text_channel.send(f"Error: {str(e)}", delete_after=10)
+            await text_channel.send(f"Error: {str(e)}", delete_after=cleartimer)
     
     async def send_control_panel(self, text_channel, voice_channel, guild_id):
         """Send a control panel with buttons to the text channel"""
@@ -951,13 +951,14 @@ class MyBot(commands.Bot):
 # Set up intents
 intents = discord.Intents.default()
 intents.message_content = True
+cleartimer=10
 # Create the bot instance
 bot = MyBot(command_prefix="jbot ", intents=intents)
 
 @bot.command(name="hello")
 async def hello(ctx):
     """Simple hello command to test the bot is working"""
-    await ctx.send("Hello there!", delete_after=10)
+    await ctx.send("Hello there!", delete_after=cleartimer)
 
 @bot.command(name="jhelp")
 async def help_command(ctx):
@@ -972,7 +973,7 @@ async def help_command(ctx):
     embed.add_field(name="jbot search <query>", value="Search for a YouTube video and add it to queue", inline=False)
     embed.add_field(name="jbot hello", value="Say hello to the bot", inline=False)
     
-    await ctx.send(embed=embed, delete_after=10)
+    await ctx.send(embed=embed, delete_after=cleartimer)
 
 # Search command using the optimized bot structure
 @bot.command(name='search')
@@ -980,12 +981,12 @@ async def search_command(ctx, *, query):
     """Search for a YouTube video and add it to the queue"""
     # Check if user is in a voice channel
     if not ctx.author.voice:
-        await ctx.send("You need to be in a voice channel to use this command", delete_after=10)
+        await ctx.send("You need to be in a voice channel to use this command", delete_after=cleartimer)
         return
     
     # Validate query length
     if len(query.strip()) < 2:
-        await ctx.send("Please provide a more specific search query (at least 2 characters)", delete_after=10)
+        await ctx.send("Please provide a more specific search query (at least 2 characters)", delete_after=cleartimer)
         return
     
     voice_channel = ctx.author.voice.channel
@@ -998,7 +999,7 @@ async def search_command(ctx, *, query):
         results = await music_service.search_videos(query)
         
         if not results:
-            await ctx.send(f"No results found for: {query}", delete_after=10)
+            await ctx.send(f"No results found for: {query}", delete_after=cleartimer)
             return
         
         # Create embed for results
@@ -1102,11 +1103,11 @@ async def search_command(ctx, *, query):
         select.callback = select_callback
         
         # Send results
-        await ctx.send(embed=embed, view=view, delete_after=10)
+        await ctx.send(embed=embed, view=view, delete_after=cleartimer)
         
     except Exception as e:
         print(f"Error searching for videos: {e}")
-        await ctx.send(f"An error occurred while searching: {str(e)}", delete_after=10)
+        await ctx.send(f"An error occurred while searching: {str(e)}", delete_after=cleartimer)
 
 if __name__ == "__main__":
     # First try loading .env.local, then fall back to .env if needed
