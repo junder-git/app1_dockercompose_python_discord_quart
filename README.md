@@ -46,7 +46,7 @@ cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_discordbot_quar
 ```bash
 docker-compose up --build -d
 ```  
-Go to http://localhost:5000 for the webplayer and/or join a voice chat channel in discord, type `jbot` in any of the servers text channels to get the discord interface to pop up in there. I recommend doing this in a `# bot-channel` or some dedicated text channel.      
+Go to `http://localhost` for the webplayer and/or join a voice chat channel in discord, type `jbot` in any of the servers text channels to get the discord interface to pop up in there. I recommend doing this in a `# bot-channel` or some dedicated text channel.      
   
 **Stop the bot**:
 ```bash
