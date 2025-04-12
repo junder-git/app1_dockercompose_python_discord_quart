@@ -33,7 +33,7 @@ Locate the `.env.example` file in the extracted directory and rename it `.env` t
 
 **Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
 
-**Important**: Add in the .env for FLASK_SECRET_KEY    
+**Important**: Add in the .env your own value for SECRET_KEY    
   
 ### Step 3: Run the Application
 Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
