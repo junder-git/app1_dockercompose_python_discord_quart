@@ -21,7 +21,7 @@ Locate the `.env.example` file in the extracted directory and rename it `.env` t
 #### Discord API Setup
 1. Visit [Discord Developer Portal](https://discord.com/developers)
 2. Create a new application
-3. Add the redirect url http://localhost:5000/callback to the dev portal    
+3. Add the redirect url http://localhost/callback to the dev portal    
 5. Copy the OAuth2 Secret Key and Client Key to the `.env` file  
 6. Invite the bot to the server from discord dev portal with `bot` scope and `admin` permissions in the oauth2 section for guild install.  
   
