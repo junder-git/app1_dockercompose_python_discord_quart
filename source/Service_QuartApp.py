@@ -245,7 +245,7 @@ async def server_dashboard(guild_id):
         bot_state=bot_state
     )
 
-@app.route('/server/<guild_id>/music/control')
+@app.route('/server/<guild_id>/music/control', methods=['POST'])
 @login_required
 async def music_control(guild_id):
     """Handle music control commands: join, skip, pause, resume, stop"""
@@ -297,7 +297,7 @@ async def music_control(guild_id):
     # Redirect back to dashboard with the selected channel
     return redirect(url_for('server_dashboard', guild_id=guild_id, channel_id=channel_id))
 
-@app.route('/server/<guild_id>/queue/clear')
+@app.route('/server/<guild_id>/queue/clear', methods=['POST'])
 @login_required
 async def clear_queue(guild_id):
     """Explicitly clear the queue for a guild"""
@@ -312,7 +312,7 @@ async def clear_queue(guild_id):
     
     return redirect(url_for('server_dashboard', guild_id=guild_id))
 
-@app.route('/server/<guild_id>/queue/add')
+@app.route('/server/<guild_id>/queue/add', methods=['POST'])
 @login_required
 async def add_to_queue(guild_id):
     """Handle adding videos to the queue"""
@@ -919,7 +919,7 @@ async def reorder_queue(guild_id):
     # Redirect back to the dashboard
     return redirect(url_for('server_dashboard', guild_id=guild_id, channel_id=channel_id))
 
-@app.route('/server/<guild_id>/music/shuffle')
+@app.route('/server/<guild_id>/music/shuffle', methods=['POST'])
 @login_required
 async def shuffle_queue(guild_id):
     """Shuffle the current music queue"""
