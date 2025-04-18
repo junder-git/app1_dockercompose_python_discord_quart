@@ -8,9 +8,8 @@ import asyncio
 from discord.ext import commands
 from collections import defaultdict
 from dotenv import load_dotenv
-from source.Shared.Class_MusicPlayer import MusicService
-from source.Shared.Class_YouTube import YouTubeService
-from source.Discord.Class_DiscordView import MusicControlView
+from Class_MusicPlayer import MusicService
+from Class_YouTube import YouTubeService
 
 # Import methods package that contains all bot methods
 from source.Discord.methods import apply_methods
