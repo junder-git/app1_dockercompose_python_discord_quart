@@ -4,6 +4,7 @@ Handles API requests to join a voice channel
 """
 import asyncio
 from aiohttp import web
+import discord
 
 async def handle_join(self, request):
     """
