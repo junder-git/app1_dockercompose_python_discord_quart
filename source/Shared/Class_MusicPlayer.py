@@ -1,6 +1,6 @@
 import yt_dlp
 import aiohttp
-from source.Shared.Class_YouTube import YouTubeService
+from Class_YouTube import YouTubeService
 
 class MusicService:
     """

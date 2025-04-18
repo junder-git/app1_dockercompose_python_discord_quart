@@ -12,7 +12,7 @@ from Class_MusicPlayer import MusicService
 from Class_YouTube import YouTubeService
 
 # Import methods package that contains all bot methods
-from source.Discord.methods import apply_methods
+from methods import apply_methods
 
 # First try loading .env.local, then fall back to .env if needed
 load_dotenv()
