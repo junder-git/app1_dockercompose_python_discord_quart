@@ -72,16 +72,7 @@ async def index():
         return redirect(url_for('dashboard'))
     return await render_template("index.html", authorized=await discord.authorized)
 
-@app.route("/login")
-async def login():
-    # Clear any existing session data to ensure a fresh login
-    session.clear()
-    
-    # Make sure we're requesting all the scopes we need
-    scope = ["identify", "guilds"]
-    authorization_url = await discord.create_session(scope=scope)
-    
-    return authorization_url
+
 
 # The callback route is exempt from CSRF protection
 @app.route("/callback")
