@@ -80,7 +80,6 @@
                             <h5>Add Entire Playlist</h5>
                             <p>Add all {{ total_results }} videos to your queue in order.</p>
                             <form id="addEntirePlaylistForm" method="POST" action="{{ url_for('add_entire_playlist', guild_id=guild_id) }}">
-                                <!-- Add CSRF token explicitly -->
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
                                 <input type="hidden" name="channel_id" value="{{ channel_id }}">

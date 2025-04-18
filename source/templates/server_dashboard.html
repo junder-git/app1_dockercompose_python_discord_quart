@@ -117,7 +117,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post" action="{{ url_for('youtube_search', guild_id=guild_id) }}">
-                        {{ csrf_token() }}  <!-- Add the CSRF token -->
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label for="channelSelect" class="form-label">Voice Channel</label>
@@ -212,6 +212,7 @@
                                 <p>Do you want to continue?</p>
                                 
                                 <form id="addEntirePlaylistForm" method="POST" action="{{ url_for('add_entire_playlist', guild_id=guild_id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
                                     <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
                                     <input type="hidden" name="playlist_title" value="{{ playlist_details.title }}">
@@ -279,6 +280,7 @@
                     </div>
                     <div class="card-body">
                         <form id="addMultipleForm" method="POST" action="{{ url_for('add_multiple_to_queue', guild_id=guild_id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
                             <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
                             <!-- Store the current page for returning to the correct page after adding -->
