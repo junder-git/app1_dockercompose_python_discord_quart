@@ -326,10 +326,11 @@ async def clear_queue(guild_id):
 @login_required
 async def add_to_queue(guild_id):
     """Handle adding videos to the queue"""
-    # Get the requested channel_id from the URL parameters
-    channel_id = request.args.get('channel_id')
-    video_id = request.args.get('video_id')
-    video_title = request.args.get('video_title', 'Unknown Video')
+    # Get the requested channel_id from the form/request
+    channel_id = request.form.get('channel_id')
+    video_id = request.form.get('video_id')
+    video_title = request.form.get('video_title', 'Unknown Video')
+    return_to = request.form.get('return_to', 'dashboard')
     
     if not channel_id or not video_id:
         flash("Missing channel ID or video ID", "error")
@@ -340,15 +341,8 @@ async def add_to_queue(guild_id):
     user_id = str(user.id)
     user_voice_channel = await get_user_voice_channel(guild_id, user_id)
     
-    # Add debug logging to help identify the issue
-    print(f"Add to queue: User voice channel: {user_voice_channel}")
-    print(f"Add to queue: Requested channel: {channel_id}")
-    
-    # More tolerant check - if we got a user_voice_channel object, use its ID
+    # More tolerant check
     user_voice_channel_id = user_voice_channel['id'] if user_voice_channel else None
-    
-    # Debug log the values we're comparing
-    print(f"Comparing user channel ID: {user_voice_channel_id} with requested channel ID: {channel_id}")
     
     # Verify the user is actually in a voice channel
     if not user_voice_channel_id:
@@ -366,14 +360,9 @@ async def add_to_queue(guild_id):
         flash(f"Error adding to queue: {str(e)}", "error")
     
     # Redirect back to search results or dashboard with the selected channel
-    return_to = request.args.get('return_to', 'dashboard')
     if return_to == 'search':
-        playlist_id = request.args.get('playlist_id')
-        page_token = request.args.get('page_token')
-        if playlist_id:
-            return redirect(url_for('youtube_search', guild_id=guild_id, playlist_id=playlist_id, page_token=page_token))
-        else:
-            return redirect(url_for('youtube_search', guild_id=guild_id))
+        # If coming from search, preserve the search context
+        return redirect(url_for('youtube_search', guild_id=guild_id))
     else:
         return redirect(url_for('server_dashboard', guild_id=guild_id))
 

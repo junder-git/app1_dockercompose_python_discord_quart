@@ -421,7 +421,12 @@
                                                     <h6 class="card-title">{{ video.title }}</h6>
                                                     <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
                                                     <a href="{{ url_for('add_to_queue', guild_id=guild_id, channel_id=user_voice_channel.id, video_id=video.id, video_title=video.title, return_to='search') }}" 
-                                                       class="btn discord-btn btn-sm {% if not user_voice_channel %}disabled{% endif %}">
+                                                        data-method="post"
+                                                        data-channel-id="{{ user_voice_channel.id }}"
+                                                        data-video-id="{{ video.id }}"
+                                                        data-video-title="{{ video.title }}"
+                                                        data-return-to="search"
+                                                        class="btn discord-btn btn-sm {% if not user_voice_channel %}disabled{% endif %}">
                                                         <i class="fas fa-plus me-1"></i> Add to Queue
                                                     </a>
                                                 </div>

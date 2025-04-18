@@ -120,53 +120,42 @@ class YouTubeService:
         return search_results
     
     async def search_artists(self, query, max_results=10):
-        """Search for YouTube channels (artists) based on a query
-        
-        Args:
-            query (str): The search query
-            max_results (int): Maximum number of results to return
-            
-        Returns:
-            list: List of channel results with id, title, and thumbnail
-        """
-        try:
-            # Build the search request
-            search_response = await self.youtube_client.search().list(
-                q=query,
-                part="snippet",
-                maxResults=max_results,
-                type="channel"  # Search for channels only
-            ).execute()
-            
-            # Process the results
-            channel_results = []
-            for item in search_response.get("items", []):
-                snippet = item.get("snippet", {})
-                channel_id = item.get("id", {}).get("channelId")
-                
-                if not channel_id:
-                    continue
-                    
-                # Get the best thumbnail available
-                thumbnails = snippet.get("thumbnails", {})
-                thumbnail_url = (
-                    thumbnails.get("high", {}).get("url") or
-                    thumbnails.get("medium", {}).get("url") or
-                    thumbnails.get("default", {}).get("url")
-                )
-                
-                channel_results.append({
-                    "id": channel_id,
-                    "title": snippet.get("title", "Unknown Channel"),
-                    "description": snippet.get("description", ""),
-                    "thumbnail": thumbnail_url
-                })
-                
-            return channel_results
-        except Exception as e:
-            print(f"Error searching for artists: {e}")
+        """Search for YouTube channels (artists) based on a query"""
+        # If no API key, return empty results
+        if not self.api_key:
             return []
-
+            
+        search_results = []
+        async with aiohttp.ClientSession() as session:
+            url = 'https://www.googleapis.com/youtube/v3/search'
+            params = {
+                'part': 'snippet',
+                'q': query,
+                'key': self.api_key,
+                'maxResults': max_results,
+                'type': 'channel'  # Explicitly search for channels
+            }
+            try:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        results = await response.json()
+                        if 'items' in results:
+                            for item in results['items']:
+                                channel = {
+                                    'id': item['id']['channelId'],
+                                    'title': item['snippet']['title'],
+                                    'description': item['snippet'].get('description', ''),
+                                    'thumbnail': (
+                                        item['snippet']['thumbnails']['medium']['url'] 
+                                        if 'thumbnails' in item['snippet'] and 'medium' in item['snippet']['thumbnails'] 
+                                        else ''
+                                    )
+                                }
+                                search_results.append(channel)
+            except Exception as e:
+                print(f"Error searching YouTube channels: {e}")
+        
+        return search_results
     async def get_playlist_details(self, playlist_id):
         """
         Get details about a YouTube playlist
