@@ -1,10 +1,7 @@
-"""
-Add to queue route for JBot Quart application
-"""
 from quart import Blueprint, redirect, url_for, request, flash
 from .helpers import login_required, get_user_voice_channel
 
-# Create a blueprint for queue add route
+# Create a blueprint for queue add multiple route
 queue_add_bp = Blueprint('queue_add', __name__)
 
 @queue_add_bp.route('/server/<guild_id>/queue/add', methods=['POST'])
@@ -15,11 +12,6 @@ async def queue_add_route(guild_id):
     from quart import current_app
     discord = current_app.discord
     bot_api = current_app.bot_api
-    
-    # Verify the user is actually in a voice channel
-    if not user_voice_channel:
-        flash("You must join a voice channel before adding music to the queue", "warning")
-        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Get the form data asynchronously
     form = await request.form
@@ -39,11 +31,8 @@ async def queue_add_route(guild_id):
     user_id = str(user.id)
     user_voice_channel = await get_user_voice_channel(guild_id, user_id, bot_api)
     
-    # More tolerant check
-    user_voice_channel_id = user_voice_channel['id'] if user_voice_channel else None
-    
     # Verify the user is actually in a voice channel
-    if not user_voice_channel_id:
+    if not user_voice_channel:
         flash("You must join a voice channel before adding music to the queue", "warning")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
