@@ -3,8 +3,8 @@ services:
     tty: true
     stdin_open: true
     build:
-      context: ./source
-      dockerfile: Quart/Dockerfile.quart
+      context: .
+      dockerfile: Dockerfile.quart
     ports:
       - "80:80"
     environment:
@@ -23,8 +23,8 @@ services:
     tty: true
     stdin_open: true
     build:
-      context: ./source
-      dockerfile: Discord/Dockerfile.discord
+      context: .
+      dockerfile: Dockerfile.discord
     environment:
       - PYTHONUNBUFFERED=1
       - SECRET_KEY=${SECRET_KEY}

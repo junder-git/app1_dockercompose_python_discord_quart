@@ -12,9 +12,8 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsQUART
 
 # Copy application files and shared services
 COPY .env .
-RUN mkdir -p source
-COPY ./Quart .source/Quart
-COPY Shared .source
+COPY Quart .
+COPY Shared .
 
 # Expose port 80 for Quart
 EXPOSE 80
@@ -23,4 +22,4 @@ EXPOSE 80
 ENV PYTHONUNBUFFERED=1
 
 # Run the application with Hypercorn instead of the default Quart runner
-CMD ["hypercorn", "source/Quart/Service_QuartApp:app", "--bind", "0.0.0.0:80"]
+CMD ["hypercorn", "Service_QuartApp:app", "--bind", "0.0.0.0:80"]
