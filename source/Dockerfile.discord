@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy project files
 COPY requirementsDISCORD.txt .
-RUN pip install --no-cache-dir -r requirementsDISCORD.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsDISCORD.txt
 
 # Copy both the bot and the shared services
 COPY Service_DiscordBot.py .
