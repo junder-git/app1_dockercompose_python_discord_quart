@@ -4,12 +4,14 @@ Main bot file that initializes the bot and registers all methods
 """
 import os
 import discord
-import asyncio
 from discord.ext import commands
 from collections import defaultdict
 from dotenv import load_dotenv
 from Class_MusicPlayer import MusicService
 from Class_YouTube import YouTubeService
+
+# Import methods package that contains all bot methods
+from methods import apply_methods
 
 # First try loading .env.local, then fall back to .env if needed
 load_dotenv()
@@ -48,7 +50,7 @@ class MyBot(commands.Bot):
         # Set cleartimer for auto-delete messages
         self.cleartimer = 10
     
-    # Override the setup_hook method directly in the class definition
+    # Define the setup_hook method directly in the class
     async def setup_hook(self):
         """
         This is called when the bot starts up
@@ -66,9 +68,6 @@ cleartimer = 10
 
 # Create the bot instance
 bot = MyBot(command_prefix="jbot ", intents=intents, SECRET_KEY=SECRET_KEY)
-
-# Import methods package that contains all bot methods
-from methods import apply_methods
 
 # Apply all methods from the methods package
 apply_methods(bot)

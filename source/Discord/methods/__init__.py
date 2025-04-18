@@ -23,12 +23,14 @@ def apply_methods(bot_class):
     from .commands import apply_methods as apply_command_methods
     
     # Apply all methods to the bot class
+    # The order is important - make sure the API methods are applied before events
+    # because setup_hook needs start_api_server
+    apply_api_methods(bot_class)  # First, to ensure API methods are available
     apply_queue_methods(bot_class)
     apply_voice_methods(bot_class)
     apply_playback_methods(bot_class)
     apply_ui_methods(bot_class)
-    apply_api_methods(bot_class)
-    apply_event_methods(bot_class)
+    apply_event_methods(bot_class)  # After API methods
     apply_command_methods(bot_class)
     
     return bot_class

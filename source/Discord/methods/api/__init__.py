@@ -2,6 +2,7 @@
 API handler methods for Discord bot
 Methods for handling API requests from external services
 """
+import types
 from .start_api_server import start_api_server
 from .handle_join import handle_join
 from .handle_guild_count import handle_guild_count
@@ -35,20 +36,25 @@ __all__ = [
 ]
 
 def apply_methods(bot_class):
-    """Apply all API handler methods to the bot class"""
-    # Make sure start_api_server is applied first
-    bot_class.start_api_server = start_api_server
-    bot_class.handle_join = handle_join
-    bot_class.handle_guild_count = handle_guild_count
-    bot_class.handle_guild_ids = handle_guild_ids
-    bot_class.handle_add_to_queue = handle_add_to_queue
-    bot_class.handle_get_queue = handle_get_queue
-    bot_class.handle_skip = handle_skip
-    bot_class.handle_pause = handle_pause
-    bot_class.handle_resume = handle_resume
-    bot_class.handle_disconnect = handle_disconnect
-    bot_class.handle_get_user_voice_state = handle_get_user_voice_state
-    bot_class.handle_clear_queue = handle_clear_queue
-    bot_class.handle_shuffle_queue = handle_shuffle_queue
-    bot_class.handle_reorder_queue = handle_reorder_queue
+    """
+    Apply all API handler methods to the bot class
+    
+    This uses types.MethodType to properly bind the functions as methods to the bot instance,
+    ensuring they receive 'self' when called.
+    """
+    # Use types.MethodType to bind functions as methods
+    bot_class.start_api_server = types.MethodType(start_api_server, bot_class)
+    bot_class.handle_join = types.MethodType(handle_join, bot_class)
+    bot_class.handle_guild_count = types.MethodType(handle_guild_count, bot_class)
+    bot_class.handle_guild_ids = types.MethodType(handle_guild_ids, bot_class)
+    bot_class.handle_add_to_queue = types.MethodType(handle_add_to_queue, bot_class)
+    bot_class.handle_get_queue = types.MethodType(handle_get_queue, bot_class)
+    bot_class.handle_skip = types.MethodType(handle_skip, bot_class)
+    bot_class.handle_pause = types.MethodType(handle_pause, bot_class)
+    bot_class.handle_resume = types.MethodType(handle_resume, bot_class)
+    bot_class.handle_disconnect = types.MethodType(handle_disconnect, bot_class)
+    bot_class.handle_get_user_voice_state = types.MethodType(handle_get_user_voice_state, bot_class)
+    bot_class.handle_clear_queue = types.MethodType(handle_clear_queue, bot_class)
+    bot_class.handle_shuffle_queue = types.MethodType(handle_shuffle_queue, bot_class)
+    bot_class.handle_reorder_queue = types.MethodType(handle_reorder_queue, bot_class)
     return bot_class
