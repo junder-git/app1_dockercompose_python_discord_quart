@@ -24,5 +24,5 @@ EXPOSE 80
 # Define environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Run the application unbuffered
-CMD ["python", "-u", "Service_QuartApp.py"]
+# Run the application with Hypercorn instead of the default Quart runner
+CMD ["hypercorn", "Service_QuartApp:app", "--bind", "0.0.0.0:80"]
