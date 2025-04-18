@@ -25,6 +25,10 @@ async def queue_add_route(guild_id):
     video_title = form.get('video_title', 'Unknown Video')
     return_to = form.get('return_to', 'dashboard')
     
+    # Preserve search context parameters
+    search_query = form.get('search_query', '')
+    search_type = form.get('search_type', 'comprehensive')
+    
     if not channel_id or not video_id:
         flash("Missing channel ID or video ID", "error")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
@@ -54,7 +58,10 @@ async def queue_add_route(guild_id):
     
     # Redirect back to search results or dashboard with the selected channel
     if return_to == 'search':
-        # If coming from search, preserve the search context
-        return redirect(url_for('youtube_search.youtube_search_route', guild_id=guild_id))
+        # Preserve search context when redirecting
+        return redirect(url_for('youtube_search.youtube_search_route', 
+                                guild_id=guild_id, 
+                                query=search_query, 
+                                search_type=search_type))
     else:
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))

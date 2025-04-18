@@ -313,10 +313,15 @@
                                                     <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
                                                     <form method="POST" action="{{ url_for('queue_add.queue_add_route', guild_id=guild_id) }}">
                                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                                        <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
+                                                        <input type="hidden" name="channel_id" value="{{ user_voice_channel.id }}">
                                                         <input type="hidden" name="video_id" value="{{ video.id }}">
                                                         <input type="hidden" name="video_title" value="{{ video.title }}">
-                                                        <button type="submit">Add to Queue</button>
+                                                        <input type="hidden" name="return_to" value="search">
+                                                        <input type="hidden" name="search_query" value="{{ request.form.get('query', '') }}">
+                                                        <input type="hidden" name="search_type" value="{{ search_type }}">
+                                                        <button type="submit" class="btn discord-btn btn-sm">
+                                                            <i class="fas fa-plus me-1"></i> Add to Queue
+                                                        </button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -387,15 +392,18 @@
                                     <div class="card-body">
                                         <h6 class="card-title">{{ video.title }}</h6>
                                         <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
-                                        <a href="{{ url_for('add_to_queue', guild_id=guild_id, channel_id=user_voice_channel.id, video_id=video.id, video_title=video.title, return_to='search') }}" 
-                                            data-method="post"
-                                            data-channel-id="{{ user_voice_channel.id }}"
-                                            data-video-id="{{ video.id }}"
-                                            data-video-title="{{ video.title|urlencode }}"
-                                            data-return-to="search"
-                                            class="btn discord-btn btn-sm {% if not user_voice_channel %}disabled{% endif %}">
-                                            <i class="fas fa-plus me-1"></i> Add to Queue
-                                        </a>
+                                        <form method="POST" action="{{ url_for('queue_add.queue_add_route', guild_id=guild_id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="channel_id" value="{{ user_voice_channel.id }}">
+                                            <input type="hidden" name="video_id" value="{{ video.id }}">
+                                            <input type="hidden" name="video_title" value="{{ video.title }}">
+                                            <input type="hidden" name="return_to" value="search">
+                                            <input type="hidden" name="search_query" value="{{ request.form.get('query', '') }}">
+                                            <input type="hidden" name="search_type" value="{{ search_type }}">
+                                            <button type="submit" class="btn discord-btn btn-sm">
+                                                <i class="fas fa-plus me-1"></i> Add to Queue
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
