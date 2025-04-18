@@ -4,9 +4,9 @@ import aiohttp
 from quart_discord import DiscordOAuth2Session
 import os
 from dotenv import load_dotenv
-from source.Quart.Class_DiscordBotAPI import DiscordBotAPI
-from source.Shared.Class_YouTube import YouTubeService
-from source.Shared.Class_MusicPlayer import MusicService
+from Class_DiscordBotAPI import DiscordBotAPI
+from Class_YouTube import YouTubeService
+from Class_MusicPlayer import MusicService
 import werkzeug.security
 import secrets
 def import_safe_str_cmp(a, b):
