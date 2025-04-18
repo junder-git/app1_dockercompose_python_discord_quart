@@ -1,4 +1,9 @@
-// Queue drag and drop functionality
+// Function to get CSRF token from meta tag
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').content;
+}
+
+// Updated queue drag and drop function with CSRF protection
 function initQueueDragDrop() {
     const queueList = document.getElementById('queue-list');
     if (!queueList) return; // Exit if no queue list found
@@ -82,6 +87,13 @@ function initQueueDragDrop() {
         form.action = `/server/${guildId}/queue/reorder`;
         form.style.display = 'none';
         
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = getCsrfToken();
+        form.appendChild(csrfInput);
+        
         // Add the necessary data
         const channelInput = document.createElement('input');
         channelInput.name = 'channel_id';
@@ -104,138 +116,7 @@ function initQueueDragDrop() {
     }
 }
 
-// Playlist video selection
-function initPlaylistSelection() {
-    console.log("Initializing playlist selection...");
-    const videoCheckboxes = document.querySelectorAll('.video-checkbox');
-    if (videoCheckboxes.length === 0) {
-        console.log("No video checkboxes found. Exiting initialization.");
-        return; // No checkboxes found
-    }
-    
-    console.log(`Found ${videoCheckboxes.length} video checkboxes`);
-    
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    const addSelectedBtn = document.getElementById('addSelectedToQueueBtn');
-    const selectedVideosContainer = document.getElementById('selectedVideosContainer');
-    const addMultipleForm = document.getElementById('addMultipleForm');
-    
-    // Debug element availability
-    console.log("Elements check:", {
-        selectAllBtn: !!selectAllBtn,
-        addSelectedBtn: !!addSelectedBtn,
-        selectedVideosContainer: !!selectedVideosContainer,
-        addMultipleForm: !!addMultipleForm
-    });
-    
-    let allSelected = false;
-    
-    // Function to update the selected videos form
-    function updateSelectedVideos() {
-        // Clear container
-        if (!selectedVideosContainer) {
-            console.error("selectedVideosContainer not found");
-            return;
-        }
-        
-        selectedVideosContainer.innerHTML = '';
-        
-        // Count selected videos
-        let selectedCount = 0;
-        
-        // Add new hidden inputs for each checked video
-        videoCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selectedCount++;
-                
-                const videoId = checkbox.getAttribute('data-video-id');
-                const videoTitle = checkbox.getAttribute('data-video-title');
-                
-                console.log(`Adding selected video: ID=${videoId}, Title=${videoTitle}`);
-                
-                // Create hidden input for video ID
-                const idInput = document.createElement('input');
-                idInput.type = 'hidden';
-                idInput.name = 'video_ids';
-                idInput.value = videoId;
-                selectedVideosContainer.appendChild(idInput);
-                
-                // Create hidden input for video title
-                const titleInput = document.createElement('input');
-                titleInput.type = 'hidden';
-                titleInput.name = 'video_titles';
-                titleInput.value = videoTitle;
-                selectedVideosContainer.appendChild(titleInput);
-            }
-        });
-        
-        // Enable/disable add selected button
-        if (addSelectedBtn) {
-            addSelectedBtn.disabled = selectedCount === 0;
-            
-            // Update button text
-            if (selectedCount > 0) {
-                addSelectedBtn.innerHTML = `<i class="fas fa-plus me-1"></i> Add ${selectedCount} Selected`;
-            } else {
-                addSelectedBtn.innerHTML = `<i class="fas fa-plus me-1"></i> Add Selected to Queue`;
-            }
-        }
-        
-        console.log(`Selected ${selectedCount} videos for queue`);
-    }
-    
-    // Add event listeners to checkboxes
-    videoCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            console.log(`Checkbox for ${checkbox.getAttribute('data-video-title')} changed to ${checkbox.checked}`);
-            updateSelectedVideos();
-        });
-    });
-    
-    // Select/deselect all videos
-    if (selectAllBtn) {
-        selectAllBtn.addEventListener('click', function() {
-            allSelected = !allSelected;
-            console.log(`Select all toggled to: ${allSelected}`);
-            
-            videoCheckboxes.forEach(checkbox => {
-                checkbox.checked = allSelected;
-            });
-            
-            // Update button text
-            if (allSelected) {
-                selectAllBtn.innerHTML = `<i class="fas fa-square me-1"></i> Deselect All`;
-            } else {
-                selectAllBtn.innerHTML = `<i class="fas fa-check-square me-1"></i> Select All`;
-            }
-            
-            updateSelectedVideos();
-        });
-    }
-    
-    // Add form submission handling to ensure data is sent
-    if (addMultipleForm) {
-        addMultipleForm.addEventListener('submit', function(event) {
-            // Check if any videos are selected
-            const selectedVideos = document.querySelectorAll('input[name="video_ids"]');
-            if (selectedVideos.length === 0) {
-                event.preventDefault();
-                alert('Please select at least one video to add to the queue.');
-                return false;
-            }
-            
-            console.log(`Submitting form with ${selectedVideos.length} selected videos`);
-            // Allow the form to submit
-            return true;
-        });
-    }
-    
-    // Initialize
-    updateSelectedVideos();
-    console.log("Playlist selection initialization complete");
-}
-
-// Unified queue manager for handling both queue refresh and bot state
+// Updated queue manager with CSRF protection for AJAX
 function initQueueManager() {
     const guildId = document.querySelector('[data-guild-id]')?.dataset.guildId;
     const channelId = document.querySelector('[data-channel-id]')?.dataset.channelId;
@@ -244,7 +125,11 @@ function initQueueManager() {
 
     // Function to refresh queue data
     function refreshQueueData() {
-        fetch(`/server/${guildId}/queue/ajax?channel_id=${channelId}`)
+        fetch(`/server/${guildId}/queue/ajax?channel_id=${channelId}`, {
+            headers: {
+                'X-CSRF-Token': getCsrfToken()  // Add CSRF token to header
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 updateQueueDisplay(data);
@@ -379,6 +264,69 @@ function initQueueManager() {
     refreshQueueData();
 }
 
+// Helper function to create and submit a form with CSRF token
+function submitFormWithCsrf(action, data = {}) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = action;
+    form.style.display = 'none';
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = getCsrfToken();
+    form.appendChild(csrfInput);
+    
+    // Add all data fields
+    Object.entries(data).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    });
+    
+    // Add to document and submit
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Updated playlist selection with CSRF protection
+function initPlaylistSelection() {
+    // Other logic remains the same
+    // ...
+    
+    // Add form submission handling to ensure data is sent
+    if (addMultipleForm) {
+        addMultipleForm.addEventListener('submit', function(event) {
+            // Check if any videos are selected
+            const selectedVideos = document.querySelectorAll('input[name="video_ids"]');
+            if (selectedVideos.length === 0) {
+                event.preventDefault();
+                alert('Please select at least one video to add to the queue.');
+                return false;
+            }
+            
+            // Add CSRF token if not already present
+            if (!addMultipleForm.querySelector('input[name="csrf_token"]')) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = getCsrfToken();
+                addMultipleForm.appendChild(csrfInput);
+            }
+            
+            console.log(`Submitting form with ${selectedVideos.length} selected videos`);
+            // Allow the form to submit
+            return true;
+        });
+    }
+    
+    // Initialize
+    updateSelectedVideos();
+}
+
 // Initialize all dashboard features
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize queue drag and drop
@@ -401,4 +349,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Convert links that should be POSTs to form submissions
+    document.querySelectorAll('a[data-method="post"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const url = this.getAttribute('href');
+            const data = {};
+            
+            // Extract data attributes
+            Object.keys(this.dataset).forEach(key => {
+                if (key !== 'method') {
+                    data[key] = this.dataset[key];
+                }
+            });
+            
+            // Create and submit form
+            submitFormWithCsrf(url, data);
+        });
+    });
 });

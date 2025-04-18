@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from Class_DiscordBotAPI import DiscordBotAPI
 from Class_YouTube import YouTubeService
 from Class_MusicPlayer import MusicService
+from quart_csrf import CSRFProtect  # Import the CSRF protection
 
 # First try loading .env.local, then fall back to .env if needed
 load_dotenv()
@@ -14,7 +15,6 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over htt
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
 
 # Initialize the services
 youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
@@ -32,6 +32,9 @@ app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 app.config["DISCORD_CLIENT_ID"] = os.environ.get('DISCORD_CLIENT_ID')
 app.config["DISCORD_CLIENT_SECRET"] = os.environ.get('DISCORD_CLIENT_SECRET')
 app.config["DISCORD_REDIRECT_URI"] = os.environ.get('DISCORD_REDIRECT_URI')
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
 
 discord = DiscordOAuth2Session(app)
 
@@ -54,6 +57,9 @@ def login_required(f):
 
 @app.route("/")
 async def index():
+    # Redirect to dashboard if already logged in
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
     return await render_template("index.html", authorized=await discord.authorized)
 
 @app.route("/login")
@@ -67,7 +73,9 @@ async def login():
     
     return authorization_url
 
+# The callback route is exempt from CSRF protection
 @app.route("/callback")
+@csrf.exempt
 async def callback():
     try:
         # Complete the OAuth flow
