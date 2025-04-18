@@ -372,10 +372,9 @@ async def add_to_queue(guild_id):
 @app.route('/server/<guild_id>/search', methods=['GET', 'POST'])
 @login_required
 async def youtube_search(guild_id):
-    """Handle YouTube search requests for videos, playlists, and artists with pagination"""
+    """Handle YouTube search requests for videos and playlists with pagination"""
     search_results = []
     playlist_results = []
-    artist_results = []  # New list for artist results
     playlist_videos = []
     selected_playlist_id = None
     playlist_details = None
@@ -441,7 +440,7 @@ async def youtube_search(guild_id):
                     else:
                         flash(f"Error adding to queue: {result.get('error')}", "error")
                     
-                    return redirect(url_for('server_dashboard', guild_id=guild_id))
+                    return redirect(url_for('youtube_search', guild_id=guild_id))
                     
                 elif playlist_id:
                     # If it's a playlist URL, redirect to the playlist view
@@ -455,20 +454,10 @@ async def youtube_search(guild_id):
                     elif search_type == 'playlist':
                         # Use the YouTube service for playlist search only
                         playlist_results = await youtube_service.search_playlists(query)
-                    elif search_type == 'artist':
-                        # Use the YouTube service for artist search only
-                        artist_results = await youtube_service.search_artists(query)
                     elif search_type == 'both':
                         # Search for both videos and playlists
                         search_results = await youtube_service.search_videos(query, max_results=5)
                         playlist_results = await youtube_service.search_playlists(query, max_results=5)
-                    elif search_type == 'comprehensive':
-                        # Search for videos, playlists, and artists
-                        search_results = await youtube_service.search_videos(query, max_results=5)
-                        playlist_results = await youtube_service.search_playlists(query, max_results=5)
-                        artist_results = await youtube_service.search_artists(query, max_results=5)
-    elif request.method == 'POST' and not user_voice_channel:
-        flash("You must join a voice channel in Discord before searching for music", "warning")
     
     # Always use the user's current voice channel as the selected channel
     selected_channel_id = user_voice_channel['id'] if user_voice_channel else None
@@ -503,7 +492,6 @@ async def youtube_search(guild_id):
         voice_channels=all_voice_channels,
         search_results=search_results,
         playlist_results=playlist_results,
-        artist_results=artist_results,  # Add artist results to the template
         playlist_videos=playlist_videos,
         playlist_details=playlist_details,
         selected_playlist_id=selected_playlist_id,

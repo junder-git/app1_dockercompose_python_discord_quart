@@ -364,81 +364,45 @@
                     </div>
                 </div>
             {% endif %}
-            
-            {% if artist_results %}
-                <!-- Artist Search Results -->
-                <div class="card discord-card mb-4">
-                    <div class="card-header">
-                        Artist Results
-                    </div>
-                    <div class="card-body">
-                        <div class="row row-cols-1 row-cols-xl-2 g-3">
-                            {% for artist in artist_results %}
-                                <div class="col">
-                                    <div class="card discord-card h-100">
-                                        <div class="row g-0">
-                                            <div class="col-md-4">
-                                                <img src="{{ artist.thumbnail }}" class="img-fluid rounded-start h-100" 
-                                                     style="object-fit: cover;" alt="{{ artist.title }}">
-                                            </div>
-                                            <div class="col-md-8">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">{{ artist.title }}</h6>
-                                                    <p class="card-text small">{{ artist.description|truncate(100) }}</p>
-                                                    <a href="https://www.youtube.com/channel/{{ artist.id }}" 
-                                                       class="btn discord-btn btn-sm" target="_blank">
-                                                        <i class="fas fa-external-link-alt me-1"></i> View Channel
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
             {% if search_results %}
-                <!-- Song Results -->
-                <div class="card discord-card">
-                    <div class="card-header">
-                        Song Results
-                    </div>
-                    <div class="card-body">
-                        <div class="row row-cols-1 row-cols-xl-2 g-3">
-                            {% for video in search_results %}
-                                <div class="col">
-                                    <div class="card discord-card h-100">
-                                        <div class="row g-0">
-                                            <div class="col-md-4">
-                                                <img src="{{ video.thumbnail }}" class="img-fluid rounded-start h-100" 
-                                                     style="object-fit: cover;" alt="{{ video.title }}">
-                                            </div>
-                                            <div class="col-md-8">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">{{ video.title }}</h6>
-                                                    <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
-                                                    <a href="{{ url_for('add_to_queue', guild_id=guild_id, channel_id=user_voice_channel.id, video_id=video.id, video_title=video.title, return_to='search') }}" 
-                                                        data-method="post"
-                                                        data-channel-id="{{ user_voice_channel.id }}"
-                                                        data-video-id="{{ video.id }}"
-                                                        data-video-title="{{ video.title }}"
-                                                        data-return-to="search"
-                                                        class="btn discord-btn btn-sm {% if not user_voice_channel %}disabled{% endif %}">
-                                                        <i class="fas fa-plus me-1"></i> Add to Queue
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
+    <!-- Song Results -->
+    <div class="card discord-card">
+        <div class="card-header">
+            Song Results
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-xl-2 g-3">
+                {% for video in search_results %}
+                    <div class="col">
+                        <div class="card discord-card h-100">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="{{ video.thumbnail }}" class="img-fluid rounded-start h-100" 
+                                         style="object-fit: cover;" alt="{{ video.title }}">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ video.title }}</h6>
+                                        <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
+                                        <a href="{{ url_for('add_to_queue', guild_id=guild_id, channel_id=user_voice_channel.id, video_id=video.id, video_title=video.title, return_to='search') }}" 
+                                            data-method="post"
+                                            data-channel-id="{{ user_voice_channel.id }}"
+                                            data-video-id="{{ video.id }}"
+                                            data-video-title="{{ video.title|urlencode }}"
+                                            data-return-to="search"
+                                            class="btn discord-btn btn-sm {% if not user_voice_channel %}disabled{% endif %}">
+                                            <i class="fas fa-plus me-1"></i> Add to Queue
+                                        </a>
                                     </div>
                                 </div>
-                            {% endfor %}
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
         </div>
     </div>
 </div>
