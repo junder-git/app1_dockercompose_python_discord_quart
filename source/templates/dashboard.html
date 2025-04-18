@@ -21,8 +21,8 @@
                                     <strong>Add our bot to your server</strong>
                                     <p>Click the button below to invite the bot to one of your Discord servers:</p>
                                     <form method="POST" action="{{ url_for('invite_bot') }}">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                        <button type="button" class="btn discord-btn">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn discord-btn">
                                             <i class="fab fa-discord me-2"></i> Add to Discord
                                         </button>
                                     </form>

@@ -264,22 +264,22 @@ function initQueueManager() {
     refreshQueueData();
 }
 
-// Helper function to create and submit a form with CSRF token
-function submitFormWithCsrf(action, data = {}) {
+// Modify your form submission function to always include CSRF
+function submitFormWithCsrf(action, additionalData = {}) {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = action;
     form.style.display = 'none';
     
-    // Add CSRF token
+    // Always add CSRF token
     const csrfInput = document.createElement('input');
     csrfInput.type = 'hidden';
     csrfInput.name = 'csrf_token';
     csrfInput.value = getCsrfToken();
     form.appendChild(csrfInput);
     
-    // Add all data fields
-    Object.entries(data).forEach(([key, value]) => {
+    // Add additional data
+    Object.entries(additionalData).forEach(([key, value]) => {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = key;
@@ -287,15 +287,118 @@ function submitFormWithCsrf(action, data = {}) {
         form.appendChild(input);
     });
     
-    // Add to document and submit
     document.body.appendChild(form);
     form.submit();
 }
 
-// Updated playlist selection with CSRF protection
+// Playlist video selection
 function initPlaylistSelection() {
-    // Other logic remains the same
-    // ...
+    console.log("Initializing playlist selection...");
+    const videoCheckboxes = document.querySelectorAll('.video-checkbox');
+    if (videoCheckboxes.length === 0) {
+        console.log("No video checkboxes found. Exiting initialization.");
+        return; // No checkboxes found
+    }
+    
+    console.log(`Found ${videoCheckboxes.length} video checkboxes`);
+    
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const addSelectedBtn = document.getElementById('addSelectedToQueueBtn');
+    const selectedVideosContainer = document.getElementById('selectedVideosContainer');
+    const addMultipleForm = document.getElementById('addMultipleForm');
+    
+    // Debug element availability
+    console.log("Elements check:", {
+        selectAllBtn: !!selectAllBtn,
+        addSelectedBtn: !!addSelectedBtn,
+        selectedVideosContainer: !!selectedVideosContainer,
+        addMultipleForm: !!addMultipleForm
+    });
+    
+    let allSelected = false;
+    
+    // Function to update the selected videos form
+    function updateSelectedVideos() {
+        // Clear container
+        if (!selectedVideosContainer) {
+            console.error("selectedVideosContainer not found");
+            return;
+        }
+        
+        selectedVideosContainer.innerHTML = '';
+        
+        // Count selected videos
+        let selectedCount = 0;
+        
+        // Add new hidden inputs for each checked video
+        videoCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedCount++;
+                
+                const videoId = checkbox.getAttribute('data-video-id');
+                const videoTitle = checkbox.getAttribute('data-video-title');
+                
+                console.log(`Adding selected video: ID=${videoId}, Title=${videoTitle}`);
+                
+                // Create hidden input for video ID
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'video_ids';
+                idInput.value = videoId;
+                selectedVideosContainer.appendChild(idInput);
+                
+                // Create hidden input for video title
+                const titleInput = document.createElement('input');
+                titleInput.type = 'hidden';
+                titleInput.name = 'video_titles';
+                titleInput.value = videoTitle;
+                selectedVideosContainer.appendChild(titleInput);
+            }
+        });
+        
+        // Enable/disable add selected button
+        if (addSelectedBtn) {
+            addSelectedBtn.disabled = selectedCount === 0;
+            
+            // Update button text
+            if (selectedCount > 0) {
+                addSelectedBtn.innerHTML = `<i class="fas fa-plus me-1"></i> Add ${selectedCount} Selected`;
+            } else {
+                addSelectedBtn.innerHTML = `<i class="fas fa-plus me-1"></i> Add Selected to Queue`;
+            }
+        }
+        
+        console.log(`Selected ${selectedCount} videos for queue`);
+    }
+    
+    // Add event listeners to checkboxes
+    videoCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            console.log(`Checkbox for ${checkbox.getAttribute('data-video-title')} changed to ${checkbox.checked}`);
+            updateSelectedVideos();
+        });
+    });
+    
+    // Select/deselect all videos
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            allSelected = !allSelected;
+            console.log(`Select all toggled to: ${allSelected}`);
+            
+            videoCheckboxes.forEach(checkbox => {
+                checkbox.checked = allSelected;
+            });
+            
+            // Update button text
+            if (allSelected) {
+                selectAllBtn.innerHTML = `<i class="fas fa-square me-1"></i> Deselect All`;
+            } else {
+                selectAllBtn.innerHTML = `<i class="fas fa-check-square me-1"></i> Select All`;
+            }
+            
+            updateSelectedVideos();
+        });
+    }
     
     // Add form submission handling to ensure data is sent
     if (addMultipleForm) {
