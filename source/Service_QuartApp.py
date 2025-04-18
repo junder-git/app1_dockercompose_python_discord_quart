@@ -326,11 +326,14 @@ async def clear_queue(guild_id):
 @login_required
 async def add_to_queue(guild_id):
     """Handle adding videos to the queue"""
-    # Get the requested channel_id from the form/request
-    channel_id = request.form.get('channel_id')
-    video_id = request.form.get('video_id')
-    video_title = request.form.get('video_title', 'Unknown Video')
-    return_to = request.form.get('return_to', 'dashboard')
+    # Get the form data asynchronously
+    form = await request.form
+    
+    # Get the requested channel_id from the form
+    channel_id = form.get('channel_id')
+    video_id = form.get('video_id')
+    video_title = form.get('video_title', 'Unknown Video')
+    return_to = form.get('return_to', 'dashboard')
     
     if not channel_id or not video_id:
         flash("Missing channel ID or video ID", "error")
