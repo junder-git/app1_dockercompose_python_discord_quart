@@ -311,15 +311,13 @@
                                                         </label>
                                                     </div>
                                                     <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
-                                                    <a href="#"
-                                                    class="btn btn-primary btn-sm add-to-queue"
-                                                    data-url="/server/{{ guild_id }}/queue/add"
-                                                    data-channel_id="{{ video.channel_id }}"
-                                                    data-video_id="{{ video.id }}"
-                                                    data-video_title="{{ video.title }}"
-                                                    data-return_to="dashboard">
-                                                    <i class="fas fa-plus me-1"></i> Add to queue
-                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-primary add-track-btn"
+                                                            data-guild-id="{{ guild_id }}"
+                                                            data-channel-id="{{ selected_channel_id }}"
+                                                            data-video-id="{{ video.id }}"
+                                                            data-video-title="{{ video.title }}">
+                                                        <i class="fas fa-plus me-1"></i> Add to Queue
+                                                    </button>
 
                                                 </div>
                                             </div>
@@ -390,15 +388,13 @@
                                     <div class="card-body">
                                         <h6 class="card-title">{{ video.title }}</h6>
                                         <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
-                                        <a href="#"
-                                        class="btn btn-primary btn-sm add-to-queue"
-                                        data-url="/server/{{ guild_id }}/queue/add"
-                                        data-channel_id="{{ video.channel_id }}"
-                                        data-video_id="{{ video.id }}"
-                                        data-video_title="{{ video.title }}"
-                                        data-return_to="dashboard">
-                                        <i class="fas fa-plus me-1"></i> Add to queue
-                                        </a>
+                                        <button type="button" class="btn btn-sm btn-primary add-track-btn"
+                                                data-guild-id="{{ guild_id }}"
+                                                data-channel-id="{{ selected_channel_id }}"
+                                                data-video-id="{{ video.id }}"
+                                                data-video-title="{{ video.title }}">
+                                            <i class="fas fa-plus me-1"></i> Add to Queue
+                                        </button>
 
                                     </div>
                                 </div>
