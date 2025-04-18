@@ -56,10 +56,10 @@ docker-compose down -v
 ## Application Interfaces
 
 ### Discord Chat Model Manager
-![Discord Chat Interface](source/READMEresources/discord_chat_model_example.png)
+![Discord Chat Interface](READMEresources/discord_chat_model_example.png)
 
 ### Flask Webplayer Manager
-![Flask Webplayer Interface](source/READMEresources/flask_webapp_example.png)
+![Flask Webplayer Interface](READMEresources/flask_webapp_example.png)
 
 ## Development Notes
 
@@ -69,7 +69,7 @@ docker-compose down -v
 - **Solution in Progress**: Implement authentication for Flask endpoints while maintaining necessary accessibility
 - **Note**: Discord API is only accessible within the Docker network, so it's protected
 
-![Flask Endpoints](source/READMEresources/flask_endpoints.png)
+![Flask Endpoints](READMEresources/flask_endpoints.png)
 
 ### Planned Features
 - Twitch bot integration with channel points for song requests

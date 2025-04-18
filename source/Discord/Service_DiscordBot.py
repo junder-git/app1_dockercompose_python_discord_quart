@@ -6,9 +6,9 @@ from aiohttp import web
 from dotenv import load_dotenv
 from collections import defaultdict
 import random
-from Class_MusicPlayer import MusicService
-from Class_YouTube import YouTubeService
-from Class_DiscordView import MusicControlView
+from source.Shared.Class_MusicPlayer import MusicService
+from source.Shared.Class_YouTube import YouTubeService
+from source.Discord.Class_DiscordView import MusicControlView
 
 # First try loading .env.local, then fall back to .env if needed
 load_dotenv()
