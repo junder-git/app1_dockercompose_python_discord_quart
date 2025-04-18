@@ -36,6 +36,7 @@ __all__ = [
 
 def apply_methods(bot_class):
     """Apply all API handler methods to the bot class"""
+    # Make sure start_api_server is applied first
     bot_class.start_api_server = start_api_server
     bot_class.handle_join = handle_join
     bot_class.handle_guild_count = handle_guild_count
