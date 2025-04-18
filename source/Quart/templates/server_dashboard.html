@@ -311,13 +311,13 @@
                                                         </label>
                                                     </div>
                                                     <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
-                                                    <form method="POST" action="{{ url_for('queue_add.queue_add_route', guild_id=guild_id) }}">
+                                                    <form method="POST" action="{{ url_for('queue_add.queue_add', guild_id=guild_id) }}">
                                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                         <input type="hidden" name="channel_id" value="{{ user_voice_channel.id }}">
                                                         <input type="hidden" name="video_id" value="{{ video.id }}">
                                                         <input type="hidden" name="video_title" value="{{ video.title }}">
                                                         <input type="hidden" name="return_to" value="search">
-                                                        <input type="hidden" name="search_query" value="{{ request.form.get('query', '') }}">
+                                                        <input type="hidden" name="search_query" value="{{ search_query }}">
                                                         <input type="hidden" name="search_type" value="{{ search_type }}">
                                                         <button type="submit" class="btn discord-btn btn-sm">
                                                             <i class="fas fa-plus me-1"></i> Add to Queue
@@ -398,7 +398,7 @@
                                             <input type="hidden" name="video_id" value="{{ video.id }}">
                                             <input type="hidden" name="video_title" value="{{ video.title }}">
                                             <input type="hidden" name="return_to" value="search">
-                                            <input type="hidden" name="search_query" value="{{ request.form.get('query', '') }}">
+                                            <input type="hidden" name="search_query" value="{{ search_query }}">
                                             <input type="hidden" name="search_type" value="{{ search_type }}">
                                             <button type="submit" class="btn discord-btn btn-sm">
                                                 <i class="fas fa-plus me-1"></i> Add to Queue
