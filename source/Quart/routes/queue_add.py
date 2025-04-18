@@ -1,7 +1,7 @@
 from quart import Blueprint, redirect, url_for, request, flash
 from .helpers import login_required, get_user_voice_channel
 
-# Create a blueprint for queue add multiple route
+# Create a blueprint for queue add
 queue_add_bp = Blueprint('queue_add', __name__)
 
 @queue_add_bp.route('/server/<guild_id>/queue/add', methods=['POST'])
