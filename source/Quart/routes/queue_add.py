@@ -16,6 +16,11 @@ async def queue_add_route(guild_id):
     discord = current_app.discord
     bot_api = current_app.bot_api
     
+    # Verify the user is actually in a voice channel
+    if not user_voice_channel:
+        flash("You must join a voice channel before adding music to the queue", "warning")
+        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
     # Get the form data asynchronously
     form = await request.form
     

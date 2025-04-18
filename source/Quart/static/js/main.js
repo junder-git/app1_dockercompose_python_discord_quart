@@ -395,3 +395,65 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".add-to-queue").forEach(link => {
+      link.addEventListener("click", async (e) => {
+        e.preventDefault();
+  
+        const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+  
+        const url = link.dataset.url;
+        const channelId = link.dataset.channel_id;
+        const videoId = link.dataset.video_id;
+        const videoTitle = link.dataset.video_title;
+        const returnTo = link.dataset.return_to;
+  
+        const formData = new URLSearchParams();
+        formData.append("channel_id", channelId);
+        formData.append("video_id", videoId);
+        formData.append("video_title", videoTitle);
+        formData.append("return_to", returnTo);
+  
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "X-CSRFToken": csrfToken
+            },
+            body: formData.toString()
+          });
+  
+          if (response.ok) {
+            // ✅ Add to queue worked!
+            showToast(`✅ Added "${videoTitle}" to the queue.`);
+          } else {
+            const err = await response.text();
+            console.error("Queue error:", err);
+            showToast("❌ Failed to add song.");
+          }
+        } catch (err) {
+          console.error("Network error:", err);
+          showToast("❌ Network issue.");
+        }
+      });
+    });
+  });
+  
+  // Simple toast message function (feel free to customize)
+  function showToast(msg) {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.style.position = "fixed";
+    toast.style.bottom = "20px";
+    toast.style.left = "50%";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.background = "#333";
+    toast.style.color = "#fff";
+    toast.style.padding = "10px 20px";
+    toast.style.borderRadius = "5px";
+    toast.style.zIndex = 1000;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  
