@@ -31,7 +31,7 @@ async def music_control_route(guild_id):
     state_response = await bot_api.get(state_api_url)
     bot_state = {"connected": False, "playing": False, "paused": False}
     
-    if state_response.status_code == 200:
+    if state_response.status == 200:
         bot_state = await state_response.json()
     
     # Determine if command should be executed based on current state
@@ -52,7 +52,7 @@ async def music_control_route(guild_id):
         api_url = f"/api/control/{guild_id}/{channel_id}/{command}"
         response = await bot_api.post(api_url)
         
-        if response.status_code == 200:
+        if response.status == 200:
             flash(f'Successfully executed {command}', 'success')
         else:
             error_data = await response.json()

@@ -1,7 +1,7 @@
 """
 YouTube search route for JBot Quart application
 """
-from quart import Blueprint, render_template, request, session, url_for
+from quart import Blueprint, render_template, request, redirect, url_for
 from .helpers import login_required, get_voice_channels, get_user_voice_channel
 from forms import SearchForm, MusicControlForm, ShuffleQueueForm, PlaylistForm, AddMultipleForm, UrlForm
 

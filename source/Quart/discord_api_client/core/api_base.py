@@ -2,6 +2,7 @@
 Base API class with core functionality for the Discord Bot API client
 """
 import aiohttp
+from urllib.parse import urlencode
 
 class DiscordAPIBase:
     def __init__(self, host, port, secret_key):
@@ -72,6 +73,49 @@ class DiscordAPIBase:
         except Exception as e:
             print(f"Error calling bot API ({endpoint}): {e}")
             return {"success": False, "error": str(e)}
+    
+    # Public HTTP method wrappers for easier use in routes
+    async def get(self, endpoint, params=None):
+        """
+        Public GET method wrapper for route handlers
+        
+        Args:
+            endpoint (str): API endpoint path (can include query params)
+            params (dict, optional): Additional query parameters
+            
+        Returns:
+            Response: aiohttp ClientResponse object
+        """
+        await self.ensure_session()
+        headers = {"Authorization": f"Bearer {self.secret_key}"}
+        
+        # If endpoint already has query params, preserve them
+        if '?' in endpoint and params:
+            query_string = urlencode(params)
+            url = f"{self.base_url}{endpoint}&{query_string}"
+        elif params:
+            query_string = urlencode(params)
+            url = f"{self.base_url}{endpoint}?{query_string}"
+        else:
+            url = f"{self.base_url}{endpoint}"
+            
+        return await self.session.get(url, headers=headers)
+    
+    async def post(self, endpoint, data=None):
+        """
+        Public POST method wrapper for route handlers
+        
+        Args:
+            endpoint (str): API endpoint path
+            data (dict, optional): JSON data to send
+            
+        Returns:
+            Response: aiohttp ClientResponse object
+        """
+        await self.ensure_session()
+        headers = {"Authorization": f"Bearer {self.secret_key}"}
+        url = f"{self.base_url}{endpoint}"
+        return await self.session.post(url, headers=headers, json=data)
     
     async def close(self):
         """Close the session when done"""
