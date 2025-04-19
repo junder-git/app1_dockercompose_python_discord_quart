@@ -33,7 +33,7 @@ async def server_dashboard_route(guild_id):
     user_voice_channel = await get_user_voice_channel(guild_id, user_id, bot_api)
     
     # Get current selected channel (if any)
-    selected_channel_id = request.args.get('channel_id', '')
+    selected_channel_id = request.args.get('channel_id', None)
     
     # If no channel is selected but user is in a voice channel, use that
     if not selected_channel_id and user_voice_channel:
@@ -52,7 +52,7 @@ async def server_dashboard_route(guild_id):
     add_multiple_form = AddMultipleForm()
     
     # Set default values    
-    if selected_channel_id and hasattr(music_control_form, 'channel_id'):
+    if selected_channel_id != None:
         music_control_form.channel_id.data = selected_channel_id
         search_form.channel_id.data = selected_channel_id
         shuffle_queue_form.channel_id.data = selected_channel_id
