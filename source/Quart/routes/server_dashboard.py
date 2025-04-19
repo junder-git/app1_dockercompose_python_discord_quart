@@ -3,7 +3,7 @@ Server dashboard route for JBot Quart application
 """
 from quart import Blueprint, render_template, redirect, url_for, request
 from .helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from forms import SearchForm, UrlForm, MusicControlForm
+from forms import SearchForm, MusicControlForm, ShuffleQueueForm, PlaylistForm, AddMultipleForm
 
 # Create a blueprint for server dashboard route
 server_dashboard_bp = Blueprint('server_dashboard', __name__)
@@ -44,20 +44,20 @@ async def server_dashboard_route(guild_id):
         guild_id, selected_channel_id, voice_channels, bot_api
     )
     
-    # Create forms
-    search_form = await SearchForm.create_form()
-    url_form = await UrlForm.create_form()
-    music_control_form = await MusicControlForm.create_form()
+    # Initialize all forms
+    music_control_form = MusicControlForm()
+    search_form = SearchForm()
+    shuffle_queue_form = ShuffleQueueForm()
+    playlist_form = PlaylistForm()
+    add_multiple_form = AddMultipleForm()
     
-    # Set default values
-    if user_voice_channel and hasattr(search_form, 'channel_id'):
-        search_form.channel_id.data = user_voice_channel['id']
-    
-    if user_voice_channel and hasattr(url_form, 'channel_id'):
-        url_form.channel_id.data = user_voice_channel['id']
-    
+    # Set default values    
     if selected_channel_id and hasattr(music_control_form, 'channel_id'):
         music_control_form.channel_id.data = selected_channel_id
+        search_form.channel_id.data = selected_channel_id
+        shuffle_queue_form.channel_id.data = selected_channel_id
+        playlist_form.channel_id.data = selected_channel_id
+        add_multiple_form.channel_id.data = selected_channel_id
     
     # Safe attribute access
     guild_icon = getattr(guild_info, 'icon', None)
@@ -76,7 +76,9 @@ async def server_dashboard_route(guild_id):
         current_track=queue_info.get("current_track"),
         bot_state=bot_state,
         # Forms
+        music_control_form=music_control_form,
         search_form=search_form,
-        url_form=url_form,
-        music_control_form=music_control_form
+        shuffle_queue_form=shuffle_queue_form,
+        playlist_form=playlist_form,
+        add_multiple_form=add_multiple_form
     )

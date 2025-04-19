@@ -98,13 +98,20 @@
                     {% else %}
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0">Coming Up Next:</h6>
-                            <!-- Shuffle Button -->
+                            <!-- Shuffle Button - Fixed -->
                             <form method="POST" action="{{ url_for('shuffle_queue.shuffle_queue_route', guild_id=guild_id) }}">
-                                {{ csrf_token() }}
-                                <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
-                                <button type="submit" class="btn btn-sm btn-outline-light" title="Shuffle Queue">
-                                    <i class="fas fa-random"></i> Shuffle
-                                </button>
+                                {{ shuffle_queue_form.csrf_token }}
+                                {{ shuffle_queue_form.channel_id(value=selected_channel_id) }}
+                                {{ shuffle_queue_form.submit(class="btn btn-sm btn-outline-light", title="Shuffle Queue") }}
+                                <script>
+                                    // Update button text to include icon
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const shuffleBtn = document.querySelector('[title="Shuffle Queue"]');
+                                        if (shuffleBtn) {
+                                            shuffleBtn.innerHTML = '<i class="fas fa-random"></i> Shuffle';
+                                        }
+                                    });
+                                </script>
                             </form>
                         </div>
                         <!-- Draggable queue list -->
@@ -160,9 +167,16 @@
                                 <label for="searchQuery" class="form-label">Search for Songs, Playlists, Artists or Enter URL</label>
                                 <div class="input-group">
                                     {{ search_form.query(class="form-control bg-dark text-light", id="searchQuery", placeholder="Search for songs, playlists, artists or paste YouTube URL...", required=True, disabled=not user_voice_channel) }}
-                                    <button class="btn discord-btn" type="submit" {% if not user_voice_channel %}disabled{% endif %}>
-                                        <i class="fas fa-search me-1"></i> Search
-                                    </button>
+                                    {{ search_form.submit(class="btn discord-btn", disabled=not user_voice_channel) }}
+                                    <script>
+                                        // Update button text to include icon
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            const searchBtn = document.querySelector('form button[type="submit"]');
+                                            if (searchBtn) {
+                                                searchBtn.innerHTML = '<i class="fas fa-search me-1"></i> Search';
+                                            }
+                                        });
+                                    </script>
                                 </div>
                                 <!-- Hidden field for search type -->
                                 {{ search_form.search_type(value="comprehensive", style="display: none;") }}
@@ -212,7 +226,7 @@
                     </div>
                 </div>
 
-                <!-- Modal for adding entire playlist -->
+                <!-- Modal for adding entire playlist - Fixed -->
                 <div class="modal fade" id="addPlaylistModal" tabindex="-1" aria-labelledby="addPlaylistModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content bg-dark text-light">
@@ -230,10 +244,10 @@
                                 <p>Do you want to continue?</p>
                                 
                                 <form id="addEntirePlaylistForm" method="POST" action="{{ url_for('queue_add_entire_playlist.queue_add_entire_playlist_route', guild_id=guild_id) }}">
-                                    {{ csrf_token() }}
-                                    <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
-                                    <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
-                                    <input type="hidden" name="playlist_title" value="{{ playlist_details.title }}">
+                                    {{ playlist_form.csrf_token }}
+                                    {{ playlist_form.playlist_id(value=selected_playlist_id) }}
+                                    {{ playlist_form.channel_id(value=selected_channel_id) }}
+                                    {{ playlist_form.playlist_title(value=playlist_details.title) }}
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -283,7 +297,7 @@
             {% endif %}
             
             {% if playlist_videos %}
-                <!-- Playlist Videos -->
+                <!-- Playlist Videos - Fixed AddMultipleForm -->
                 <div class="card discord-card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Playlist Videos (Page {{ current_page }} of {{ total_pages }})</span>
@@ -291,18 +305,17 @@
                             <button type="button" id="selectAllBtn" class="btn btn-sm btn-outline-light me-2">
                                 <i class="fas fa-check-square me-1"></i> Select All
                             </button>
-                            <button type="button" id="addSelectedToQueueBtn" onclick="document.getElementById('addMultipleForm').submit();" class="btn btn-sm btn-primary" disabled>
+                            <button type="button" id="addSelectedToQueueBtn" class="btn btn-sm btn-primary" disabled>
                                 <i class="fas fa-plus me-1"></i> Add Selected to Queue
                             </button>
                         </div>
                     </div>
                     <div class="card-body">
                         <form id="addMultipleForm" method="POST" action="{{ url_for('queue_add_multiple.queue_add_multiple_route', guild_id=guild_id) }}">
-                            {{ csrf_token() }}
-                            <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
-                            <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
-                            <!-- Store the current page for returning to the correct page after adding -->
-                            <input type="hidden" name="page_token" value="{{ page_token }}">
+                            {{ add_multiple_form.csrf_token }}
+                            {{ add_multiple_form.channel_id(value=selected_channel_id) }}
+                            {{ add_multiple_form.playlist_id(value=selected_playlist_id) }}
+                            {{ add_multiple_form.page_token(value=page_token) }}
                             
                             <div id="selectedVideosContainer">
                                 <!-- Selected video IDs and titles will be added here by JavaScript -->
@@ -432,6 +445,15 @@
     // Ensure playlist selection is initialized when videos are loaded
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Server dashboard loaded, reinitializing playlist selection');
+        
+        // Set up the "Add Selected to Queue" button to submit the form
+        const addSelectedBtn = document.getElementById('addSelectedToQueueBtn');
+        if (addSelectedBtn) {
+            addSelectedBtn.addEventListener('click', function() {
+                document.getElementById('addMultipleForm').submit();
+            });
+        }
+        
         // Double-check that initPlaylistSelection is properly called
         if (typeof initPlaylistSelection === 'function') {
             // Call it immediately
@@ -442,6 +464,74 @@
         } else {
             console.error('initPlaylistSelection function not found! Check if main.js is loaded correctly.');
         }
+        
+        // Set up video selection
+        setupVideoSelection();
     });
+    
+    function setupVideoSelection() {
+        const videoCheckboxes = document.querySelectorAll('.video-checkbox');
+        const addSelectedBtn = document.getElementById('addSelectedToQueueBtn');
+        const selectedContainer = document.getElementById('selectedVideosContainer');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        
+        // Handle select all button
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function() {
+                const allChecked = Array.from(videoCheckboxes).every(cb => cb.checked);
+                videoCheckboxes.forEach(cb => cb.checked = !allChecked);
+                updateSelectedVideos();
+            });
+        }
+        
+        // Handle individual checkboxes
+        videoCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedVideos);
+        });
+        
+        function updateSelectedVideos() {
+            // Clear container
+            if (selectedContainer) {
+                selectedContainer.innerHTML = '';
+            }
+            
+            // Count selected videos
+            let selectedCount = 0;
+            
+            // Create hidden fields for each selected video
+            videoCheckboxes.forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    selectedCount++;
+                    const videoId = checkbox.dataset.videoId;
+                    const videoTitle = checkbox.dataset.videoTitle;
+                    
+                    // Create hidden fields using the FieldList format expected by WTForms
+                    const idField = document.createElement('input');
+                    idField.type = 'hidden';
+                    idField.name = `video_ids-${index}`;
+                    idField.value = videoId;
+                    
+                    const titleField = document.createElement('input');
+                    titleField.type = 'hidden';
+                    titleField.name = `video_titles-${index}`;
+                    titleField.value = videoTitle;
+                    
+                    selectedContainer.appendChild(idField);
+                    selectedContainer.appendChild(titleField);
+                }
+            });
+            
+            // Enable/disable the add button
+            if (addSelectedBtn) {
+                addSelectedBtn.disabled = selectedCount === 0;
+                addSelectedBtn.innerText = selectedCount > 0 
+                    ? `Add ${selectedCount} Selected to Queue` 
+                    : 'Add Selected to Queue';
+            }
+        }
+        
+        // Initialize on page load
+        updateSelectedVideos();
+    }
 </script>
 {% endblock %}
