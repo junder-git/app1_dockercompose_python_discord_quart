@@ -2,7 +2,7 @@
 OAuth callback route for JBot Quart application
 """
 from quart import Blueprint, redirect, url_for, session
-from quart_csrf import csrf
+from quart_wtf import csrf
 import traceback
 
 # Create a blueprint for callback route

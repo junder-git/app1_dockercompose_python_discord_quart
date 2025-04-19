@@ -7,15 +7,7 @@ from Class_YouTube import YouTubeService
 from Class_MusicPlayer import MusicService
 import werkzeug.security
 import secrets
-def import_safe_str_cmp(a, b):
-    try:
-        a_bytes = str(a).encode('utf-8')
-        b_bytes = str(b).encode('utf-8')
-        return secrets.compare_digest(a_bytes, b_bytes)
-    except Exception:
-        return False
-werkzeug.security.safe_str_cmp = import_safe_str_cmp
-from quart_csrf import CSRFProtect  # Import the CSRF protection
+from quart_wtf import QuartWTF, CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session
 
 # Import routes package

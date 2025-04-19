@@ -1,6 +1,12 @@
-// Function to get CSRF token from meta tag
+// Function to get CSRF token from meta tag or input field
 function getCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]').content;
+    // Look for meta tag first (current method)
+    const metaToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (metaToken) return metaToken;
+    
+    // Then look for hidden input (quart-wtf method)
+    const inputToken = document.querySelector('input[name="csrf_token"]')?.value;
+    return inputToken || '';
 }
 
 // Function to submit forms with CSRF protection
@@ -231,7 +237,7 @@ function initQueueManager() {
     function refreshQueueData() {
         fetch(`/server/${guildId}/queue/ajax?channel_id=${channelId}`, {
             headers: {
-                'X-CSRF-Token': getCsrfToken()
+                'X-CSRFToken': getCsrfToken()
             }
         })
             .then(response => response.json())
@@ -409,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRFToken': getCsrfToken()
                     },
                     body: new URLSearchParams({
                         'channel_id': btn.dataset.channelId,
