@@ -9,11 +9,11 @@
                 <h2 class="card-title">Control your Discord music bot from your browser</h2>
                 <p class="card-text">Search for YouTube videos and queue them to play in your Discord server's voice channels.</p>
                 {% if not authorized %}
-                    <a href="{{ url_for('login') }}" class="btn discord-btn btn-lg">
+                    <a href="{{ url_for('login.login_route') }}" class="btn discord-btn btn-lg">
                         <i class="fab fa-discord me-2"></i> Login with Discord
                     </a>
                 {% else %}
-                    <a href="{{ url_for('dashboard') }}" class="btn discord-btn btn-lg">
+                    <a href="{{ url_for('dashboard.dashboard_route') }}" class="btn discord-btn btn-lg">
                         Go to Dashboard
                     </a>
                 {% endif %}

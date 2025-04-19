@@ -6,8 +6,8 @@
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Servers</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('server_dashboard', guild_id=guild_id) }}">{{ guild_name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.dashboard_route') }}">Servers</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('server_dashboard.server_dashboard_route', guild_id=guild_id) }}">{{ guild_name }}</a></li>
                     <li class="breadcrumb-item active">Add Playlist</li>
                 </ol>
             </nav>
@@ -79,11 +79,14 @@
                             <i class="fas fa-list-ol fa-4x mb-3 text-primary"></i>
                             <h5>Add Entire Playlist</h5>
                             <p>Add all {{ total_results }} videos to your queue in order.</p>
-                            <form id="addEntirePlaylistForm" method="POST" action="{{ url_for('add_entire_playlist', guild_id=guild_id) }}">
+                            <form id="addEntirePlaylistForm" method="POST" action="{{ url_for('queue_add_entire_playlist.queue_add_entire_playlist_route', guild_id=guild_id) }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
                                 <input type="hidden" name="channel_id" value="{{ channel_id }}">
                                 <input type="hidden" name="playlist_title" value="{{ playlist_details.title }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i> Add All Videos
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -94,7 +97,7 @@
                             <i class="fas fa-check-square fa-4x mb-3 text-success"></i>
                             <h5>Select Specific Videos</h5>
                             <p>Browse the playlist and select only the videos you want.</p>
-                            <a href="{{ url_for('youtube_search', guild_id=guild_id, playlist_id=playlist_id) }}" class="btn btn-success">
+                            <a href="{{ url_for('youtube_search.youtube_search_route', guild_id=guild_id, playlist_id=playlist_id) }}" class="btn btn-success">
                                 <i class="fas fa-search me-1"></i> Browse and Select
                             </a>
                         </div>
@@ -103,7 +106,7 @@
             </div>
         </div>
         <div class="card-footer">
-            <a href="{{ url_for('server_dashboard', guild_id=guild_id) }}" class="btn btn-outline-light">
+            <a href="{{ url_for('server_dashboard.server_dashboard_route', guild_id=guild_id) }}" class="btn btn-outline-light">
                 <i class="fas fa-arrow-left me-1"></i> Cancel
             </a>
         </div>
