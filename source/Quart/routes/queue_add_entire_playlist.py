@@ -12,13 +12,10 @@ queue_add_entire_playlist_bp = Blueprint('queue_add_entire_playlist', __name__)
 @login_required
 async def queue_add_entire_playlist_route(guild_id):
     """Handle adding an entire YouTube playlist to the queue"""
-    # Import from current app context
     from quart import current_app
-    discord = current_app.discord
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service
     
-    # Create and validate form
     form = await PlaylistForm.create_form()
     
     if not form.validate_on_submit():
@@ -31,51 +28,17 @@ async def queue_add_entire_playlist_route(guild_id):
     channel_id = form.channel_id.data
     playlist_title = form.playlist_title.data
     
-    # Get user's current voice channel
-    user = await discord.fetch_user()
-    user_id = str(user.id)
-    user_voice_channel = await get_user_voice_channel(guild_id, user_id, bot_api)
+    videos, _, _ = await youtube_service.get_playlist_videos(playlist_id)
+    if not videos:
+        flash("No videos found in playlist", "error")
+        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
-    # Verify the user is actually in a voice channel
-    if not user_voice_channel:
-        flash("You must join a voice channel before adding music to the queue", "warning")
-        return redirect(url_for('youtube_search.youtube_search_route', guild_id=guild_id))
+    # Send the batch add request to the Discord bot
+    result = await bot_api.add_multiple_to_queue(guild_id, channel_id, videos)
     
-    # Start by getting the first batch of videos
-    added_count = 0
-    page_token = None
-    total_added = 0
-    max_pages = 10  # Limit to 10 pages (500 videos) to prevent abuse
-    
-    # Process videos in batches
-    for _ in range(max_pages):
-        videos, next_page_token, _ = await youtube_service.get_playlist_videos(playlist_id, page_token)
-        
-        if not videos:
-            break
-            
-        # Add each video to the queue
-        for video in videos:
-            try:
-                result = await bot_api.add_to_queue(guild_id, channel_id, video['id'], video['title'])
-                if result.get('success'):
-                    total_added += 1
-            except Exception as e:
-                print(f"Error adding video to queue: {e}")
-                # Continue with next video
-                continue
-                
-        # If there's no next page, we're done
-        if not next_page_token:
-            break
-            
-        # Update page token for next batch
-        page_token = next_page_token
-    
-    if total_added > 0:
-        flash(f"Added {total_added} videos from playlist '{playlist_title}' to queue", "success")
+    if result.get('success'):
+        flash(f"Added {result.get('added_count', 0)} videos from playlist '{playlist_title}' to queue", "success")
     else:
-        flash("Failed to add videos from playlist to queue", "error")
+        flash(f"Error adding videos from playlist: {result.get('error', 'Unknown error')}", "error")
     
-    # Redirect to dashboard to show the queue
     return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))

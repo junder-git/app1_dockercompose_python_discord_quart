@@ -12,11 +12,9 @@ queue_clear_bp = Blueprint('queue_clear', __name__)
 @login_required
 async def queue_clear_route(guild_id):
     """Explicitly clear the queue for a guild"""
-    # Import from current app context
     from quart import current_app
     bot_api = current_app.bot_api
     
-    # Create and validate form
     form = await ClearQueueForm.create_form()
     
     if not form.validate_on_submit():
@@ -30,7 +28,7 @@ async def queue_clear_route(guild_id):
         if result.get('success'):
             flash("Music queue cleared", "success")
         else:
-            flash(f"Error clearing queue: {result.get('error')}", "error")
+            flash(f"Error clearing queue: {result.get('error', 'Unknown error')}", "error")
     except Exception as e:
         flash(f"Error clearing queue: {str(e)}", "error")
     

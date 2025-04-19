@@ -12,11 +12,9 @@ queue_reorder_bp = Blueprint('queue_reorder', __name__)
 @login_required
 async def queue_reorder_route(guild_id):
     """Handle reordering of tracks in the queue"""
-    # Import from current app context
     from quart import current_app
     bot_api = current_app.bot_api
     
-    # Create and validate form
     form = await ReorderQueueForm.create_form()
     
     if not form.validate_on_submit():
@@ -26,23 +24,17 @@ async def queue_reorder_route(guild_id):
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
     channel_id = form.channel_id.data
-    old_index = form.old_index.data
-    new_index = form.new_index.data
+    old_index = int(form.old_index.data)
+    new_index = int(form.new_index.data)
     
     try:
-        # Convert to integers
-        old_index = int(old_index)
-        new_index = int(new_index)
-        
-        # Call the API to reorder the queue
         result = await bot_api.reorder_queue(guild_id, channel_id, old_index, new_index)
         
         if result.get('success'):
             flash("Queue order updated", "success")
         else:
-            flash(f"Error reordering queue: {result.get('error')}", "error")
+            flash(f"Error reordering queue: {result.get('error', 'Unknown error')}", "error")
     except Exception as e:
         flash(f"Error reordering queue: {str(e)}", "error")
         
-    # Redirect back to the dashboard
     return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))

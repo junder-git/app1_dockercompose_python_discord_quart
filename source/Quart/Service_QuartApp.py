@@ -5,9 +5,7 @@ from dotenv import load_dotenv
 from Class_DiscordBotAPI import DiscordBotAPI
 from Class_YouTube import YouTubeService
 from Class_MusicPlayer import MusicService
-import werkzeug.security
-import secrets
-from quart_wtf import QuartForm, CSRFProtect  # Update import
+from quart_wtf import CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session
 
 # Import routes package

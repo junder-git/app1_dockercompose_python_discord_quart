@@ -12,13 +12,10 @@ add_by_url_bp = Blueprint('add_by_url', __name__)
 @login_required
 async def add_by_url_route(guild_id):
     """Handle adding videos by URL - supports both single videos and playlists"""
-    # Import from current app context
     from quart import current_app
-    discord = current_app.discord
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service
     
-    # Create and validate form
     form = await UrlForm.create_form()
     
     if not form.validate_on_submit():
@@ -30,22 +27,11 @@ async def add_by_url_route(guild_id):
     url = form.url.data
     channel_id = form.channel_id.data
     
-    # Get user's current voice channel
-    user = await discord.fetch_user()
-    user_id = str(user.id)
-    user_voice_channel = await get_user_voice_channel(guild_id, user_id, bot_api)
-    
-    # Verify the user is actually in a voice channel
-    if not user_voice_channel:
-        flash("You must join a voice channel before adding music to the queue", "warning")
-        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
-    
-    # Use the shared service for URL handling
+    # Determine if it's a playlist or single video
     is_playlist = youtube_service.extract_playlist_id(url) is not None
     
     try:
         if is_playlist:
-            # Extract playlist ID
             playlist_id = youtube_service.extract_playlist_id(url)
             if not playlist_id:
                 flash("Invalid YouTube playlist URL", "error")
@@ -67,15 +53,14 @@ async def add_by_url_route(guild_id):
             video_details = await youtube_service.get_video_details(video_id)
             video_title = video_details.get('title', 'Unknown Video')
             
-            # Add to queue
+            # Let the Discord bot handle the connection and queueing
             result = await bot_api.add_to_queue(guild_id, channel_id, video_id, video_title)
             if result.get('success'):
                 flash(f"Added '{video_title}' to queue", "success")
             else:
-                flash(f"Error adding video to queue: {result.get('error')}", "error")
+                flash(f"Error: {result.get('error', 'Unknown error')}", "error")
         
     except Exception as e:
         flash(f"Error processing URL: {str(e)}", "error")
     
-    # Redirect back to dashboard
     return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
