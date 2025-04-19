@@ -81,7 +81,7 @@ async def youtube_search_route(guild_id):
             playlist_api_url += f"?page_token={page_token}"
         
         playlist_response = await bot_api.get(playlist_api_url)
-        if playlist_response.status_code == 200:
+        if playlist_response.status == 200:
             playlist_data = await playlist_response.json()
             playlist_videos = playlist_data.get('items', [])
             playlist_details = playlist_data.get('playlist_details', {})
@@ -120,7 +120,7 @@ async def youtube_search_route(guild_id):
             url_api_url = f"/api/youtube/video-info?url={query}"
             url_response = await bot_api.get(url_api_url)
             
-            if url_response.status_code == 200:
+            if url_response.status == 200:
                 url_data = await url_response.json()
                 video_info = url_data.get('video_info', {})
                 
@@ -145,7 +145,7 @@ async def youtube_search_route(guild_id):
             search_api_url = f"/api/youtube/search?q={query}&type={search_type}"
             search_response = await bot_api.get(search_api_url)
             
-            if search_response.status_code == 200:
+            if search_response.status == 200:
                 search_data = await search_response.json()
                 
                 # Handle different result types
@@ -166,7 +166,7 @@ async def youtube_search_route(guild_id):
         queue_api_url = f"/api/queue/{guild_id}/{selected_channel_id}"
         queue_response = await bot_api.get(queue_api_url)
         
-        if queue_response.status_code == 200:
+        if queue_response.status == 200:
             queue_data = await queue_response.json()
             queue_info = queue_data
         
@@ -174,7 +174,7 @@ async def youtube_search_route(guild_id):
         state_api_url = f"/api/state/{guild_id}/{selected_channel_id}"
         state_response = await bot_api.get(state_api_url)
         
-        if state_response.status_code == 200:
+        if state_response.status == 200:
             bot_state = await state_response.json()
     
     return await render_template(
