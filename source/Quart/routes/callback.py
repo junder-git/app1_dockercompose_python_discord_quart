@@ -2,8 +2,10 @@
 OAuth callback route for JBot Quart application
 """
 from quart import Blueprint, redirect, url_for, session
-from quart_wtf import csrf
 import traceback
+from quart_wtf import CSRFProtect
+
+csrf = CSRFProtect()
 
 # Create a blueprint for callback route
 callback_bp = Blueprint('callback', __name__)
