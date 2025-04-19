@@ -2,11 +2,13 @@ from functools import wraps
 from quart import Quart
 import os
 from dotenv import load_dotenv
-from Class_DiscordBotAPI import DiscordBotAPI
 from Class_YouTube import YouTubeService
 from Class_MusicPlayer import MusicService
 from quart_wtf import CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session
+
+# Import discord API client blueprint
+from discord_api_client import discord_api_client_bp, create_discord_bot_api
 
 # Import routes package
 from routes import register_blueprints
@@ -22,18 +24,21 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
 music_service = MusicService(api_key=YOUTUBE_API_KEY)
 
-# Initialize the Bot API client
-bot_api = DiscordBotAPI(
-    host="discord-bot",  # Docker service name
-    port=5001,           # Port exposed in docker-compose
-    secret_key=os.environ.get('SECRET_KEY')
-)
-
 app = Quart(__name__)
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 app.config["DISCORD_CLIENT_ID"] = os.environ.get('DISCORD_CLIENT_ID')
 app.config["DISCORD_CLIENT_SECRET"] = os.environ.get('DISCORD_CLIENT_SECRET')
 app.config["DISCORD_REDIRECT_URI"] = os.environ.get('DISCORD_REDIRECT_URI')
+
+# Initialize the Bot API client using the new blueprint factory function
+app.bot_api = create_discord_bot_api(
+    host="discord-bot",  # Docker service name
+    port=5001,           # Port exposed in docker-compose
+    secret_key=os.environ.get('SECRET_KEY')
+)
+
+# Register the discord_api_client blueprint
+app.register_blueprint(discord_api_client_bp)
 
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
@@ -43,7 +48,6 @@ discord = DiscordOAuth2Session(app)
 
 # Make discord and bot_api available to all routes
 app.discord = discord
-app.bot_api = bot_api
 app.quart_app = app  # For render_template access in blueprints
 app.music_service = music_service
 app.youtube_service = youtube_service
@@ -54,7 +58,7 @@ register_blueprints(app)
 # Add cleanup on app exit
 @app.teardown_appcontext
 async def shutdown_session(exception=None):
-    await bot_api.close()
+    await app.bot_api.close()
 
 @app.before_serving
 async def before_serving():
