@@ -36,8 +36,18 @@ async def queue_add_route(guild_id):
         flash("You must join a voice channel before adding music to the queue", "warning")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
-    # Try to add the track
     try:
+        # First, check if the bot is already connected to the voice channel
+        queue_info = await bot_api.get_queue(guild_id, channel_id)
+        
+        # If bot is not connected, connect it to the voice channel first
+        if not queue_info.get('is_connected', False):
+            join_result = await bot_api.join_voice_channel(guild_id, channel_id)
+            if not join_result.get('success'):
+                flash(f"Error connecting bot to voice channel: {join_result.get('error')}", "error")
+                return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+        
+        # Then add the track to the queue
         result = await bot_api.add_to_queue(guild_id, channel_id, video_id, video_title)
         if result.get('success'):
             flash(f"Added '{video_title}' to queue", "success")
