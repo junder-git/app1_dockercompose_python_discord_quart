@@ -1,8 +1,9 @@
 """
 Reorder queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, request, flash
+from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required
+from forms import ReorderQueueForm
 
 # Create a blueprint for queue reorder route
 queue_reorder_bp = Blueprint('queue_reorder', __name__)
@@ -15,14 +16,18 @@ async def queue_reorder_route(guild_id):
     from quart import current_app
     bot_api = current_app.bot_api
     
-    form = await request.form
-    channel_id = form.get('channel_id')
-    old_index = form.get('old_index')
-    new_index = form.get('new_index')
+    # Create and validate form
+    form = await ReorderQueueForm.create_form()
     
-    if not all([channel_id, old_index, new_index]):
-        flash("Missing parameters for queue reordering", "error")
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
+    channel_id = form.channel_id.data
+    old_index = form.old_index.data
+    new_index = form.new_index.data
     
     try:
         # Convert to integers

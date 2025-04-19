@@ -3,6 +3,7 @@ Clear queue route for JBot Quart application
 """
 from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required
+from forms import ClearQueueForm
 
 # Create a blueprint for queue clear route
 queue_clear_bp = Blueprint('queue_clear', __name__)
@@ -14,6 +15,15 @@ async def queue_clear_route(guild_id):
     # Import from current app context
     from quart import current_app
     bot_api = current_app.bot_api
+    
+    # Create and validate form
+    form = await ClearQueueForm.create_form()
+    
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
+        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
     try:
         result = await bot_api.clear_queue(guild_id)

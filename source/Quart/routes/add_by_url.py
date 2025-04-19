@@ -1,8 +1,9 @@
 """
 Add by URL route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, request, flash
+from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required, get_user_voice_channel
+from forms import UrlForm
 
 # Create a blueprint for add by URL route
 add_by_url_bp = Blueprint('add_by_url', __name__)
@@ -17,13 +18,17 @@ async def add_by_url_route(guild_id):
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service
     
-    form = await request.form
-    url = form.get('url')
-    channel_id = form.get('channel_id')
+    # Create and validate form
+    form = await UrlForm.create_form()
     
-    if not url or not channel_id:
-        flash("Missing URL or channel ID", "error")
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
+    url = form.url.data
+    channel_id = form.channel_id.data
     
     # Get user's current voice channel
     user = await discord.fetch_user()

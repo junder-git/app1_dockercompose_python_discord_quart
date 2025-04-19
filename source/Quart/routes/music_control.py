@@ -1,8 +1,9 @@
 """
 Music control route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, request, flash
+from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required
+from forms import MusicControlForm
 
 # Create a blueprint for music control route
 music_control_bp = Blueprint('music_control', __name__)
@@ -16,12 +17,18 @@ async def music_control_route(guild_id):
     discord = current_app.discord
     bot_api = current_app.bot_api
     
-    command = request.args.get('command')
-    channel_id = request.args.get('channel_id')
+    # Create and validate form
+    form = await MusicControlForm.create_form()
     
-    if not command or not channel_id:
-        flash("Missing command or channel ID", "error")
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
+    # Get form data
+    command = form.command.data
+    channel_id = form.channel_id.data
     
     try:
         if command == 'join':

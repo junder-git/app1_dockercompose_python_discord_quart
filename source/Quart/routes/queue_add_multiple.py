@@ -1,8 +1,9 @@
 """
 Add multiple videos to queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, request, flash
+from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required, get_user_voice_channel
+from forms import AddMultipleForm
 
 # Create a blueprint for queue add multiple route
 queue_add_multiple_bp = Blueprint('queue_add_multiple', __name__)
@@ -16,14 +17,16 @@ async def queue_add_multiple_route(guild_id):
     discord = current_app.discord
     bot_api = current_app.bot_api
     
-    # Debug the form data first
-    form = await request.form
-    print(f"Form data: {dict(form)}")
+    # Create and validate form
+    form = await AddMultipleForm.create_form()
     
-    channel_id = form.get('channel_id')
-    if not channel_id:
-        flash("Missing channel ID", "error")
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
+    channel_id = form.channel_id.data
     
     # Get user's current voice channel
     user = await discord.fetch_user()
@@ -36,11 +39,8 @@ async def queue_add_multiple_route(guild_id):
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Get all selected video IDs and titles
-    video_ids = form.getlist('video_ids')
-    video_titles = form.getlist('video_titles')
-    
-    print(f"Video IDs: {video_ids}")
-    print(f"Video Titles: {video_titles}")
+    video_ids = form.video_ids.data
+    video_titles = form.video_titles.data
     
     # Make sure we have data to process
     if not video_ids or len(video_ids) == 0:
@@ -68,8 +68,8 @@ async def queue_add_multiple_route(guild_id):
         flash(f"Added {added_count} videos to queue", "success")
     
     # Go back to the search page or the playlist page if a playlist_id was provided
-    playlist_id = form.get('playlist_id')
-    page_token = form.get('page_token')
+    playlist_id = form.playlist_id.data
+    page_token = form.page_token.data
     if playlist_id:
         return redirect(url_for('youtube_search.youtube_search_route', guild_id=guild_id, playlist_id=playlist_id, page_token=page_token))
     else:

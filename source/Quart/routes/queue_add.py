@@ -1,5 +1,6 @@
-from quart import Blueprint, redirect, url_for, request, flash
+from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required, get_user_voice_channel
+from forms import AddToQueueForm
 
 # Create a blueprint for queue add
 queue_add_bp = Blueprint('queue_add', __name__)
@@ -13,18 +14,20 @@ async def queue_add_route(guild_id):
     discord = current_app.discord
     bot_api = current_app.bot_api
     
-    # Get the form data asynchronously
-    form = await request.form
+    # Create and validate form
+    form = await AddToQueueForm.create_form()
     
-    # Get the requested channel_id from the form
-    channel_id = form.get('channel_id')
-    video_id = form.get('video_id')
-    video_title = form.get('video_title', 'Unknown Video')
-    return_to = form.get('return_to', 'dashboard')
-    
-    if not channel_id or not video_id:
-        flash("Missing channel ID or video ID", "error")
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
+    # Get form data
+    channel_id = form.channel_id.data
+    video_id = form.video_id.data
+    video_title = form.video_title.data
+    return_to = form.return_to.data
     
     # Get user's current voice channel
     user = await discord.fetch_user()

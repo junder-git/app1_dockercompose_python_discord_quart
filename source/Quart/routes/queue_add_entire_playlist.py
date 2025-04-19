@@ -1,8 +1,9 @@
 """
 Add entire playlist to queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, request, flash
+from quart import Blueprint, redirect, url_for, flash
 from .helpers import login_required, get_user_voice_channel
+from forms import PlaylistForm
 
 # Create a blueprint for queue add entire playlist route
 queue_add_entire_playlist_bp = Blueprint('queue_add_entire_playlist', __name__)
@@ -17,14 +18,18 @@ async def queue_add_entire_playlist_route(guild_id):
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service
     
-    form = await request.form
-    playlist_id = form.get('playlist_id')
-    channel_id = form.get('channel_id')
-    playlist_title = form.get('playlist_title', 'Unknown Playlist')
+    # Create and validate form
+    form = await PlaylistForm.create_form()
     
-    if not playlist_id or not channel_id:
-        flash("Missing playlist ID or channel ID", "error")
-        return redirect(url_for('youtube_search.youtube_search_route', guild_id=guild_id))
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", "error")
+        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
+    
+    playlist_id = form.playlist_id.data
+    channel_id = form.channel_id.data
+    playlist_title = form.playlist_title.data
     
     # Get user's current voice channel
     user = await discord.fetch_user()
