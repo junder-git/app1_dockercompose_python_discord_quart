@@ -3,7 +3,7 @@ YouTube search route for JBot Quart application
 """
 from quart import Blueprint, render_template, redirect, url_for, request, flash
 from .helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from forms import SearchForm
+from forms import SearchForm, UrlForm, MusicControlForm
 
 # Create a blueprint for YouTube search route
 youtube_search_bp = Blueprint('youtube_search', __name__)
@@ -47,8 +47,10 @@ async def youtube_search_route(guild_id):
     user_id = str(user.id)
     user_voice_channel = await get_user_voice_channel(guild_id, user_id, bot_api)
     
-    # Create search form
-    form = await SearchForm.create_form()
+    # Create all forms needed by the template
+    search_form = await SearchForm.create_form()
+    url_form = await UrlForm.create_form()
+    music_control_form = await MusicControlForm.create_form()
     
     # Check if a playlist ID was provided
     selected_playlist_id = request.args.get('playlist_id')
@@ -66,9 +68,9 @@ async def youtube_search_route(guild_id):
             total_results = video_count
     
     # Handle form submission - only process if user is in a voice channel
-    if form.validate_on_submit() and user_voice_channel:
-        query = form.query.data
-        search_type = form.search_type.data
+    if search_form.validate_on_submit() and user_voice_channel:
+        query = search_form.query.data
+        search_type = search_form.search_type.data
         
         if query:
             # Check if the query is a YouTube URL
@@ -113,13 +115,18 @@ async def youtube_search_route(guild_id):
     
     # If the form wasn't submitted via POST, pre-populate from request args
     elif request.method == 'GET' and 'query' in request.args:
-        form.query.data = request.args.get('query')
-        form.search_type.data = request.args.get('search_type', 'comprehensive')
+        search_form.query.data = request.args.get('query')
+        search_form.search_type.data = request.args.get('search_type', 'comprehensive')
     
     # Always use the user's current voice channel as the selected channel
     selected_channel_id = user_voice_channel['id'] if user_voice_channel else None
-    if selected_channel_id and form.channel_id:
-        form.channel_id.data = selected_channel_id
+    if selected_channel_id:
+        if hasattr(search_form, 'channel_id'):
+            search_form.channel_id.data = selected_channel_id
+        if hasattr(url_form, 'channel_id'):
+            url_form.channel_id.data = selected_channel_id
+        if hasattr(music_control_form, 'channel_id'):
+            music_control_form.channel_id.data = selected_channel_id
     
     # Get queue for the selected channel (if user is in a voice channel)
     queue_info = {"queue": [], "current_track": None}
@@ -161,8 +168,10 @@ async def youtube_search_route(guild_id):
         current_track=queue_info.get("current_track"),
         bot_state=bot_state,
         search_type=search_type,
-        # Add form to the template
-        form=form,
+        # Forms with consistent names
+        search_form=search_form,
+        url_form=url_form,
+        music_control_form=music_control_form,
         # Pagination data
         current_page=current_page,
         total_pages=total_pages,
