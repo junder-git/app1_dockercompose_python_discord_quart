@@ -1,5 +1,5 @@
-from quart import Blueprint, redirect, url_for, flash
-from .helpers import login_required, get_user_voice_channel
+from quart import Blueprint, redirect, url_for, flash, request
+from .helpers import login_required
 from forms import AddToQueueForm
 
 # Create a blueprint for queue add
@@ -11,7 +11,6 @@ async def queue_add_route(guild_id):
     """Handle adding videos to the queue"""
     # Import from current app context 
     from quart import current_app
-    discord = current_app.discord
     bot_api = current_app.bot_api
     
     # Create and validate form
@@ -29,39 +28,19 @@ async def queue_add_route(guild_id):
     video_title = form.video_title.data
     return_to = form.return_to.data
     
-    # Get user's current voice channel
-    user = await discord.fetch_user()
-    user_id = str(user.id)
-    user_voice_channel = await get_user_voice_channel(guild_id, user_id, bot_api)
-    
-    # Verify the user is actually in a voice channel
-    if not user_voice_channel:
-        flash("You must join a voice channel before adding music to the queue", "warning")
-        return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
-    
     try:
-        # First, check if the bot is already connected to the voice channel
-        queue_info = await bot_api.get_queue(guild_id, channel_id)
-        
-        # If bot is not connected, connect it to the voice channel first
-        if not queue_info.get('is_connected', False):
-            join_result = await bot_api.join_voice_channel(guild_id, channel_id)
-            if not join_result.get('success'):
-                flash(f"Error connecting bot to voice channel: {join_result.get('error')}", "error")
-                return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))
-        
-        # Then add the track to the queue
+        # Let the Discord bot handle everything - connecting to voice channel and adding to queue
         result = await bot_api.add_to_queue(guild_id, channel_id, video_id, video_title)
+        
         if result.get('success'):
             flash(f"Added '{video_title}' to queue", "success")
         else:
-            flash(f"Error adding to queue: {result.get('error')}", "error")
+            flash(f"Error adding to queue: {result.get('error', 'Unknown error')}", "error")
     except Exception as e:
         flash(f"Error adding to queue: {str(e)}", "error")
     
-    # Redirect back to search results or dashboard with the selected channel
+    # Redirect back based on return_to parameter
     if return_to == 'search':
-        # If coming from search, preserve the search context
         return redirect(url_for('youtube_search.youtube_search_route', guild_id=guild_id))
     else:
         return redirect(url_for('server_dashboard.server_dashboard_route', guild_id=guild_id))

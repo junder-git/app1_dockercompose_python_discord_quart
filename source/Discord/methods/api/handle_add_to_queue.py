@@ -5,15 +5,7 @@ Handles API requests for adding tracks to the queue
 from aiohttp import web
 
 async def handle_add_to_queue(self, request):
-    """
-    Handle adding a track to the queue
-    
-    Args:
-        request: The HTTP request object
-        
-    Returns:
-        web.Response: JSON response with result
-    """
+    """Handle adding a track to the queue"""
     # Check authorization
     if request.headers.get('Authorization') != f'Bearer {self.SECRET_KEY}':
         return web.json_response({"error": "Unauthorized"}, status=401)
@@ -28,7 +20,13 @@ async def handle_add_to_queue(self, request):
         if not all([guild_id, channel_id, video_id]):
             return web.json_response({"error": "Missing parameters"}, status=400)
         
-        # Use the shared add_to_queue method
+        # First, ensure we're connected to the voice channel
+        voice_client, queue_id = await self.get_voice_client(guild_id, channel_id, connect=True)
+        
+        if not voice_client:
+            return web.json_response({"error": "Failed to connect to voice channel"}, status=500)
+        
+        # Then add the track to the queue
         result = await self.add_to_queue(guild_id, channel_id, video_id, video_title)
         
         if result["success"]:
