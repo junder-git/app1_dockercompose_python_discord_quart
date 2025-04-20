@@ -1,7 +1,7 @@
 """
 Music control route for JBot Quart application
 """
-from quart import Blueprint, request, redirect, url_for, flash
+from quart import Blueprint, request, redirect, url_for, flash, current_app
 from .helpers import login_required
 from forms import MusicControlForm
 
@@ -12,8 +12,6 @@ music_control_bp = Blueprint('music_control', __name__)
 @login_required
 async def music_control_route(guild_id):
     """Handle music control commands"""
-    # Import from current app context
-    from quart import current_app
     bot_api = current_app.bot_api
     
     # Get form data

@@ -1,7 +1,7 @@
 """
 Login route for JBot Quart application
 """
-from quart import Blueprint, session
+from quart import Blueprint, session, current_app
 
 # Create a blueprint for login route
 login_bp = Blueprint('login', __name__)
@@ -10,7 +10,6 @@ login_bp = Blueprint('login', __name__)
 async def login_route():
     """Login route - redirects to Discord OAuth"""
     # Import discord from QuartApp context
-    from quart import current_app
     discord = current_app.discord
     
     # Clear any existing session data to ensure a fresh login

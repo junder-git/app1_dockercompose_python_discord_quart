@@ -1,4 +1,4 @@
-from quart import Blueprint, redirect, url_for, flash, request
+from quart import Blueprint, redirect, url_for, flash, request, current_app
 from .helpers import login_required
 from forms import AddToQueueForm
 
@@ -9,8 +9,6 @@ queue_add_bp = Blueprint('queue_add', __name__)
 @login_required
 async def queue_add_route(guild_id):
     """Handle adding videos to the queue"""
-    # Import from current app context 
-    from quart import current_app
     bot_api = current_app.bot_api
     
     # Create and validate form

@@ -1,7 +1,7 @@
 """
 Reorder queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, flash
+from quart import Blueprint, redirect, url_for, flash, current_app
 from .helpers import login_required
 from forms import ReorderQueueForm
 
@@ -12,7 +12,6 @@ queue_reorder_bp = Blueprint('queue_reorder', __name__)
 @login_required
 async def queue_reorder_route(guild_id):
     """Handle reordering of tracks in the queue"""
-    from quart import current_app
     bot_api = current_app.bot_api
     
     form = await ReorderQueueForm.create_form()

@@ -1,7 +1,7 @@
 """
 Playlist confirmation route for JBot Quart application
 """
-from quart import Blueprint, render_template, redirect, url_for, request, flash
+from quart import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from .helpers import login_required, get_voice_channels, get_user_voice_channel
 
 # Create a blueprint for playlist confirmation route
@@ -11,8 +11,6 @@ playlist_confirmation_bp = Blueprint('playlist_confirmation', __name__)
 @login_required
 async def playlist_confirmation_route(guild_id):
     """Confirmation page for adding YouTube playlists"""
-    # Import from current app context
-    from quart import current_app
     discord = current_app.discord
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service

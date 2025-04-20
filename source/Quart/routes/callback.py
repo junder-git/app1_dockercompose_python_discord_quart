@@ -1,7 +1,7 @@
 """
 OAuth callback route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, session
+from quart import Blueprint, redirect, url_for, session, current_app
 import traceback
 from quart_wtf import CSRFProtect
 
@@ -15,7 +15,6 @@ callback_bp = Blueprint('callback', __name__)
 @csrf.exempt
 async def callback_route():
     """Callback route for Discord OAuth"""
-    from quart import current_app
     discord = current_app.discord
     
     try:

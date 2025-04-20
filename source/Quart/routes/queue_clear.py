@@ -1,7 +1,7 @@
 """
 Clear queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, flash
+from quart import Blueprint, redirect, url_for, flash, current_app
 from .helpers import login_required
 from forms import ClearQueueForm
 
@@ -11,8 +11,6 @@ queue_clear_bp = Blueprint('queue_clear', __name__)
 @queue_clear_bp.route('/server/<guild_id>/queue/clear', methods=['POST'])
 @login_required
 async def queue_clear_route(guild_id):
-    """Explicitly clear the queue for a guild"""
-    from quart import current_app
     bot_api = current_app.bot_api
     
     form = await ClearQueueForm.create_form()

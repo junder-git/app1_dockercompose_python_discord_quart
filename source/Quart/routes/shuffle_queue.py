@@ -1,7 +1,7 @@
 """
 Shuffle queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, flash
+from quart import Blueprint, redirect, url_for, flash, current_app
 from .helpers import login_required
 from forms import ShuffleQueueForm
 
@@ -12,7 +12,6 @@ shuffle_queue_bp = Blueprint('shuffle_queue', __name__)
 @login_required
 async def shuffle_queue_route(guild_id):
     """Shuffle the current music queue"""
-    from quart import current_app
     bot_api = current_app.bot_api
     
     form = await ShuffleQueueForm.create_form()

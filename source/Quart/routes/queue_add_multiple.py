@@ -1,7 +1,7 @@
 """
 Add multiple videos to queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, flash
+from quart import Blueprint, redirect, url_for, flash, current_app
 from .helpers import login_required, get_user_voice_channel
 from forms import AddMultipleForm
 
@@ -12,8 +12,6 @@ queue_add_multiple_bp = Blueprint('queue_add_multiple', __name__)
 @login_required
 async def queue_add_multiple_route(guild_id):
     """Handle adding multiple videos to the queue from a playlist"""
-    # Import from current app context
-    from quart import current_app
     discord = current_app.discord
     bot_api = current_app.bot_api
     

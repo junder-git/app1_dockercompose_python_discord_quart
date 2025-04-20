@@ -1,7 +1,7 @@
 """
 Add entire playlist to queue route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, flash
+from quart import Blueprint, redirect, url_for, flash, current_app
 from .helpers import login_required, get_user_voice_channel
 from forms import PlaylistForm
 
@@ -12,7 +12,6 @@ queue_add_entire_playlist_bp = Blueprint('queue_add_entire_playlist', __name__)
 @login_required
 async def queue_add_entire_playlist_route(guild_id):
     """Handle adding an entire YouTube playlist to the queue"""
-    from quart import current_app
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service
     

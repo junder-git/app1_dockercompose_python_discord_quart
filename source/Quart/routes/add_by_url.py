@@ -1,7 +1,7 @@
 """
 Add by URL route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, flash
+from quart import Blueprint, redirect, url_for, flash, current_app
 from .helpers import login_required, get_user_voice_channel
 from forms import UrlForm
 
@@ -12,7 +12,6 @@ add_by_url_bp = Blueprint('add_by_url', __name__)
 @login_required
 async def add_by_url_route(guild_id):
     """Handle adding videos by URL - supports both single videos and playlists"""
-    from quart import current_app
     bot_api = current_app.bot_api
     youtube_service = current_app.youtube_service
     

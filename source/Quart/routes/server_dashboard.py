@@ -1,7 +1,7 @@
 """
 Server dashboard route for JBot Quart application
 """
-from quart import Blueprint, render_template, redirect, url_for, request
+from quart import Blueprint, render_template, redirect, url_for, request, current_app
 from .helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
 from forms import SearchForm, MusicControlForm, ShuffleQueueForm, PlaylistForm, AddMultipleForm
 
@@ -12,8 +12,6 @@ server_dashboard_bp = Blueprint('server_dashboard', __name__)
 @login_required
 async def server_dashboard_route(guild_id):
     """Server dashboard for viewing voice channels and music status"""
-    # Import from current app context
-    from quart import current_app
     discord = current_app.discord
     bot_api = current_app.bot_api
     

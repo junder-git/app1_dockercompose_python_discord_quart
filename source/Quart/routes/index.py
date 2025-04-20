@@ -1,7 +1,7 @@
 """
 Index route for JBot Quart application
 """
-from quart import Blueprint, redirect, url_for, session, render_template
+from quart import Blueprint, redirect, url_for, session, render_template, current_app
 
 # Create a blueprint for index route
 index_bp = Blueprint('index', __name__)
@@ -10,7 +10,6 @@ index_bp = Blueprint('index', __name__)
 async def index_route():
     """Home page route"""
     # Import discord from QuartApp context to avoid circular imports
-    from quart import current_app
     discord = current_app.discord
     
     # Redirect to dashboard if already logged in

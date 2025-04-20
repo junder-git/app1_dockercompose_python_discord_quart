@@ -1,7 +1,7 @@
 """
 Dashboard route for JBot Quart application
 """
-from quart import Blueprint, render_template, redirect, url_for, session
+from quart import Blueprint, render_template, redirect, url_for, session, current_app
 from .helpers import login_required
 import traceback
 
@@ -14,7 +14,6 @@ async def dashboard_route():
     """Main dashboard page listing servers"""
     try:
         # Import from current app context to avoid circular imports
-        from quart import current_app
         discord = current_app.discord
         bot_api = current_app.bot_api
         

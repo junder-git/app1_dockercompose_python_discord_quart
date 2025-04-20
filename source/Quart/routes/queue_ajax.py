@@ -1,7 +1,7 @@
 """
 AJAX queue data route for JBot Quart application
 """
-from quart import Blueprint, request
+from quart import Blueprint, request, current_app
 from .helpers import login_required, get_voice_channels, get_queue_and_bot_state
 
 # Create a blueprint for queue AJAX route
@@ -11,8 +11,6 @@ queue_ajax_bp = Blueprint('queue_ajax', __name__)
 @login_required
 async def queue_ajax_route(guild_id):
     """AJAX endpoint to retrieve queue data for real-time updates"""
-    # Import from current app context
-    from quart import current_app
     bot_api = current_app.bot_api
     
     # Get the channel ID from query parameters

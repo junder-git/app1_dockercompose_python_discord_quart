@@ -1,7 +1,7 @@
 """
 YouTube search route for JBot Quart application
 """
-from quart import Blueprint, render_template, request, redirect, url_for
+from quart import Blueprint, render_template, request, redirect, url_for, current_app
 from .helpers import login_required, get_voice_channels, get_user_voice_channel
 from forms import SearchForm, MusicControlForm, ShuffleQueueForm, PlaylistForm, AddMultipleForm, UrlForm
 
@@ -12,8 +12,6 @@ youtube_search_bp = Blueprint('youtube_search', __name__)
 @login_required
 async def youtube_search_route(guild_id):
     """Search YouTube for videos or display playlist details"""
-    # Import from current app context
-    from quart import current_app
     discord = current_app.discord
     bot_api = current_app.bot_api
     
