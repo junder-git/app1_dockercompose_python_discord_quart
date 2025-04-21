@@ -1,5 +1,0 @@
-<form method="POST" action="{{ url_for('shuffle_queue.shuffle_queue_route', guild_id=guild_id) }}">
-    {{ shuffle_queue_form.csrf_token }}
-    {{ shuffle_queue_form.channel_id(value=selected_channel_id) }}
-    {{ shuffle_queue_form.submit(class="btn btn-sm btn-outline-light", title="Shuffle Queue") }}
-</form>
