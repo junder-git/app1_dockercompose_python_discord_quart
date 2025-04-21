@@ -31,7 +31,12 @@ async def youtube_search_route(guild_id):
     guild_icon = getattr(guild_info, 'icon', None)
     guild_name = getattr(guild_info, 'name', f"Server {guild_id}")
     
-    # Initialize forms
+    # Initialize forms with default values where needed
+    selected_channel_id = None
+    if user_voice_channel:
+        selected_channel_id = user_voice_channel['id']
+    
+    # Create form instances with appropriate data
     search_form = SearchForm()
     music_control_form = MusicControlForm()
     shuffle_queue_form = ShuffleQueueForm()
@@ -39,18 +44,14 @@ async def youtube_search_route(guild_id):
     add_multiple_form = AddMultipleForm()
     url_form = UrlForm()
     
-    # Set channel ID if available 
-    selected_channel_id = None
-    if user_voice_channel:
-        selected_channel_id = user_voice_channel['id']
+    # Set form values based on user's voice channel 
+    if selected_channel_id:
         music_control_form.channel_id.data = selected_channel_id
         shuffle_queue_form.channel_id.data = selected_channel_id
+        search_form.channel_id.data = selected_channel_id
         playlist_form.channel_id.data = selected_channel_id
         add_multiple_form.channel_id.data = selected_channel_id
         url_form.channel_id.data = selected_channel_id
-        
-        # Set search form channel_id
-        search_form.channel_id.data = selected_channel_id
     
     # Default values
     search_results = []
@@ -100,13 +101,13 @@ async def youtube_search_route(guild_id):
             add_multiple_form.page_token.data = page_token
 
     # Handle search query from GET parameters
-    elif 'query' in request.args:
-        # Get search parameters from query string
+    elif request.args.get('query'):
+        # Process the search form
         query = request.args.get('query', '')
         search_type = request.args.get('search_type', 'comprehensive')
         channel_id = request.args.get('channel_id', '')
         
-        # Populate the form with these values for rendering
+        # Set search form values for the template
         search_form.query.data = query
         search_form.search_type.data = search_type
         search_form.channel_id.data = channel_id
@@ -204,7 +205,7 @@ async def youtube_search_route(guild_id):
         queue=queue_info.get("queue", []),
         current_track=queue_info.get("current_track"),
         bot_state=bot_state,
-        # Forms - make sure ALL forms are passed
+        # Forms - pass all form objects to the template
         search_form=search_form,
         music_control_form=music_control_form,
         shuffle_queue_form=shuffle_queue_form,

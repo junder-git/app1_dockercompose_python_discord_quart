@@ -9,34 +9,84 @@ function getCsrfToken() {
     return inputToken || '';
 }
 
-// Function to submit forms with CSRF protection
-function submitFormWithCsrf(action, additionalData = {}) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = action;
-    form.style.display = 'none';
-    
-    // Always add CSRF token
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrf_token';
-    csrfInput.value = getCsrfToken();
-    form.appendChild(csrfInput);
-    
-    // Add additional data
-    Object.entries(additionalData).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
+// Function to handle adding videos to queue (improved for WTForms compatibility)
+function initAddTrackButtons() {
+    document.querySelectorAll('.add-track-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
+            btn.disabled = true;
+            
+            // Create a proper form submission matching the AddToQueueForm structure
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/server/${btn.dataset.guildId}/queue/add`;
+            form.style.display = 'none';
+            
+            // CSRF Token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = getCsrfToken();
+            form.appendChild(csrfInput);
+            
+            // Channel ID
+            const channelInput = document.createElement('input');
+            channelInput.type = 'hidden';
+            channelInput.name = 'channel_id';
+            channelInput.value = btn.dataset.channelId;
+            form.appendChild(channelInput);
+            
+            // Video ID
+            const videoIdInput = document.createElement('input');
+            videoIdInput.type = 'hidden';
+            videoIdInput.name = 'video_id';
+            videoIdInput.value = btn.dataset.videoId;
+            form.appendChild(videoIdInput);
+            
+            // Video Title
+            const videoTitleInput = document.createElement('input');
+            videoTitleInput.type = 'hidden';
+            videoTitleInput.name = 'video_title';
+            videoTitleInput.value = btn.dataset.videoTitle;
+            form.appendChild(videoTitleInput);
+            
+            // Return to
+            const returnToInput = document.createElement('input');
+            returnToInput.type = 'hidden';
+            returnToInput.name = 'return_to';
+            returnToInput.value = 'dashboard';
+            form.appendChild(returnToInput);
+            
+            // Add form to the document and submit
+            document.body.appendChild(form);
+            
+            form.onsubmit = () => {
+                // Add success notification
+                showToast(`✅ Added "${btn.dataset.videoTitle}" to the queue.`);
+                
+                // Restore button state after a short delay
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-check me-1"></i> Added!';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, 2000);
+                }, 1000);
+                
+                // Remove the form from DOM
+                setTimeout(() => form.remove(), 100);
+            };
+            
+            form.submit();
+        });
     });
-    
-    document.body.appendChild(form);
-    form.submit();
 }
 
-// Playlist video selection function
+// Function to properly handle playlist selection for WTForms
 function initPlaylistSelection() {
     console.log("Initializing playlist selection...");
     const videoCheckboxes = document.querySelectorAll('.video-checkbox');
@@ -64,7 +114,7 @@ function initPlaylistSelection() {
         // Count selected videos
         let selectedCount = 0;
         
-        // Add new hidden inputs for each checked video
+        // Add new hidden inputs for each checked video - using WTForms FieldList format
         videoCheckboxes.forEach((checkbox, index) => {
             if (checkbox.checked) {
                 selectedCount++;
@@ -75,14 +125,14 @@ function initPlaylistSelection() {
                 // Create hidden input for video ID
                 const idInput = document.createElement('input');
                 idInput.type = 'hidden';
-                idInput.name = `video_ids-${index}`;
+                idInput.name = `video_ids-${index}`;  // Match WTForms FieldList naming format
                 idInput.value = videoId;
                 selectedVideosContainer.appendChild(idInput);
                 
                 // Create hidden input for video title
                 const titleInput = document.createElement('input');
                 titleInput.type = 'hidden';
-                titleInput.name = `video_titles-${index}`;
+                titleInput.name = `video_titles-${index}`;  // Match WTForms FieldList naming format
                 titleInput.value = videoTitle;
                 selectedVideosContainer.appendChild(titleInput);
             }
@@ -128,7 +178,7 @@ function initPlaylistSelection() {
         });
     }
     
-    // Add form submission handling to ensure data is sent
+    // Add form submission validation
     if (addMultipleForm) {
         addMultipleForm.addEventListener('submit', function(event) {
             // Check if any videos are selected
@@ -157,7 +207,7 @@ function initPlaylistSelection() {
     updateSelectedVideos();
 }
 
-// Queue drag and drop functionality
+// Initialize queue drag-and-drop with proper form submission
 function initQueueDragDrop() {
     const queueList = document.getElementById('queue-list');
     if (!queueList) return;
@@ -212,6 +262,7 @@ function initQueueDragDrop() {
         });
     });
     
+    // Use WTForms structure for the reorder form
     function updateQueueOrder(oldIndex, newIndex) {
         const container = document.querySelector('.container-fluid');
         const guildId = container ? container.dataset.guildId : null;
@@ -219,167 +270,61 @@ function initQueueDragDrop() {
         
         if (!guildId || !channelId) return;
         
-        submitFormWithCsrf(`/server/${guildId}/queue/reorder`, {
-            channel_id: channelId,
-            old_index: oldIndex,
-            new_index: newIndex
-        });
+        // Create a form that matches ReorderQueueForm structure
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/server/${guildId}/queue/reorder`;
+        form.style.display = 'none';
+        
+        // CSRF Token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = getCsrfToken();
+        form.appendChild(csrfInput);
+        
+        // Channel ID
+        const channelInput = document.createElement('input');
+        channelInput.type = 'hidden';
+        channelInput.name = 'channel_id';
+        channelInput.value = channelId;
+        form.appendChild(channelInput);
+        
+        // Old Index
+        const oldIndexInput = document.createElement('input');
+        oldIndexInput.type = 'hidden';
+        oldIndexInput.name = 'old_index';
+        oldIndexInput.value = oldIndex;
+        form.appendChild(oldIndexInput);
+        
+        // New Index
+        const newIndexInput = document.createElement('input');
+        newIndexInput.type = 'hidden';
+        newIndexInput.name = 'new_index';
+        newIndexInput.value = newIndex;
+        form.appendChild(newIndexInput);
+        
+        // Add form to the document and submit
+        document.body.appendChild(form);
+        form.submit();
+        
+        // Remove the form after submission
+        setTimeout(() => form.remove(), 100);
     }
 }
 
-// Queue manager with AJAX support
-function initQueueManager() {
-    const guildId = document.querySelector('[data-guild-id]')?.dataset.guildId;
-    const channelId = document.querySelector('[data-channel-id]')?.dataset.channelId;
+// Initialize all dashboard features
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize components
+    initQueueDragDrop();
+    initPlaylistSelection();
+    initAddTrackButtons();
     
-    if (!guildId || !channelId) return;
-
-    function refreshQueueData() {
-        fetch(`/server/${guildId}/queue/ajax?channel_id=${channelId}`, {
-            headers: {
-                'X-CSRFToken': getCsrfToken()
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                updateQueueDisplay(data);
-            })
-            .catch(error => console.error('Error refreshing queue:', error));
+    // Check for server dashboard page
+    if (document.querySelector('.container-fluid[data-guild-id]')) {
+        console.log('Server dashboard loaded, initializing all components');
     }
-    
-    function updateQueueDisplay(data) {
-        const currentTrackDiv = document.getElementById('current-track');
-        const queueListDiv = document.getElementById('queue-list');
-        const queueEmptyDiv = document.getElementById('queue-empty');
-        const botControlsDiv = document.getElementById('bot-controls');
-        
-        document.querySelectorAll('.bot-status-indicator').forEach(indicator => {
-            indicator.classList.add('d-none');
-        });
-        
-        if (data.is_connected) {
-            const statusElement = document.getElementById(
-                data.is_playing ? 'status-playing' : 
-                (data.is_paused ? 'status-paused' : 'status-connected')
-            );
-            if (statusElement) {
-                statusElement.classList.remove('d-none');
-            }
-        } else {
-            const disconnectedStatus = document.getElementById('status-disconnected');
-            if (disconnectedStatus) {
-                disconnectedStatus.classList.remove('d-none');
-            }
-        }
-        
-        if (data.current_track && currentTrackDiv) {
-            currentTrackDiv.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <div class="me-2">
-                        <i class="fas fa-play-circle text-success"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Now Playing:</h6>
-                        <p class="mb-0">${data.current_track.title}</p>
-                    </div>
-                </div>
-            `;
-            currentTrackDiv.classList.remove('d-none');
-            
-            if (botControlsDiv) {
-                botControlsDiv.classList.remove('d-none');
-                
-                const pauseButton = document.getElementById('pause-button');
-                const resumeButton = document.getElementById('resume-button');
-                
-                if (pauseButton && resumeButton) {
-                    if (data.is_paused) {
-                        pauseButton.classList.add('d-none');
-                        resumeButton.classList.remove('d-none');
-                    } else {
-                        pauseButton.classList.remove('d-none');
-                        resumeButton.classList.add('d-none');
-                    }
-                }
-            }
-        } else if (currentTrackDiv) {
-            currentTrackDiv.classList.add('d-none');
-            
-            if (botControlsDiv && !data.is_connected) {
-                botControlsDiv.classList.add('d-none');
-            }
-        }
-        
-        if (queueListDiv && data.queue) {
-            if (data.queue.length > 0) {
-                let queueHtml = '';
-                data.queue.forEach((item, index) => {
-                    queueHtml += `
-                        <div class="list-group-item bg-dark text-light border-secondary queue-item" 
-                             data-id="${item.id}" draggable="true">
-                            <div class="d-flex w-100 justify-content-between align-items-start">
-                                <div>
-                                    <div class="drag-handle me-2 d-inline-block">
-                                        <i class="fas fa-grip-vertical text-muted"></i>
-                                    </div>
-                                    <h6 class="mb-1 d-inline-block">${item.title}</h6>
-                                </div>
-                                <span class="badge bg-secondary">${index + 1}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                queueListDiv.innerHTML = queueHtml;
-                queueListDiv.classList.remove('d-none');
-                
-                if (queueEmptyDiv) {
-                    queueEmptyDiv.classList.add('d-none');
-                }
-                
-                initQueueDragDrop();
-            } else {
-                queueListDiv.innerHTML = '';
-                if (queueEmptyDiv) {
-                    queueEmptyDiv.classList.remove('d-none');
-                }
-            }
-        }
-
-        const lastRefreshed = document.getElementById('last-refreshed');
-        if (lastRefreshed) {
-            const now = new Date();
-            lastRefreshed.textContent = `Last updated: ${now.toLocaleTimeString()}`;
-        }
-    }
-
-    document.querySelectorAll('.playback-control, .join-button, #leave-button').forEach(button => {
-        button.addEventListener('click', function() {
-            setTimeout(refreshQueueData, 500);
-        });
-    });
-
-    refreshQueueData();
-}
-
-// Dynamic link conversion for POST requests
-function convertPostLinks() {
-    document.querySelectorAll('a[data-method="post"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const additionalData = {};
-            Object.keys(this.dataset).forEach(key => {
-                if (key !== 'method') {
-                    additionalData[key] = this.dataset[key];
-                }
-            });
-            
-            const url = this.getAttribute('href');
-            submitFormWithCsrf(url, additionalData);
-        });
-    });
-}
+});
 
 // Toast notification system
 function showToast(msg) {
@@ -397,116 +342,3 @@ function showToast(msg) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
-
-// Function to update button text with icons
-function updateButtonIcons() {
-    // Update search button
-    const searchBtn = document.querySelector('form button[type="submit"]');
-    if (searchBtn && !searchBtn.innerHTML.includes('<i ')) {
-        searchBtn.innerHTML = '<i class="fas fa-search me-1"></i> Search';
-    }
-    
-    // Update shuffle button
-    const shuffleBtn = document.querySelector('[title="Shuffle Queue"]');
-    if (shuffleBtn && !shuffleBtn.innerHTML.includes('<i ')) {
-        shuffleBtn.innerHTML = '<i class="fas fa-random"></i> Shuffle';
-    }
-}
-
-// Function to handle adding tracks to queue
-function initAddTrackButtons() {
-    document.querySelectorAll('.add-track-btn').forEach(button => {
-        button.addEventListener('click', async function() {
-            const btn = this;
-            const originalText = btn.innerHTML;
-            
-            // Show loading state
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
-            btn.disabled = true;
-            
-            try {
-                const response = await fetch(`/server/${btn.dataset.guildId}/queue/add_multiple`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': getCsrfToken()
-                    },
-                    body: new URLSearchParams({
-                        'channel_id': btn.dataset.channelId,
-                        'video_ids': btn.dataset.videoId,
-                        'video_titles': btn.dataset.videoTitle,
-                        'return_to': 'dashboard'
-                    })
-                });
-                
-                if (response.ok) {
-                    // Show success state
-                    btn.innerHTML = '<i class="fas fa-check me-1"></i> Added!';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }, 2000);
-                    
-                    showToast(`✅ Added "${btn.dataset.videoTitle}" to the queue.`);
-                    
-                    // Refresh queue display if available
-                    if (typeof refreshQueueData === 'function') {
-                        refreshQueueData();
-                    }
-                } else {
-                    // Show error state
-                    btn.innerHTML = '<i class="fas fa-times me-1"></i> Error!';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }, 2000);
-                    
-                    const errorText = await response.text();
-                    console.error('Queue error:', errorText);
-                    showToast("❌ Failed to add song.");
-                }
-            } catch (error) {
-                // Handle network errors
-                btn.innerHTML = '<i class="fas fa-times me-1"></i> Error!';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }, 2000);
-                
-                console.error('Network error:', error);
-                showToast("❌ Network issue.");
-            }
-        });
-    });
-}
-
-// Initialize keyboard shortcuts
-function initKeyboardShortcuts() {
-    const searchField = document.getElementById('searchQuery');
-    if (searchField) {
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+/ or Cmd+/ to focus search field
-            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-                e.preventDefault();
-                searchField.focus();
-            }
-        });
-    }
-}
-
-// Initialize all dashboard features
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize components
-    initQueueDragDrop();
-    initPlaylistSelection();
-    initQueueManager();
-    convertPostLinks();
-    updateButtonIcons();
-    initAddTrackButtons();
-    initKeyboardShortcuts();
-    
-    // Check for server dashboard page
-    if (document.querySelector('.container-fluid[data-guild-id]')) {
-        console.log('Server dashboard loaded, initializing all components');
-    }
-});
