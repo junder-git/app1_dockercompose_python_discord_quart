@@ -2,13 +2,11 @@ from functools import wraps
 from quart import Quart
 import os
 from dotenv import load_dotenv
-from Class_YouTube import YouTubeService
-from Class_MusicPlayer import MusicService
 from quart_wtf import CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session
 
 # Import discord API client blueprint
-from discord_api_client import discord_api_client_bp, create_discord_bot_api
+from additional_clients.discord_api_client import discord_api_client_bp, create_discord_bot_api
 
 # Import routes package
 from routes import register_blueprints
@@ -19,10 +17,6 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Required for OAuth 2 over htt
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
-# Initialize the services
-youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
-music_service = MusicService(api_key=YOUTUBE_API_KEY)
 
 app = Quart(__name__)
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
@@ -49,8 +43,6 @@ discord = DiscordOAuth2Session(app)
 # Make discord and bot_api available to all routes
 app.discord = discord
 app.quart_app = app  # For render_template access in blueprints
-app.music_service = music_service
-app.youtube_service = youtube_service
 
 # Register all route blueprints
 register_blueprints(app)
