@@ -2,16 +2,13 @@
 Discord Bot Service for JBot
 Main bot file that initializes the bot and registers all methods
 """
-import sys
 import os
-# Add the current directory to Python path
-sys.path.append(os.getcwd())
 import discord
 from discord.ext import commands
 from collections import defaultdict
 from dotenv import load_dotenv
-from additional_clients.youtube_api_client import YouTubeService
-from additional_clients.music_player_client import MusicService
+from youtube_api_client import YouTubeService
+from music_player_client import MusicService
 
 # Import methods package that contains all bot methods
 from methods import apply_methods

@@ -1,17 +1,14 @@
-import sys
 import os
-# Add the current directory to Python path
-sys.path.append(os.getcwd())
 from quart import Quart
 from dotenv import load_dotenv
 from quart_wtf import CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session
 
 # Import discord API client blueprint
-from additional_clients.discord_api_client import discord_api_client_bp, create_discord_bot_api
+from discord_api_client import discord_api_client_bp, create_discord_bot_api
 
 # Import YouTube API client
-from additional_clients.youtube_api_client import YouTubeService
+from youtube_api_client import YouTubeService
 
 # Import routes package
 from routes import register_blueprints
