@@ -1,6 +1,8 @@
-from functools import wraps
-from quart import Quart
+import sys
 import os
+# Add the current directory to Python path
+sys.path.append(os.getcwd())
+from quart import Quart
 from dotenv import load_dotenv
 from quart_wtf import CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session

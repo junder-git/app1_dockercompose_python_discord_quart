@@ -2,7 +2,10 @@
 Discord Bot Service for JBot
 Main bot file that initializes the bot and registers all methods
 """
+import sys
 import os
+# Add the current directory to Python path
+sys.path.append(os.getcwd())
 import discord
 from discord.ext import commands
 from collections import defaultdict
