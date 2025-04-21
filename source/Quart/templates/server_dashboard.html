@@ -138,37 +138,8 @@
                     Search YouTube (Songs, Playlists, Artists) or Add URL
                 </div>
                 <div class="card-body">
-                    <!-- Search Form - Direct Inline -->
-                    <form method="post" action="{{ url_for('youtube_search.youtube_search_route', guild_id=guild_id) }}">
-                        {{ search_form.csrf_token }}
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="channelSelect" class="form-label">Voice Channel</label>
-                                {% if user_voice_channel %}
-                                    <!-- When user is in a voice channel, auto-select it and make it the only option -->
-                                    {{ search_form.channel_id(value=user_voice_channel.id, type="hidden") }}
-                                    <div class="form-control bg-dark text-light disabled">
-                                        <i class="fas fa-volume-up me-2"></i>{{ user_voice_channel.name }} 
-                                        <span class="badge bg-success ms-2">You are here</span>
-                                    </div>
-                                {% else %}
-                                    <!-- When user is not in a voice channel, display a disabled message -->
-                                    <div class="form-control bg-dark text-light disabled">
-                                        <i class="fas fa-info-circle me-2"></i>Join a voice channel in Discord first
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-9">
-                                <label for="searchQuery" class="form-label">Search for Songs, Playlists, Artists or Enter URL</label>
-                                <div class="input-group">
-                                    {{ search_form.query(class="form-control bg-dark text-light", id="searchQuery", placeholder="Search for songs, playlists, artists or paste YouTube URL...", required=True, disabled=not user_voice_channel) }}
-                                    {{ search_form.submit(class="btn discord-btn", disabled=not user_voice_channel) }}
-                                </div>
-                                <!-- Use the value from the form object instead of hardcoding it -->
-                                {{ search_form.search_type(style="display: none;") }}
-                            </div>
-                        </div>
-                    </form>
+                    <!-- Search Form generated via WTForms with GET method -->
+                    {{ search_form(action=url_for('youtube_search.youtube_search_route', guild_id=guild_id)) }}
                 </div>
             </div>
             
