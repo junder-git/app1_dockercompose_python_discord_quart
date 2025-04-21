@@ -181,6 +181,18 @@
             </form>
         </div>
     </div>
+
+        <!-- Add this temporarily just below the search form for debugging -->
+    <div class="card discord-card mb-4">
+        <div class="card-header">Debug Info</div>
+        <div class="card-body">
+            <p>Query: "{{ search_form.query.data }}"</p>
+            <p>Search Type: {{ search_form.search_type.data }}</p>
+            <p>Results: {{ search_results|length if search_results else 0 }} videos, 
+                        {{ playlist_results|length if playlist_results else 0 }} playlists</p>
+            <p>API Response Status: [add this in your route]</p>
+        </div>
+    </div>
     
     {% if playlist_details %}
         <!-- Playlist Header -->
