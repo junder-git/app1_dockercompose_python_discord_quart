@@ -1,9 +1,12 @@
+import sys
 import os
 from quart import Quart
 from dotenv import load_dotenv
 from quart_wtf import CSRFProtect  # Update import
 from quart_discord import DiscordOAuth2Session
 
+# Add the additional_clients directory to the Python path
+sys.path.append(os.path.join(os.getcwd()))
 # Import discord API client blueprint
 from discord_api_client import discord_api_client_bp, create_discord_bot_api
 
