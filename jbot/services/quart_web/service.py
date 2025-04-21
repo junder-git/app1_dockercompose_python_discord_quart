@@ -50,6 +50,17 @@ app.config.update(
     MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 16MB max upload size
 )
 
+# Set defaults to avoid KeyErrors
+app.config.setdefault("SECRET_KEY", SECRET_KEY)  # make sure this is set!
+app.config.setdefault("WTF_CSRF_ENABLED", True)
+app.config.setdefault("WTF_CSRF_CHECK_DEFAULT", True)
+app.config.setdefault("WTF_CSRF_METHODS", ["POST", "PUT", "PATCH", "DELETE"])
+app.config.setdefault("WTF_CSRF_TIME_LIMIT", 3600)
+app.config.setdefault("WTF_CSRF_FIELD_NAME", "csrf_token")
+app.config.setdefault("WTF_CSRF_HEADERS", ["X-CSRFToken", "X-CSRF-Token"])
+app.config.setdefault("WTF_CSRF_SSL_STRICT", True)
+app.config.setdefault("WTF_CSRF_SECRET_KEY", SECRET_KEY)
+
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
 

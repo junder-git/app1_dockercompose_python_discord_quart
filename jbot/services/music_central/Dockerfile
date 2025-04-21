@@ -20,8 +20,5 @@ COPY services/music_central/ /app/music_central/
 # Add clients to Python path
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 
-# Expose API port
-EXPOSE 5002
-
 # Run the service
 CMD ["python", "-u", "music_central/service.py"]
