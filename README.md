@@ -1,6 +1,6 @@
 # JBot - Discord Bot & Quart Website Manager
 
-NEED 3 containers, discord bot, quart view /manager, centralised musicplayer and search, where both discord and flask can call upon the same object instance
+NEED 3 containers, discord bot with search, quart view /manager with search, centralised musicplayer object instance, where both discord and flask can call upon the same object instance in the third container
 
 ## Setup & Installation Guide
 
