@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from clients.youtube_api import YouTubeClient
 
 # Import blueprints
-from services.music_central.blueprints import (
+from music_central.blueprints import (
     audio_blueprint,
     search_blueprint,
     queue_blueprint

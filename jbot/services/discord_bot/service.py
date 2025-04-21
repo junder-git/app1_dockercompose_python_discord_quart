@@ -19,7 +19,7 @@ from clients.youtube_api import YouTubeClient
 from clients.music_player import MusicPlayerClient
 
 # Import blueprints
-from services.discord_bot.blueprints import (
+from discord_bot.blueprints import (
     api_blueprint,
     commands_blueprint,
     events_blueprint,
@@ -64,21 +64,19 @@ class JBotDiscord(commands.Bot):
         # Message auto-deletion time (in seconds)
         self.cleartimer = 10
     
-    # Used by queue_blueprint
     def get_queue_id(self, guild_id, channel_id):
         """Create a unique queue ID from guild and channel IDs"""
         return f"{guild_id}_{channel_id}"
     
-    # Apply all blueprints
     def apply_blueprints(self):
-        """Apply all functional blueprints to the bot"""
-        # Apply each blueprint
-        api_blueprint.apply(self)
-        commands_blueprint.apply(self)
-        events_blueprint.apply(self)
-        queue_blueprint.apply(self)
-        playback_blueprint.apply(self)
-        voice_blueprint.apply(self)
+        """Apply functional blueprints to the bot"""
+        # Apply each blueprint 
+        api_blueprint(self)
+        commands_blueprint(self)
+        events_blueprint(self)
+        queue_blueprint(self)
+        playback_blueprint(self)
+        voice_blueprint(self)
 
 # Create the bot instance
 bot = JBotDiscord(command_prefix="jbot ", intents=intents)

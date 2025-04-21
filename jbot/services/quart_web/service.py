@@ -17,7 +17,7 @@ from clients.youtube_api import YouTubeClient, youtube_api_blueprint
 from clients.music_player import MusicPlayerClient, music_player_blueprint
 
 # Import blueprints
-from services.quart_web.blueprints import (
+from quart_web.blueprints import (
     index_blueprint,
     auth_blueprint,
     dashboard_blueprint,
