@@ -13,8 +13,8 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsQuart
 # Copy application files and shared services
 COPY .env .
 COPY QuartWebService .
-COPY additional_clients/discord_api_client .
-COPY additional_clients/youtube_api_client .
+COPY additional_clients/discord_api_client /app/
+COPY additional_clients/youtube_api_client /app/
 
 # Expose port 80 for Quart
 EXPOSE 80
