@@ -5,15 +5,16 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY Quart/requirementsQUART.txt .
+COPY requirementsQuartWebService.txt .
 
 # Install any needed dependencies
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsQUART.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsQuartWebService.txt
 
 # Copy application files and shared services
 COPY .env .
-COPY Quart .
-COPY Shared .
+COPY QuartWebService ./QuartWebService
+COPY additional_clients/discord_api_client ./additional_clients/discord_api_client
+COPY additional_clients/youtube_api_client ./additional_clients/youtube_api_client
 
 # Expose port 80 for Quart
 EXPOSE 80
@@ -22,4 +23,4 @@ EXPOSE 80
 ENV PYTHONUNBUFFERED=1
 
 # Run the application with Hypercorn instead of the default Quart runner
-CMD ["hypercorn", "Service_QuartApp:app", "--bind", "0.0.0.0:80"]
+CMD ["hypercorn", "QuartWebService/QuartWebService:app", "--bind", "0.0.0.0:80"]
