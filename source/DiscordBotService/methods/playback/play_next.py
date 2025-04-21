@@ -5,7 +5,7 @@ Plays the next song in the queue
 import asyncio
 import discord
 import os
-from Class_MusicPlayer import MusicService
+from music_player_client import MusicService
 
 async def play_next(self, guild_id, channel_id):
     """

@@ -17,8 +17,8 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsDisco
 # Copy both the bot and the shared services
 COPY .env .
 COPY DiscordBotService .
-COPY additional_clients/youtube_api_client /app/
-COPY additional_clients/music_player_client /app/
+COPY additional_clients/youtube_api_client /app/youtube_api_client/
+COPY additional_clients/music_player_client /app/music_player_client/
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
