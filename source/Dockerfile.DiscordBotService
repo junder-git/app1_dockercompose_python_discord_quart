@@ -11,13 +11,14 @@ RUN apt-get update && apt-get install -y \
     python3-dev
 
 # Copy project files
-COPY Discord/requirementsDISCORD.txt .
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsDISCORD.txt
+COPY requirementsDiscordBotService.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirementsDiscordBotService.txt
 
 # Copy both the bot and the shared services
 COPY .env .
-COPY Discord .
-COPY Shared .
+COPY DiscordBotService .
+COPY additional_clients/youtube_api_client .
+COPY additional_clients/music_player_client .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

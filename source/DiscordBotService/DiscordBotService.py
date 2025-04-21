@@ -7,8 +7,6 @@ import discord
 from discord.ext import commands
 from collections import defaultdict
 from dotenv import load_dotenv
-from Class_MusicPlayer import MusicService
-from Class_YouTube import YouTubeService
 
 # Import methods package that contains all bot methods
 from methods import apply_methods

@@ -4,7 +4,7 @@ services:
     stdin_open: true
     build:
       context: .
-      dockerfile: Dockerfile.quart
+      dockerfile: Dockerfile.QuartWebService
     ports:
       - "80:80"
     environment:
@@ -24,7 +24,7 @@ services:
     stdin_open: true
     build:
       context: .
-      dockerfile: Dockerfile.discord
+      dockerfile: Dockerfile.DiscordBotService
     environment:
       - PYTHONUNBUFFERED=1
       - SECRET_KEY=${SECRET_KEY}
