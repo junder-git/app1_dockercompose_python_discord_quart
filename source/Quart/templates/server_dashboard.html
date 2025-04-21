@@ -138,8 +138,42 @@
                     Search YouTube (Songs, Playlists, Artists) or Add URL
                 </div>
                 <div class="card-body">
-                    <!-- Search Form generated via WTForms with GET method -->
-                    {{ search_form(action=url_for('youtube_search.youtube_search_route', guild_id=guild_id)) }}
+                    <!-- Custom-styled Search Form with GET method -->
+                    <form method="get" action="{{ url_for('youtube_search.youtube_search_route', guild_id=guild_id) }}">
+                        <!-- No CSRF token needed for GET forms -->
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="channelSelect" class="form-label">Voice Channel</label>
+                                {% if user_voice_channel %}
+                                    <!-- When user is in a voice channel, auto-select it and make it the only option -->
+                                    <input type="hidden" name="channel_id" value="{{ user_voice_channel.id }}">
+                                    <div class="form-control bg-dark text-light disabled">
+                                        <i class="fas fa-volume-up me-2"></i>{{ user_voice_channel.name }} 
+                                        <span class="badge bg-success ms-2">You are here</span>
+                                    </div>
+                                {% else %}
+                                    <!-- When user is not in a voice channel, display a disabled message -->
+                                    <div class="form-control bg-dark text-light disabled">
+                                        <i class="fas fa-info-circle me-2"></i>Join a voice channel in Discord first
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-9">
+                                <label for="searchQuery" class="form-label">Search for Songs, Playlists, Artists or Enter URL</label>
+                                <div class="input-group">
+                                    <input type="text" name="query" class="form-control bg-dark text-light" id="searchQuery" 
+                                           placeholder="Search for songs, playlists, artists or paste YouTube URL..." 
+                                           value="{{ search_form.query.data if search_form.query.data else '' }}"
+                                           required {% if not user_voice_channel %}disabled{% endif %}>
+                                    <button type="submit" class="btn discord-btn" {% if not user_voice_channel %}disabled{% endif %}>
+                                        <i class="fas fa-search me-1"></i> Search
+                                    </button>
+                                </div>
+                                <!-- Include search_type as a hidden field -->
+                                <input type="hidden" name="search_type" value="{{ search_form.search_type.data if search_form.search_type.data else 'comprehensive' }}">
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
             
