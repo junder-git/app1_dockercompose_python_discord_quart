@@ -3,7 +3,7 @@ send_control_panel method for Discord bot
 Sends or updates a music control panel in a text channel
 """
 import discord
-from source.DiscordBotService.DiscordViewClass import MusicControlView
+from DiscordViewClass import MusicControlView
 
 async def send_control_panel(self, text_channel, voice_channel, guild_id):
     """

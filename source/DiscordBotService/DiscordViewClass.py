@@ -1,6 +1,6 @@
 import discord
-from Class_MusicPlayer import MusicService
-from Class_YouTube import YouTubeService
+from music_player_client import MusicService
+from youtube_api_client import YouTubeService
 import os
 
 # Get API key for services (used by modals)
