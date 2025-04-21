@@ -8,6 +8,9 @@ from quart_discord import DiscordOAuth2Session
 # Import discord API client blueprint
 from additional_clients.discord_api_client import discord_api_client_bp, create_discord_bot_api
 
+# Import YouTube API client
+from additional_clients.youtube_api_client import YouTubeService
+
 # Import routes package
 from routes import register_blueprints
 
@@ -30,6 +33,9 @@ app.bot_api = create_discord_bot_api(
     port=5001,           # Port exposed in docker-compose
     secret_key=os.environ.get('SECRET_KEY')
 )
+
+# Initialize YouTube service and make it available to routes
+app.youtube_service = YouTubeService(api_key=YOUTUBE_API_KEY)
 
 # Register the discord_api_client blueprint
 app.register_blueprint(discord_api_client_bp)
