@@ -8,7 +8,7 @@ from forms import SearchForm, MusicControlForm, ShuffleQueueForm, PlaylistForm, 
 # Create a blueprint for YouTube search
 youtube_search_bp = Blueprint('youtube_search', __name__)
 
-@youtube_search_bp.route('/server/<guild_id>/search', methods=['GET', 'POST'])
+@youtube_search_bp.route('/server/<guild_id>/search', methods=['GET'])
 @login_required
 async def youtube_search_route(guild_id):
     """Search YouTube for videos or display playlist details"""
@@ -35,20 +35,22 @@ async def youtube_search_route(guild_id):
     search_form = SearchForm()
     music_control_form = MusicControlForm()
     shuffle_queue_form = ShuffleQueueForm()
-    playlist_form = PlaylistForm()  # Add this for playlist details 
-    add_multiple_form = AddMultipleForm()  # Add this for multiple track selection
-    url_form = UrlForm()  # For URL submission
+    playlist_form = PlaylistForm()
+    add_multiple_form = AddMultipleForm()
+    url_form = UrlForm()
     
     # Set channel ID if available 
     selected_channel_id = None
     if user_voice_channel:
         selected_channel_id = user_voice_channel['id']
-        search_form.channel_id.data = selected_channel_id
         music_control_form.channel_id.data = selected_channel_id
         shuffle_queue_form.channel_id.data = selected_channel_id
         playlist_form.channel_id.data = selected_channel_id
         add_multiple_form.channel_id.data = selected_channel_id
         url_form.channel_id.data = selected_channel_id
+        
+        # Set search form channel_id
+        search_form.channel_id.data = selected_channel_id
     
     # Default values
     search_results = []
@@ -97,22 +99,23 @@ async def youtube_search_route(guild_id):
             add_multiple_form.playlist_id.data = selected_playlist_id
             add_multiple_form.page_token.data = page_token
 
-    # Handle POST request (search)
-    elif request.method == 'POST':
-        form = await request.form
-        query = form.get('query', '')
-        search_type = form.get('search_type', 'comprehensive')
-        channel_id = form.get('channel_id', '')
+    # Handle search query from GET parameters
+    elif 'query' in request.args:
+        # Get search parameters from query string
+        query = request.args.get('query', '')
+        search_type = request.args.get('search_type', 'comprehensive')
+        channel_id = request.args.get('channel_id', '')
+        
+        # Populate the form with these values for rendering
+        search_form.query.data = query
+        search_form.search_type.data = search_type
+        search_form.channel_id.data = channel_id
         
         # Check if query looks like a URL
         if 'youtube.com/' in query or 'youtu.be/' in query:
             # Process URL directly
             url_form.url.data = query
             url_form.channel_id.data = channel_id
-            
-            # Prefill form data for rendering
-            search_form.query.data = query
-            search_form.channel_id.data = channel_id
             
             # Fetch video details for the URL
             url_api_url = f"/api/youtube/video-info?url={query}"
@@ -149,11 +152,6 @@ async def youtube_search_route(guild_id):
                 # Handle different result types
                 search_results = search_data.get('videos', [])
                 playlist_results = search_data.get('playlists', [])
-                
-                # Prefill form data for rendering
-                search_form.query.data = query
-                search_form.search_type.data = search_type
-                search_form.channel_id.data = channel_id
     
     # Get queue for selected channel
     queue_info = {"queue": [], "current_track": None}
@@ -175,6 +173,13 @@ async def youtube_search_route(guild_id):
         if state_response.status == 200:
             bot_state = await state_response.json()
     
+    # Make sure search_results and playlist_results are properly defined
+    if not isinstance(search_results, list):
+        search_results = []
+    if not isinstance(playlist_results, list):
+        playlist_results = []
+    
+    # Render the template with all necessary data
     return await render_template(
         'server_dashboard.html',
         guild_id=guild_id,
