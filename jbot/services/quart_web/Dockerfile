@@ -1,17 +1,21 @@
-FROM python:3.9-slim
+FROM python:3.9-bullseye
 
 # Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip and install tools
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 # Copy requirements first for better caching
 COPY services/quart_web/requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the client libraries and service code
 COPY clients/ /app/clients/
