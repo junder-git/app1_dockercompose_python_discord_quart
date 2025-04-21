@@ -1,0 +1,46 @@
+<form id="addMultipleForm" method="POST" action="{{ url_for('queue_add_multiple.queue_add_multiple_route', guild_id=guild_id) }}">
+    {{ add_multiple_form.csrf_token }}
+    {{ add_multiple_form.channel_id(value=selected_channel_id) }}
+    {{ add_multiple_form.playlist_id(value=selected_playlist_id) }}
+    {{ add_multiple_form.page_token(value=page_token) }}
+    
+    <div id="selectedVideosContainer">
+        <!-- Selected video IDs and titles will be added here by JavaScript -->
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for video in playlist_videos %}
+        <div class="col">
+            <div class="card discord-card h-100">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="{{ video.thumbnail }}" class="img-fluid rounded-start h-100" 
+                             style="object-fit: cover;" alt="{{ video.title }}">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input video-checkbox" type="checkbox"
+                                       data-video-id="{{ video.id }}"
+                                       data-video-title="{{ video.title|replace('"', '&quot;') }}"
+                                       id="video-{{ video.id }}">
+                                <label class="form-check-label" for="video-{{ video.id }}">
+                                    <h6 class="card-title mb-0">{{ video.title }}</h6>
+                                </label>
+                            </div>
+                            <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
+                            <button type="button" class="btn btn-sm btn-primary add-track-btn"
+                                    data-guild-id="{{ guild_id }}"
+                                    data-channel-id="{{ selected_channel_id }}"
+                                    data-video-id="{{ video.id }}"
+                                    data-video-title="{{ video.title }}">
+                                <i class="fas fa-plus me-1"></i> Add to Queue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</form>

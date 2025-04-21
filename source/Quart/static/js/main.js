@@ -65,7 +65,7 @@ function initPlaylistSelection() {
         let selectedCount = 0;
         
         // Add new hidden inputs for each checked video
-        videoCheckboxes.forEach(checkbox => {
+        videoCheckboxes.forEach((checkbox, index) => {
             if (checkbox.checked) {
                 selectedCount++;
                 
@@ -75,14 +75,14 @@ function initPlaylistSelection() {
                 // Create hidden input for video ID
                 const idInput = document.createElement('input');
                 idInput.type = 'hidden';
-                idInput.name = 'video_ids';
+                idInput.name = `video_ids-${index}`;
                 idInput.value = videoId;
                 selectedVideosContainer.appendChild(idInput);
                 
                 // Create hidden input for video title
                 const titleInput = document.createElement('input');
                 titleInput.type = 'hidden';
-                titleInput.name = 'video_titles';
+                titleInput.name = `video_titles-${index}`;
                 titleInput.value = videoTitle;
                 selectedVideosContainer.appendChild(titleInput);
             }
@@ -132,7 +132,7 @@ function initPlaylistSelection() {
     if (addMultipleForm) {
         addMultipleForm.addEventListener('submit', function(event) {
             // Check if any videos are selected
-            const selectedVideos = document.querySelectorAll('input[name="video_ids"]');
+            const selectedVideos = document.querySelectorAll('input[name^="video_ids-"]');
             if (selectedVideos.length === 0) {
                 event.preventDefault();
                 alert('Please select at least one video to add to the queue.');
@@ -381,26 +381,40 @@ function convertPostLinks() {
     });
 }
 
-// Initialize all dashboard features
-document.addEventListener('DOMContentLoaded', function() {
-    initQueueDragDrop();
-    initPlaylistSelection();
-    initQueueManager();
-    convertPostLinks();
-    
-    // Keyboard shortcut for search field
-    const searchField = document.getElementById('searchQuery');
-    if (searchField) {
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+/ or Cmd+/ to focus search field
-            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-                e.preventDefault();
-                searchField.focus();
-            }
-        });
-    }
+// Toast notification system
+function showToast(msg) {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.style.position = "fixed";
+    toast.style.bottom = "20px";
+    toast.style.left = "50%";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.background = "#333";
+    toast.style.color = "#fff";
+    toast.style.padding = "10px 20px";
+    toast.style.borderRadius = "5px";
+    toast.style.zIndex = 1000;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
 
-    // Find all add track buttons
+// Function to update button text with icons
+function updateButtonIcons() {
+    // Update search button
+    const searchBtn = document.querySelector('form button[type="submit"]');
+    if (searchBtn && !searchBtn.innerHTML.includes('<i ')) {
+        searchBtn.innerHTML = '<i class="fas fa-search me-1"></i> Search';
+    }
+    
+    // Update shuffle button
+    const shuffleBtn = document.querySelector('[title="Shuffle Queue"]');
+    if (shuffleBtn && !shuffleBtn.innerHTML.includes('<i ')) {
+        shuffleBtn.innerHTML = '<i class="fas fa-random"></i> Shuffle';
+    }
+}
+
+// Function to handle adding tracks to queue
+function initAddTrackButtons() {
     document.querySelectorAll('.add-track-btn').forEach(button => {
         button.addEventListener('click', async function() {
             const btn = this;
@@ -435,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     showToast(`✅ Added "${btn.dataset.videoTitle}" to the queue.`);
                     
-                    // Optionally refresh the queue display if you have that function
+                    // Refresh queue display if available
                     if (typeof refreshQueueData === 'function') {
                         refreshQueueData();
                     }
@@ -464,21 +478,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+}
+
+// Initialize keyboard shortcuts
+function initKeyboardShortcuts() {
+    const searchField = document.getElementById('searchQuery');
+    if (searchField) {
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+/ or Cmd+/ to focus search field
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                searchField.focus();
+            }
+        });
+    }
+}
+
+// Initialize all dashboard features
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize components
+    initQueueDragDrop();
+    initPlaylistSelection();
+    initQueueManager();
+    convertPostLinks();
+    updateButtonIcons();
+    initAddTrackButtons();
+    initKeyboardShortcuts();
     
-    // Your existing showToast function
-    function showToast(msg) {
-        const toast = document.createElement("div");
-        toast.textContent = msg;
-        toast.style.position = "fixed";
-        toast.style.bottom = "20px";
-        toast.style.left = "50%";
-        toast.style.transform = "translateX(-50%)";
-        toast.style.background = "#333";
-        toast.style.color = "#fff";
-        toast.style.padding = "10px 20px";
-        toast.style.borderRadius = "5px";
-        toast.style.zIndex = 1000;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    // Check for server dashboard page
+    if (document.querySelector('.container-fluid[data-guild-id]')) {
+        console.log('Server dashboard loaded, initializing all components');
     }
 });
