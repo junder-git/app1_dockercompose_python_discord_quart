@@ -1,0 +1,192 @@
+"""
+Server Blueprint for Quart Web Service
+Handles server-specific dashboard and controls
+"""
+from quart import Blueprint, render_template, redirect, url_for, request, current_app
+from .helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
+from quart_wtf import QuartForm
+from wtforms import StringField, HiddenField, SubmitField, SelectField
+from wtforms.validators import DataRequired, Optional
+
+# Create blueprint
+server_blueprint = Blueprint('server', __name__)
+
+# Create forms for server dashboard
+class MusicControlForm(QuartForm):
+    """Form for music control actions"""
+    command = SelectField('Command', 
+                          choices=[
+                              ('join', 'Join'), 
+                              ('skip', 'Skip'), 
+                              ('pause', 'Pause'), 
+                              ('resume', 'Resume'), 
+                              ('stop', 'Stop')
+                          ],
+                          validators=[DataRequired()])
+    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
+    submit = SubmitField('Execute')
+
+class ShuffleQueueForm(QuartForm):
+    """Form for shuffling the queue"""
+    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
+    submit = SubmitField('Shuffle Queue')
+
+class SearchForm(QuartForm):
+    """Form for searching YouTube"""
+    # Set form properties for GET method
+    class Meta:
+        method = "GET"
+        csrf = False
+    
+    query = StringField('Search', validators=[DataRequired()])
+    search_type = SelectField('Search Type', 
+                             choices=[
+                                 ('video', 'Videos'), 
+                                 ('playlist', 'Playlists'),
+                                 ('comprehensive', 'All Types')
+                             ],
+                             default='comprehensive')
+    channel_id = HiddenField('Channel ID', validators=[Optional()])
+    submit = SubmitField('Search')
+
+class UrlForm(QuartForm):
+    """Form for adding videos by URL"""
+    url = StringField('YouTube URL', validators=[DataRequired()])
+    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
+    submit = SubmitField('Add to Queue')
+
+class ClearQueueForm(QuartForm):
+    """Form for clearing the queue"""
+    guild_id = HiddenField('Guild ID', validators=[DataRequired()])
+    submit = SubmitField('Clear Queue')
+
+@server_blueprint.route('/server/<guild_id>/dashboard')
+@login_required
+async def server_dashboard_route(guild_id):
+    """Server dashboard for viewing voice channels and music status"""
+    discord = current_app.discord
+    discord_client = current_app.discord_client
+    
+    # Get guild info
+    user_guilds = await discord.fetch_guilds()
+    guild_info = next((g for g in user_guilds if str(g.id) == guild_id), None)
+    
+    if not guild_info:
+        return redirect(url_for('dashboard.dashboard_route'))
+    
+    # Get voice channels
+    voice_channels = await get_voice_channels(guild_id)
+    
+    # Get user's voice channel
+    user = await discord.fetch_user()
+    user_id = str(user.id)
+    user_voice_channel = await get_user_voice_channel(guild_id, user_id)
+    
+    # Get current selected channel (if any)
+    selected_channel_id = request.args.get('channel_id', None)
+    
+    # If no channel is selected but user is in a voice channel, use that
+    if not selected_channel_id and user_voice_channel:
+        selected_channel_id = user_voice_channel['id']
+    
+    # Get queue for selected channel (if applicable)
+    queue_info, bot_state = await get_queue_and_bot_state(guild_id, selected_channel_id)
+    
+    # Initialize all forms
+    music_control_form = MusicControlForm()
+    search_form = SearchForm()
+    shuffle_queue_form = ShuffleQueueForm()
+    url_form = UrlForm()
+    clear_queue_form = ClearQueueForm()
+    
+    # Set default values    
+    if selected_channel_id:
+        music_control_form.channel_id.data = selected_channel_id
+        search_form.channel_id.data = selected_channel_id
+        shuffle_queue_form.channel_id.data = selected_channel_id
+        url_form.channel_id.data = selected_channel_id
+    
+    clear_queue_form.guild_id.data = guild_id
+    
+    # Safe attribute access
+    guild_icon = getattr(guild_info, 'icon', None)
+    guild_name = getattr(guild_info, 'name', f"Server {guild_id}")
+    
+    return await render_template(
+        'server_dashboard.html',
+        guild_id=guild_id,
+        guild_name=guild_name,
+        guild_icon=guild_icon,
+        voice_channels=voice_channels,
+        search_results=[],  # Empty initially, use search route for results
+        selected_channel_id=selected_channel_id,
+        user_voice_channel=user_voice_channel,
+        queue=queue_info.get("queue", []),
+        current_track=queue_info.get("current_track"),
+        bot_state=bot_state,
+        # Forms
+        music_control_form=music_control_form,
+        search_form=search_form,
+        shuffle_queue_form=shuffle_queue_form,
+        url_form=url_form,
+        clear_queue_form=clear_queue_form
+    )
+
+@server_blueprint.route('/server/<guild_id>/music-control', methods=['POST'])
+@login_required
+async def music_control_route(guild_id):
+    """Handle music control commands"""
+    discord_client = current_app.discord_client
+    
+    # Get form data
+    form = await request.form
+    command = form.get('command')
+    channel_id = form.get('channel_id')
+    
+    # Validate inputs
+    if not command or not channel_id:
+        return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+    
+    # Execute appropriate command
+    if command == 'join':
+        await discord_client.join_voice_channel(guild_id, channel_id)
+    elif command == 'skip':
+        await discord_client.skip_track(guild_id, channel_id)
+    elif command == 'pause':
+        await discord_client.pause_playback(guild_id, channel_id)
+    elif command == 'resume':
+        await discord_client.resume_playback(guild_id, channel_id)
+    elif command == 'stop':
+        # Stop is a custom command that clears the queue and stops playback
+        await discord_client.clear_queue(guild_id, channel_id)
+        await discord_client.skip_track(guild_id, channel_id)
+    
+    # Return to the dashboard
+    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))
+
+@server_blueprint.route('/server/<guild_id>/queue/clear', methods=['POST'])
+@login_required
+async def clear_queue_route(guild_id):
+    """Handle clearing the queue"""
+    discord_client = current_app.discord_client
+    
+    # Simply clear all queues for this guild
+    await discord_client.clear_queue(guild_id)
+    
+    # Return to the dashboard
+    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+
+@server_blueprint.route('/server/<guild_id>/music/shuffle', methods=['POST'])
+@login_required
+async def shuffle_queue_route(guild_id):
+    """Shuffle the current music queue"""
+    discord_client = current_app.discord_client
+    
+    form = await request.form
+    channel_id = form.get('channel_id')
+    
+    if channel_id:
+        await discord_client.shuffle_queue(guild_id, channel_id)
+    
+    # Return to the dashboard
+    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))

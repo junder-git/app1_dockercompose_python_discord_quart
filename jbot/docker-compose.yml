@@ -1,0 +1,64 @@
+services:
+  music-central:
+    build:
+      context: ./
+      dockerfile: services/music_central/Dockerfile
+    container_name: jbot-music-central
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=${SECRET_KEY}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+    expose:
+      - "5002"
+    networks:
+      - jbot-network
+    volumes:
+      - ./services/music_central:/app/music_central
+      - ./clients:/app/clients
+
+  discord-bot:
+    build:
+      context: ./
+      dockerfile: services/discord_bot/Dockerfile
+    container_name: jbot-discord-bot
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=${SECRET_KEY}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+    expose:
+      - "5001"
+    depends_on:
+      - music-central
+    networks:
+      - jbot-network
+    volumes:
+      - ./services/discord_bot:/app/discord_bot
+      - ./clients:/app/clients
+
+  quart-web:
+    build:
+      context: ./
+      dockerfile: services/quart_web/Dockerfile
+    container_name: jbot-quart-web
+    ports:
+      - "80:80"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY=${SECRET_KEY}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+    depends_on:
+      - discord-bot
+      - music-central
+    networks:
+      - jbot-network
+    volumes:
+      - ./services/quart_web:/app/quart_web
+      - ./clients:/app/clients
+
+networks:
+  jbot-network:
+    driver: bridge
