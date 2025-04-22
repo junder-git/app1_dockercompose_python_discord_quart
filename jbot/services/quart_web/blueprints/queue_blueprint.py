@@ -20,14 +20,20 @@ class AddMultipleForm:
 @login_required
 async def queue_add_route(guild_id):
     """Handle adding videos to the queue"""
-    discord_client = current_app.discord_client
     discord = current_app.discord
+    discord_client = current_app.discord_client
     
     # Get form data
     form = await request.form
     channel_id = form.get('channel_id')
     video_id = form.get('video_id')
     video_title = form.get('video_title', 'Unknown video')
+    
+    # Capture search query parameters to preserve them
+    query = form.get('query')
+    search_type = form.get('search_type', 'comprehensive')
+    playlist_id = form.get('playlist_id')
+    page_token = form.get('page_token')
     
     if not all([channel_id, video_id]):
         flash("Missing required information", "error")
@@ -66,12 +72,18 @@ async def queue_add_route(guild_id):
     except Exception as e:
         flash(f"Error adding to queue: {str(e)}", "error")
     
-    # Redirect back to the search page or dashboard
-    return_to = form.get('return_to', 'server')
-    if return_to == 'search':
-        return redirect(url_for('search.youtube_search_route', guild_id=guild_id))
-    else:
-        return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+    # Redirect back to the search page with the same parameters
+    redirect_params = {'guild_id': guild_id}
+    if query:
+        redirect_params['query'] = query
+    if search_type:
+        redirect_params['search_type'] = search_type
+    if playlist_id:
+        redirect_params['playlist_id'] = playlist_id
+    if page_token:
+        redirect_params['page_token'] = page_token
+        
+    return redirect(url_for('search.youtube_search_route', **redirect_params))
 
 @queue_blueprint.route('/server/<guild_id>/queue/add_multiple', methods=['POST'])
 @login_required
@@ -83,6 +95,8 @@ async def queue_add_multiple_route(guild_id):
     # Get form data
     form = await request.form
     channel_id = form.get('channel_id')
+    playlist_id = form.get('playlist_id')
+    page_token = form.get('page_token')
     
     if not channel_id:
         flash("Missing channel ID", "error")
@@ -135,7 +149,6 @@ async def queue_add_multiple_route(guild_id):
     if not videos:
         flash("No videos selected", "warning")
         # Redirect based on whether we were in a playlist view
-        playlist_id = form.get('playlist_id')
         if playlist_id:
             return redirect(url_for('search.youtube_search_route', guild_id=guild_id, playlist_id=playlist_id))
         else:
@@ -157,15 +170,14 @@ async def queue_add_multiple_route(guild_id):
     except Exception as e:
         flash(f"Error adding videos to queue: {str(e)}", "error")
     
-    # Redirect back to the appropriate page
-    playlist_id = form.get('playlist_id')
+    # Redirect back to the same playlist page
     if playlist_id:
-        page_token = form.get('page_token')
         return redirect(url_for('search.youtube_search_route', 
-                              guild_id=guild_id, 
-                              playlist_id=playlist_id, 
-                              page_token=page_token))
+                             guild_id=guild_id, 
+                             playlist_id=playlist_id, 
+                             page_token=page_token))
     else:
+        # If somehow we don't have a playlist_id, redirect to the main search
         return redirect(url_for('search.youtube_search_route', guild_id=guild_id))
 
 @queue_blueprint.route('/server/<guild_id>/queue/add_entire_playlist', methods=['POST'])
@@ -209,17 +221,16 @@ async def queue_add_entire_playlist_route(guild_id):
     
     try:
         # Get playlist videos
-        videos, _, _ = await youtube_client.get_playlist_videos(playlist_id)
+        videos, _, total_count = await youtube_client.get_playlist_videos(playlist_id)
         
         if not videos:
             flash("No videos found in playlist", "error")
             return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
         
         # Enforce 50 track limit
-        total_videos = len(videos)
-        if total_videos > 50:
+        if len(videos) > 50:
             videos = videos[:50]
-            flash(f"Playlist has {total_videos} videos, but only the first 50 will be added", "warning")
+            flash(f"Playlist has {total_count} videos, but only the first 50 will be added", "warning")
         
         # Add videos to queue
         result = await discord_client.add_multiple_to_queue(guild_id, channel_id, videos)
@@ -231,7 +242,10 @@ async def queue_add_entire_playlist_route(guild_id):
     except Exception as e:
         flash(f"Error processing playlist: {str(e)}", "error")
     
-    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+    # After adding the tracks, redirect back to the playlist view
+    return redirect(url_for('search.youtube_search_route', 
+                         guild_id=guild_id, 
+                         playlist_id=playlist_id))
 
 @queue_blueprint.route('/server/<guild_id>/queue/add_by_url', methods=['POST'])
 @login_required
@@ -302,6 +316,11 @@ async def add_by_url_route(guild_id):
             else:
                 flash(f"Error adding playlist videos: {result.get('error', 'Unknown error')}", "error")
                 
+            # Redirect to the playlist view
+            return redirect(url_for('search.youtube_search_route', 
+                                  guild_id=guild_id, 
+                                  playlist_id=playlist_id))
+                
         else:
             # Extract video ID
             video_id = youtube_client.extract_video_id(url)
@@ -320,8 +339,48 @@ async def add_by_url_route(guild_id):
                 flash(f"Added '{video_title}' to queue", "success")
             else:
                 flash(f"Error adding to queue: {result.get('error', 'Unknown error')}", "error")
+            
+            # Redirect back to search with the URL as query
+            return redirect(url_for('search.youtube_search_route', 
+                                  guild_id=guild_id, 
+                                  query=url))
         
     except Exception as e:
         flash(f"Error processing URL: {str(e)}", "error")
     
+    # Fallback redirect if something goes wrong
     return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+
+@queue_blueprint.route('/server/<guild_id>/queue/reorder', methods=['POST'])
+@login_required
+async def queue_reorder_route(guild_id):
+    """Handle reordering tracks in the queue"""
+    discord_client = current_app.discord_client
+    
+    # Get form data
+    form = await request.form
+    channel_id = form.get('channel_id')
+    old_index = form.get('old_index')
+    new_index = form.get('new_index')
+    
+    if not all([channel_id, old_index is not None, new_index is not None]):
+        flash("Missing required information", "error")
+        return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+    
+    try:
+        # Convert indices to integers
+        old_index = int(old_index)
+        new_index = int(new_index)
+        
+        # Reorder the queue using the Discord bot API
+        result = await discord_client.reorder_queue(guild_id, channel_id, old_index, new_index)
+        
+        if result.get('success'):
+            flash(f"Track moved from position {old_index+1} to {new_index+1}", "success")
+        else:
+            flash(f"Error reordering queue: {result.get('error', 'Unknown error')}", "error")
+    except Exception as e:
+        flash(f"Error reordering queue: {str(e)}", "error")
+    
+    # Redirect back to the server dashboard
+    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))
