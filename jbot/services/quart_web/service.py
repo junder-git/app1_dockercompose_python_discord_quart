@@ -12,9 +12,8 @@ from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Import clients
-from clients.discord_api import DiscordAPIClient, discord_api_blueprint
-from clients.youtube_api import YouTubeClient, youtube_api_blueprint
-from clients.music_player import MusicPlayerClient, music_player_blueprint
+from clients.discord_api import DiscordAPIClient
+from clients.youtube_api import YouTubeClient
 
 # Import blueprints
 from quart_web.blueprints import (
@@ -76,12 +75,6 @@ app.discord_client = DiscordAPIClient(
 )
 
 app.youtube_client = YouTubeClient(api_key=YOUTUBE_API_KEY)
-app.music_client = MusicPlayerClient(api_key=YOUTUBE_API_KEY)
-
-# Register client blueprints
-app.register_blueprint(discord_api_blueprint)
-app.register_blueprint(youtube_api_blueprint)
-app.register_blueprint(music_player_blueprint)
 
 # Register application blueprints
 app.register_blueprint(index_blueprint)
@@ -100,9 +93,6 @@ async def shutdown_session(exception=None):
     
     if hasattr(app, 'youtube_client'):
         app.youtube_client.clear_cache()
-    
-    if hasattr(app, 'music_client'):
-        await app.music_client.close()
 
 # Start the app
 if __name__ == "__main__":

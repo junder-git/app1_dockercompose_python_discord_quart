@@ -3,20 +3,16 @@ Discord Bot Service - Main entry point
 """
 import os
 import sys
-import asyncio
 import discord
 from discord.ext import commands
 from collections import defaultdict
 from dotenv import load_dotenv
-import aiohttp
-from aiohttp import web
 
 # Update path to find clients
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Import clients
 from clients.youtube_api import YouTubeClient
-from clients.music_player import MusicPlayerClient
 
 # Import blueprints
 from discord_bot.blueprints import (
@@ -51,7 +47,6 @@ class JBotDiscord(commands.Bot):
         
         # Initialize clients
         self.youtube_client = YouTubeClient(api_key=YOUTUBE_API_KEY)
-        self.music_client = MusicPlayerClient(api_key=YOUTUBE_API_KEY)
         
         # Music queue handling
         self.music_queues = defaultdict(list)  # Queue ID -> list of tracks

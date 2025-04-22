@@ -5,7 +5,6 @@ Handles ui channel connections
 import types
 import discord
 import os
-from clients.music_player import MusicPlayerClient
 from clients.youtube_api import YouTubeClient
 
 # Get API key for services (used by modals)
@@ -13,7 +12,6 @@ YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 
 # Initialize shared services (used by modals)
 youtube_service = YouTubeClient(api_key=YOUTUBE_API_KEY)
-music_service = MusicPlayerClient(api_key=YOUTUBE_API_KEY)
 
 def apply(bot):
     """
@@ -173,7 +171,7 @@ class EnhancedURLModal(discord.ui.Modal):
                 return
             
             # Process the URL using the shared MusicService
-            result = await music_service.process_youtube_url(url)
+            result = await youtube_service.process_youtube_url(url)
             
             if not result:
                 message = await modal_interaction.followup.send(
@@ -324,7 +322,7 @@ class SearchModal(discord.ui.Modal):
         # Use the shared MusicService for search
         try:
             # Use optimized search instead of direct yt-dlp
-            results = await music_service.search_videos(self.query.value)
+            results = await youtube_service.search_videos(self.query.value)
             
             if not results:
                 message = await modal_interaction.followup.send(f"No results found for: {self.query.value}", ephemeral=True)
