@@ -50,6 +50,7 @@ async def youtube_search_route(guild_id):
     shuffle_queue_form = ShuffleQueueForm()
     url_form = UrlForm()
     clear_queue_form = ClearQueueForm()
+    add_multiple_form = AddMultipleForm()  # Add the new form
     
     # Set form values based on user's voice channel 
     if selected_channel_id:
@@ -57,6 +58,7 @@ async def youtube_search_route(guild_id):
         shuffle_queue_form.channel_id.data = selected_channel_id
         search_form.channel_id.data = selected_channel_id
         url_form.channel_id.data = selected_channel_id
+        add_multiple_form.channel_id.data = selected_channel_id  # Set channel_id for the multiple form
     
     clear_queue_form.guild_id.data = guild_id
     
@@ -78,6 +80,9 @@ async def youtube_search_route(guild_id):
     # Check if this is a playlist view request
     selected_playlist_id = request.args.get('playlist_id')
     if selected_playlist_id:
+        # Set playlist_id for the add_multiple_form
+        add_multiple_form.playlist_id.data = selected_playlist_id
+        
         # Get page token for pagination
         page_token = request.args.get('page_token')
         prev_page_token = request.args.get('prev_page_token')
@@ -173,5 +178,6 @@ async def youtube_search_route(guild_id):
         music_control_form=music_control_form,
         shuffle_queue_form=shuffle_queue_form,
         url_form=url_form,
-        clear_queue_form=clear_queue_form
+        clear_queue_form=clear_queue_form,
+        add_multiple_form=add_multiple_form
     )

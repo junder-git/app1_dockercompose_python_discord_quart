@@ -9,7 +9,7 @@ function getCsrfToken() {
     return inputToken || '';
 }
 
-// Function to handle adding videos to queue (improved for WTForms compatibility)
+// Function to handle adding videos to queue (improved for preserving context)
 function initAddTrackButtons() {
     document.querySelectorAll('.add-track-btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -54,12 +54,60 @@ function initAddTrackButtons() {
             videoTitleInput.value = btn.dataset.videoTitle;
             form.appendChild(videoTitleInput);
             
-            // Return to
-            const returnToInput = document.createElement('input');
-            returnToInput.type = 'hidden';
-            returnToInput.name = 'return_to';
-            returnToInput.value = 'dashboard';
-            form.appendChild(returnToInput);
+            // Preserve query and search context
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Add search query if it exists
+            if (urlParams.has('query')) {
+                const queryInput = document.createElement('input');
+                queryInput.type = 'hidden';
+                queryInput.name = 'query';
+                queryInput.value = urlParams.get('query');
+                form.appendChild(queryInput);
+            }
+            
+            // Add search type if it exists
+            if (urlParams.has('search_type')) {
+                const searchTypeInput = document.createElement('input');
+                searchTypeInput.type = 'hidden';
+                searchTypeInput.name = 'search_type';
+                searchTypeInput.value = urlParams.get('search_type');
+                form.appendChild(searchTypeInput);
+            }
+            
+            // Add playlist context if it exists
+            if (urlParams.has('playlist_id')) {
+                const playlistIdInput = document.createElement('input');
+                playlistIdInput.type = 'hidden';
+                playlistIdInput.name = 'playlist_id';
+                playlistIdInput.value = urlParams.get('playlist_id');
+                form.appendChild(playlistIdInput);
+            }
+            
+            // Add pagination info if it exists
+            if (urlParams.has('page_token')) {
+                const pageTokenInput = document.createElement('input');
+                pageTokenInput.type = 'hidden';
+                pageTokenInput.name = 'page_token';
+                pageTokenInput.value = urlParams.get('page_token');
+                form.appendChild(pageTokenInput);
+            }
+            
+            if (urlParams.has('prev_page_token')) {
+                const prevPageTokenInput = document.createElement('input');
+                prevPageTokenInput.type = 'hidden';
+                prevPageTokenInput.name = 'prev_page_token';
+                prevPageTokenInput.value = urlParams.get('prev_page_token');
+                form.appendChild(prevPageTokenInput);
+            }
+            
+            if (urlParams.has('page')) {
+                const pageInput = document.createElement('input');
+                pageInput.type = 'hidden';
+                pageInput.name = 'page';
+                pageInput.value = urlParams.get('page');
+                form.appendChild(pageInput);
+            }
             
             // Add form to the document and submit
             document.body.appendChild(form);
@@ -198,6 +246,20 @@ function initPlaylistSelection() {
                 addMultipleForm.appendChild(csrfInput);
             }
             
+            // Preserve pagination and search context on submission
+            const urlParams = new URLSearchParams(window.location.search);
+            const contextParams = ['page', 'page_token', 'prev_page_token', 'query'];
+            
+            contextParams.forEach(param => {
+                if (urlParams.has(param) && !addMultipleForm.querySelector(`input[name="${param}"]`)) {
+                    const contextInput = document.createElement('input');
+                    contextInput.type = 'hidden';
+                    contextInput.name = param;
+                    contextInput.value = urlParams.get(param);
+                    addMultipleForm.appendChild(contextInput);
+                }
+            });
+            
             // Allow the form to submit
             return true;
         });
@@ -313,12 +375,30 @@ function initQueueDragDrop() {
     }
 }
 
+// Function to initialize channel id on all forms
+function initializeChannelId() {
+    // Make sure the channel ID is known for searching and queue operations
+    const channelIdInputs = document.querySelectorAll('input[name="channel_id"]');
+    const container = document.querySelector('.container-fluid');
+    
+    if (container && container.dataset.channelId) {
+        const selectedChannelId = container.dataset.channelId;
+        
+        if (selectedChannelId) {
+            channelIdInputs.forEach(input => {
+                input.value = selectedChannelId;
+            });
+        }
+    }
+}
+
 // Initialize all dashboard features
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize components
     initQueueDragDrop();
     initPlaylistSelection();
     initAddTrackButtons();
+    initializeChannelId();
     
     // Check for server dashboard page
     if (document.querySelector('.container-fluid[data-guild-id]')) {

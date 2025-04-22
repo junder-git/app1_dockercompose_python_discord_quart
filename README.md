@@ -1,235 +1,92 @@
 # JBot - Discord Bot & Quart Website Manager
 
-A comprehensive Discord music bot with a web interface for management. It includes a Discord bot for music playback in voice channels and a web application for remote control.
-
-## Overview
-
-This application consists of three main services:
-
-1. **Discord Bot Service** - Handles Discord interactions and voice channel functionality
-2. **Music Central Service** - Central music processing and queue management
-3. **Quart Web Service** - Web interface for controlling the bot from your browser
-
-## Features
-
-- Play music from YouTube in Discord voice channels
-- Control music playback via Discord chat commands
-- Web interface for remote management
-- Search YouTube for videos and playlists
-- Queue management (add, remove, reorder, shuffle)
-- Multi-server support
-- Authentication via Discord OAuth
-
 ## Setup & Installation Guide
 
 ### Prerequisites
-
-- Docker and Docker Compose
-- Discord Bot Token, Client ID, and Client Secret
-- YouTube Data API Key
-
+- If not downloading as zip, then youl need Git (for cloning the repository) 
+- Must have Docker. Download and install from [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows).  
+  
 ### Step 1: Download the Repository
 
+Download the [ZIP file](https://github.com/junder-git/app1_dockercompose_discordbot_quartmanager/archive/refs/heads/main.zip) and extract to your Documents folder.  
+  
+**Alternative**:
 ```bash
-git clone https://github.com/yourusername/jbot.git
-cd jbot
-```
-
+git clone https://github.com/junder-git/app1_dockercompose_discordbot_quartmanager.git
+```  
+  
 ### Step 2: Configure Environment Variables
-
-Copy the example environment file and configure it:
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file with your credentials:
-
+Locate the `.env.example` file in the extracted directory and rename it `.env` then configure it as follows:  
+  
 #### Discord API Setup
 1. Visit [Discord Developer Portal](https://discord.com/developers)
 2. Create a new application
-3. Go to the "Bot" section and create a bot
-4. Copy the bot token to `DISCORD_BOT_TOKEN` in your `.env` file
-5. Go to OAuth2 section and copy the Client ID and Client Secret
-6. Add the redirect URL `http://localhost/callback` to OAuth2 Redirects
-7. Set the `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `DISCORD_REDIRECT_URI` in your `.env` file
+3. Add the redirect url http://localhost/callback to the dev portal    
+5. Copy the OAuth2 Secret Key and Client Key to the `.env` file  
+6. Invite the bot to the server from discord dev portal with `bot` scope and `admin` permissions in the oauth2 section for guild install.  
+  
+#### YouTube Data API Setup  
+1. Visit [YouTube Data API Portal](https://developers.google.com/youtube/v3)  
+2. Create a new application.  
+3. Enable the youtube data v3 api for the project.  
+4. Create and copy the `API key` to the `.env` file  
 
-#### YouTube Data API Setup
-1. Visit [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project
-3. Enable the YouTube Data API v3
-4. Create API credentials and copy the API key
-5. Set the `YOUTUBE_API_KEY` in your `.env` file
+**Note**: You can ignore the 'redirect URL' environment variables if you only plan to use the Discord chat interface without the Flask webplayer.
 
-#### Security
-Generate a secure random string for the `SECRET_KEY` in your `.env` file:
-
-```bash
-# Python example for generating a secure key
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
-### Step 3: Invite Bot to Your Server
-
-1. Use the following URL to invite the bot (replace YOUR_CLIENT_ID):
-```
-https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot
-```
-
-2. Select the server you want to add the bot to
-3. Authorize the bot with the necessary permissions
-
-### Step 4: Start the Application
-
-Start all services using Docker Compose:
+**Important**: Add in the .env your own value for SECRET_KEY    
+  
+### Step 3: Run the Application
+Open Command Prompt (Win+R, type `cmd`) or PowerShell and navigate to the source directory:
 
 ```bash
-docker-compose up --build
+cd C:/<YOUR_WINDOWS_USER_HERE>/Documents/app1_dockercompose_jbot_discordbot_quartmanager/jbot
 ```
 
-### Step 5: Access the Web Interface
-
-1. Open a web browser and navigate to [http://localhost](http://localhost)
-2. Log in with your Discord account
-3. Select a server where the bot is present
-4. Enjoy managing your music!
-
-## Using the Bot
-
-### Discord Commands
-
-- `jbot` - Show the music control panel in the current channel
-- `jbot search <query>` - Search for YouTube videos and add to queue
-- `jbot hello` - Test if the bot is responding
-
-### Web Interface
-
-The web interface allows you to:
-- Browse your Discord servers
-- Manage music queues for each server
-- Search YouTube for music
-- Add videos and playlists to the queue
-- Control playback (play, pause, skip, etc.)
-
-## Architecture
-
-```
-+------------------------+     +-----------------------+     +------------------------+
-|  Quart Web Service     |     |   Discord Bot Service |     |  Music Central Service |
-|  - Web Interface       |     |   - Discord Commands  |     |  - Audio Processing    |
-|  - User Authentication |     |   - Voice Connections |     |  - YouTube Integration |
-+------------------------+     +-----------------------+     +------------------------+
-           |                             |                             |
-           |                             |                             |
-           v                             v                             v
-+------------------------+     +-----------------------+     +------------------------+
-|  Discord API Client    |     |   YouTube API Client  |     |  Music Player Client   |
-|  - Queue Control       |     |   - Video Search      |     |  - Audio Extraction    |
-|  - Playback Management |     |   - Playlist Info     |     |  - Playback Control    |
-+------------------------+     +-----------------------+     +------------------------+
-```
-
-## Project Structure
-
-```
-jbot/
-├── .env.example            # Environment variables template
-├── .gitignore              # Git ignore file
-├── LICENSE                 # MIT License
-├── README.md               # Project documentation
-├── docker-compose.yaml     # Docker Compose configuration
-│
-├── clients/                # Client libraries (shared code)
-│   ├── discord_api/        # Discord API client
-│   ├── youtube_api/        # YouTube API client
-│   └── music_player/       # Music Player client
-│
-├── services/               # Main service applications
-│   ├── discord_bot/        # Discord Bot Service
-│   │   ├── Dockerfile      # Discord Bot Dockerfile
-│   │   ├── requirements.txt # Discord Bot requirements
-│   │   ├── service.py      # Discord Bot entry point
-│   │   └── blueprints/     # Discord Bot functionality modules
-│   │
-│   ├── music_central/      # Music Central Service
-│   │   ├── Dockerfile      # Music Central Dockerfile
-│   │   ├── requirements.txt # Music Central requirements
-│   │   ├── service.py      # Music Central entry point
-│   │   └── blueprints/     # Music Central functionality modules
-│   │
-│   └── quart_web/          # Quart Web Service
-│       ├── Dockerfile      # Quart Web Dockerfile
-│       ├── requirements.txt # Quart Web requirements
-│       ├── service.py      # Quart Web entry point
-│       ├── blueprints/     # Quart Web route blueprints
-│       ├── static/         # Static assets (CSS, JS)
-│       └── templates/      # HTML templates
-```
-
-## Development
-
-### Adding New Features
-
-The application is structured using a blueprint pattern for modularity:
-
-1. Discord Bot uses functional blueprints to organize code by feature
-2. Quart Web uses the standard Quart blueprint system for routes
-3. Music Central uses a similar blueprint approach for API endpoints
-
-To add new features:
-
-1. Identify which service should handle the feature
-2. Add necessary methods to the appropriate client library if needed
-3. Create or modify blueprints in the relevant service
-4. Update templates or commands as needed
-
-### Running in Development Mode
-
-For development, you can use volume mounts to see changes without rebuilding:
-
-```yaml
-# In docker-compose.yaml
-volumes:
-  - ./services/quart_web:/app/quart_web
-  - ./clients:/app/clients
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Discord Bot not connecting to voice channels**
-   - Ensure the bot has proper permissions in your server
-   - Check that FFMPEG is properly installed in the container
-
-2. **Web interface authentication failure**
-   - Verify your OAuth2 redirect URI is correctly set
-   - Check that your client ID and secret are correct
-
-3. **YouTube search not working**
-   - Ensure your YouTube API key is valid
-   - Check API quota limits on the Google Cloud Console
-
-### Logs
-
-To view logs for debugging:
-
+**Start the bot**:
 ```bash
-# All services
-docker-compose logs
-
-# Specific service
-docker-compose logs discord-bot
-docker-compose logs music-central
-docker-compose logs quart-web
+docker-compose up --build -d
+```  
+Go to `http://localhost` for the webplayer and/or join a voice chat channel in discord, type `jbot` in any of the servers text channels to get the discord interface to pop up in there. I recommend doing this in a `# bot-channel` or some dedicated text channel.      
+  
+**Stop the bot**:
+```bash
+docker-compose down -v
 ```
 
-## License
+## Application Interfaces
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Discord Chat Model Manager
+![Discord Chat Interface](READMEresources/discord_chat_model_example.png)
 
-## Acknowledgments
+### Flask Webplayer Manager
+![Flask Webplayer Interface](READMEresources/flask_webapp_example.png)
 
-- [discord.py](https://github.com/Rapptz/discord.py) - Discord API wrapper
-- [Quart](https://github.com/pgjones/quart) - ASGI web framework
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - YouTube download library
+## Development Notes
+
+### Security Considerations
+- **Current Risk**: Flask API endpoints are publicly accessible
+- **Issue**: These endpoints could be used to manipulate queues on other servers without being in the voice channel
+- **Solution in Progress**: Implement authentication for Flask endpoints while maintaining necessary accessibility
+- **Note**: Discord API is only accessible within the Docker network, so it's protected
+
+![Flask Endpoints](READMEresources/flask_endpoints.png)
+
+### Planned Features
+- Twitch bot integration with channel points for song requests
+- Track and playlist looping functionality
+- Quick access to popular playlists (up to 10 per server)
+- Protection against large playlists (100+ tracks)
+- Queue size limit of 50 tracks  
+- Make sure after clicking add to queue in the flask webplayer search it doesnt clear the search and let it add more to queue  
+- Keep the last input in the search query box  
+    
+### Current Security Features
+- Limit of one bot instance per Discord server for any number of voice channels it may have.
+  
+##### Lind  
+-Keep Playlist results until you submit a new search  
+-Keep the last input in the search bar  
+-Option to loop song or playlist  
+-Commmand to add first search result of a qry to the playlist  
+-Cache last 2 songs or so?  
+-Give option to go back?   

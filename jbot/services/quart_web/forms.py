@@ -70,3 +70,10 @@ class BotConfigForm(QuartForm):
     prefix = StringField('Command Prefix', validators=[Optional()])
     auto_join = BooleanField('Automatically Join Voice Channel')
     submit = SubmitField('Save Configuration')
+
+class AddMultipleForm(QuartForm):
+    """Form for adding multiple videos to the queue"""
+    playlist_id = HiddenField('Playlist ID', validators=[Optional()])
+    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
+    # Note: We'll handle the video selections dynamically with JavaScript
+    submit = SubmitField('Add Selected to Queue')
