@@ -219,3 +219,37 @@ async def add_by_url_route(guild_id):
         flash(f"Error processing URL: {str(e)}", "error")
     
     return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+
+@queue_blueprint.route('/server/<guild_id>/queue/reorder', methods=['POST'])
+@login_required
+async def queue_reorder_route(guild_id):
+    """Handle reordering tracks in the queue"""
+    discord_client = current_app.discord_client
+    
+    # Get form data
+    form = await request.form
+    channel_id = form.get('channel_id')
+    old_index = form.get('old_index')
+    new_index = form.get('new_index')
+    
+    if not all([channel_id, old_index is not None, new_index is not None]):
+        flash("Missing required information", "error")
+        return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+    
+    try:
+        # Convert indices to integers
+        old_index = int(old_index)
+        new_index = int(new_index)
+        
+        # Reorder the queue using the Discord bot API
+        result = await discord_client.reorder_queue(guild_id, channel_id, old_index, new_index)
+        
+        if result.get('success'):
+            flash(f"Track moved from position {old_index+1} to {new_index+1}", "success")
+        else:
+            flash(f"Error reordering queue: {result.get('error', 'Unknown error')}", "error")
+    except Exception as e:
+        flash(f"Error reordering queue: {str(e)}", "error")
+    
+    # Redirect back to the server dashboard
+    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))

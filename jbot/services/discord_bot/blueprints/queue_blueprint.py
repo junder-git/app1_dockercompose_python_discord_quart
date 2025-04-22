@@ -151,3 +151,4 @@ async def reorder_queue(self, guild_id, channel_id, old_index, new_index):
         "success": True,
         "message": f"Track moved from position {old_index} to {new_index}"
     }
+
