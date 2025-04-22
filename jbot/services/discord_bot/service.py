@@ -25,7 +25,8 @@ from discord_bot.blueprints import (
     events_blueprint,
     queue_blueprint,
     playback_blueprint,
-    voice_blueprint
+    voice_blueprint,
+    ui_blueprint
 )
 
 # Load environment variables
@@ -77,6 +78,7 @@ class JBotDiscord(commands.Bot):
         queue_blueprint(self)
         playback_blueprint(self)
         voice_blueprint(self)
+        ui_blueprint(self)
 
 # Create the bot instance
 bot = JBotDiscord(command_prefix="jbot ", intents=intents)

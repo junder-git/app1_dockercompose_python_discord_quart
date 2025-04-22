@@ -1,20 +1,20 @@
 services:
-  music-central:
-    build:
-      context: ./
-      dockerfile: services/music_central/Dockerfile
-    container_name: jbot-music-central
-    environment:
-      - PYTHONUNBUFFERED=1
-      - SECRET_KEY=${SECRET_KEY}
-      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
-    expose:
-      - "5002"
-    networks:
-      - jbot-network
-    volumes:
-      - ./services/music_central:/app/music_central
-      - ./clients:/app/clients
+  #music-central:
+   # build:
+    #  context: ./
+     # dockerfile: services/music_central/Dockerfile
+    #container_name: jbot-music-central
+    #environment:
+     # - PYTHONUNBUFFERED=1
+      #- SECRET_KEY=${SECRET_KEY}
+      #- YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+    #expose:
+    #  - "5002"
+    #networks:
+     # - jbot-network
+    #volumes:
+     # - ./services/music_central:/app/music_central
+      #- ./clients:/app/clients
 
   discord-bot:
     build:
