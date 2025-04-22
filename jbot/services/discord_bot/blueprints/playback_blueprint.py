@@ -51,13 +51,13 @@ async def play_next(self, guild_id, channel_id):
     
     try:
         # Use the music client to get the audio URL
-        audio_url = await self.music_client.extract_audio_url(song['id'])
+        audio_url = await self.youtube_client.extract_audio_url(song['id'])
         
         if not audio_url:
             raise Exception(f"Failed to extract audio URL for {song['id']}")
         
         # Get FFmpeg options from the service
-        ffmpeg_options = self.music_client.get_ffmpeg_options('medium')
+        ffmpeg_options = self.youtube_client.get_ffmpeg_options('medium')
         
         # Create FFmpeg audio source
         audio_source = discord.FFmpegPCMAudio(audio_url, **ffmpeg_options)

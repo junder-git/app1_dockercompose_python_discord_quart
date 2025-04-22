@@ -74,10 +74,10 @@ async def search_command(ctx, *, query):
     # Try to search for the video using the shared service
     try:
         # Get the music client
-        music_client = ctx.bot.music_client
+        youtube_client = ctx.bot.youtube_client
         
         # Use the shared MusicService for search
-        results = await music_client.search_videos(query)
+        results = await youtube_client.search_videos(query)
         
         if not results:
             cleartimer = getattr(ctx.bot, 'cleartimer', 10)
