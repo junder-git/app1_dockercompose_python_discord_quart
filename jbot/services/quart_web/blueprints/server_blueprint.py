@@ -2,7 +2,7 @@
 Server Blueprint for Quart Web Service
 Handles server-specific dashboard and controls
 """
-from quart import Blueprint, render_template, redirect, url_for, request, current_app
+from quart import Blueprint, render_template, redirect, url_for, request, current_app, jsonify
 from .helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
 from .forms_blueprint import MusicControlForm, SearchForm, ShuffleQueueForm, UrlForm, ClearQueueForm, AddMultipleForm
 
@@ -83,37 +83,31 @@ async def server_dashboard_route(guild_id):
         add_multiple_form=add_multiple_form
     )
 
-@server_blueprint.route('/server/<guild_id>/music-control', methods=['POST'])
+@server_blueprint.route('/server/<guild_id>/music/control', methods=['POST'])
 @login_required
 async def music_control_route(guild_id):
-    """Handle music control commands"""
+    """Handle music control commands (play, pause, skip, etc.)"""
     discord_client = current_app.discord_client
-    
-    # Get form data
     form = await request.form
-    command = form.get('command')
     channel_id = form.get('channel_id')
-    
-    # Validate inputs
-    if not command or not channel_id:
-        return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
-    
-    # Execute appropriate command
-    if command == 'join':
-        await discord_client.join_voice_channel(guild_id, channel_id)
-    elif command == 'skip':
-        await discord_client.skip_track(guild_id, channel_id)
-    elif command == 'pause':
-        await discord_client.pause_playback(guild_id, channel_id)
-    elif command == 'resume':
-        await discord_client.resume_playback(guild_id, channel_id)
-    elif command == 'stop':
-        # Stop is a custom command that clears the queue and stops playback
-        await discord_client.clear_queue(guild_id, channel_id)
-        await discord_client.skip_track(guild_id, channel_id)
-    
-    # Return to the dashboard
-    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))
+    command = form.get('command')
+
+    # Check if the bot is already connected to the voice channel
+    bot_state = await discord_client.get_bot_state(guild_id, channel_id)
+    if not bot_state.get('is_connected'):
+        return jsonify({"error": "Bot is not connected to the voice channel"}), 400
+
+    # Execute the command
+    if command == "pause":
+        await discord_client.pause(guild_id, channel_id)
+    elif command == "resume":
+        await discord_client.resume(guild_id, channel_id)
+    elif command == "skip":
+        await discord_client.skip(guild_id, channel_id)
+    else:
+        return jsonify({"error": "Invalid command"}), 400
+
+    return jsonify({"success": True})
 
 @server_blueprint.route('/server/<guild_id>/queue/clear', methods=['POST'])
 @login_required

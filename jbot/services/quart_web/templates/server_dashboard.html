@@ -59,16 +59,6 @@
                                 <i class="fas fa-play"></i>
                             </button>
                         </form>
-                        
-                        <!-- Stop button -->
-                        <form method="POST" action="{{ url_for('server.music_control_route', guild_id=guild_id) }}" style="display: inline;">
-                            {{ music_control_form.csrf_token }}
-                            {{ music_control_form.channel_id(value=selected_channel_id) }}
-                            {{ music_control_form.command(value="stop", type="hidden") }}
-                            <button type="submit" class="btn btn-sm btn-outline-light" title="Stop">
-                                <i class="fas fa-stop"></i>
-                            </button>
-                        </form>
                     </div>
                     {% endif %}
                 </div>

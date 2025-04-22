@@ -9,127 +9,43 @@ function getCsrfToken() {
     return inputToken || '';
 }
 
-// Function to handle adding videos to queue (improved for preserving context)
 function initAddTrackButtons() {
     document.querySelectorAll('.add-track-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', async function () {
             const btn = this;
             const originalText = btn.innerHTML;
-            
+
             // Show loading state
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
             btn.disabled = true;
-            
-            // Create a proper form submission matching the AddToQueueForm structure
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/server/${btn.dataset.guildId}/queue/add`;
-            form.style.display = 'none';
-            
-            // CSRF Token
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrf_token';
-            csrfInput.value = getCsrfToken();
-            form.appendChild(csrfInput);
-            
-            // Channel ID
-            const channelInput = document.createElement('input');
-            channelInput.type = 'hidden';
-            channelInput.name = 'channel_id';
-            channelInput.value = btn.dataset.channelId;
-            form.appendChild(channelInput);
-            
-            // Video ID
-            const videoIdInput = document.createElement('input');
-            videoIdInput.type = 'hidden';
-            videoIdInput.name = 'video_id';
-            videoIdInput.value = btn.dataset.videoId;
-            form.appendChild(videoIdInput);
-            
-            // Video Title
-            const videoTitleInput = document.createElement('input');
-            videoTitleInput.type = 'hidden';
-            videoTitleInput.name = 'video_title';
-            videoTitleInput.value = btn.dataset.videoTitle;
-            form.appendChild(videoTitleInput);
-            
-            // Preserve query and search context
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Add search query if it exists
-            if (urlParams.has('query')) {
-                const queryInput = document.createElement('input');
-                queryInput.type = 'hidden';
-                queryInput.name = 'query';
-                queryInput.value = urlParams.get('query');
-                form.appendChild(queryInput);
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('csrf_token', getCsrfToken());
+            formData.append('channel_id', btn.dataset.channelId);
+            formData.append('video_id', btn.dataset.videoId);
+            formData.append('video_title', btn.dataset.videoTitle);
+
+            try {
+                // Send AJAX request
+                const response = await fetch(`/server/${btn.dataset.guildId}/queue/add`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    showToast(`✅ Added "${btn.dataset.videoTitle}" to the queue.`);
+                } else {
+                    showToast('❌ Failed to add to the queue.');
+                }
+            } catch (error) {
+                console.error('Error adding to queue:', error);
+                showToast('❌ An error occurred.');
+            } finally {
+                // Restore button state
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-            
-            // Add search type if it exists
-            if (urlParams.has('search_type')) {
-                const searchTypeInput = document.createElement('input');
-                searchTypeInput.type = 'hidden';
-                searchTypeInput.name = 'search_type';
-                searchTypeInput.value = urlParams.get('search_type');
-                form.appendChild(searchTypeInput);
-            }
-            
-            // Add playlist context if it exists
-            if (urlParams.has('playlist_id')) {
-                const playlistIdInput = document.createElement('input');
-                playlistIdInput.type = 'hidden';
-                playlistIdInput.name = 'playlist_id';
-                playlistIdInput.value = urlParams.get('playlist_id');
-                form.appendChild(playlistIdInput);
-            }
-            
-            // Add pagination info if it exists
-            if (urlParams.has('page_token')) {
-                const pageTokenInput = document.createElement('input');
-                pageTokenInput.type = 'hidden';
-                pageTokenInput.name = 'page_token';
-                pageTokenInput.value = urlParams.get('page_token');
-                form.appendChild(pageTokenInput);
-            }
-            
-            if (urlParams.has('prev_page_token')) {
-                const prevPageTokenInput = document.createElement('input');
-                prevPageTokenInput.type = 'hidden';
-                prevPageTokenInput.name = 'prev_page_token';
-                prevPageTokenInput.value = urlParams.get('prev_page_token');
-                form.appendChild(prevPageTokenInput);
-            }
-            
-            if (urlParams.has('page')) {
-                const pageInput = document.createElement('input');
-                pageInput.type = 'hidden';
-                pageInput.name = 'page';
-                pageInput.value = urlParams.get('page');
-                form.appendChild(pageInput);
-            }
-            
-            // Add form to the document and submit
-            document.body.appendChild(form);
-            
-            form.onsubmit = () => {
-                // Add success notification
-                showToast(`✅ Added "${btn.dataset.videoTitle}" to the queue.`);
-                
-                // Restore button state after a short delay
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-check me-1"></i> Added!';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }, 2000);
-                }, 1000);
-                
-                // Remove the form from DOM
-                setTimeout(() => form.remove(), 100);
-            };
-            
-            form.submit();
         });
     });
 }
