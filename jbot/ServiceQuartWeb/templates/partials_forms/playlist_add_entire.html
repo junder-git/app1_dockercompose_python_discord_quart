@@ -1,0 +1,19 @@
+<form method="POST" action="{{ url_for('queue.queue_add_entire_playlist_route', guild_id=guild_id) }}" class="d-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
+    <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
+    <input type="hidden" name="playlist_title" value="{{ playlist_details.title }}">
+    <!-- Add hidden fields for pagination context -->
+    {% if page_token %}
+    <input type="hidden" name="page_token" value="{{ page_token }}">
+    {% endif %}
+    {% if prev_page_token %}
+    <input type="hidden" name="prev_page_token" value="{{ prev_page_token }}">
+    {% endif %}
+    {% if current_page %}
+    <input type="hidden" name="page" value="{{ current_page }}">
+    {% endif %}
+    <button type="submit" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus-circle me-1"></i> Add Entire Playlist to Queue
+    </button>
+</form>

@@ -1,8 +1,8 @@
 services:
-  discord-bot:
+  jbot-discord-bot:
     build:
-      context: ./
-      dockerfile: services/discord_bot/Dockerfile
+      context: .
+      dockerfile: Dockerfile.ServiceDiscordBot
     container_name: jbot-discord-bot
     environment:
       - PYTHONUNBUFFERED=1
@@ -15,13 +15,11 @@ services:
     networks:
       - jbot-network
     volumes:
-      - ./services/discord_bot:/app/discord_bot
-      - ./clients:/app/clients
-
-  quart-web:
+      - ./ServiceDiscordBot:/app/ServiceDiscordBot
+  jbot-quart-web:
     build:
-      context: ./
-      dockerfile: services/quart_web/Dockerfile
+      context: .
+      dockerfile: Dockerfile.ServiceQuartWeb
     container_name: jbot-quart-web
     ports:
       - "80:80"
@@ -36,8 +34,7 @@ services:
     networks:
       - jbot-network
     volumes:
-      - ./services/quart_web:/app/quart_web
-      - ./clients:/app/clients
+      - ./ServiceQuartWeb:/app/ServiceQuartWeb
 networks:
   jbot-network:
     driver: bridge

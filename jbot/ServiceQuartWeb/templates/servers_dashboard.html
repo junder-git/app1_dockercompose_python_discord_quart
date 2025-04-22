@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% block title %}{{ guild_name }} - Discord Music Bot{% endblock %}
+{% block content %}
+<div class="container-fluid" data-guild-id="{{ guild_id }}" data-channel-id="{{ selected_channel_id }}">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.dashboard_route') }}">Servers</a></li>
+                    <li class="breadcrumb-item active">{{ guild_name }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center mb-4">
+                {% if guild_icon %}
+                    <img src="https://cdn.discordapp.com/icons/{{ guild_id }}/{{ guild_icon }}.png" class="guild-icon me-3" alt="{{ guild_name }}">
+                {% else %}
+                    <div class="guild-icon me-3">{{ guild_name[:1] }}</div>
+                {% endif %}
+                <h1 class="mb-0">{{ guild_name }}</h1>
+            </div>
+        </div>
+    </div>
+    <div class="row">        
+        <!-- Left Column: Queue -->
+        <div class="col-md-4">
+            <div class="card discord-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Music Queue</span>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <button type="button" class="btn btn-sm btn-success" id="botJoinBtn">
+                            <i class="fas fa-sign-in-alt me-1"></i> Join
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" id="botLeaveBtn">
+                            <i class="fas fa-sign-out-alt me-1"></i> Leave
+                        </button>
+                    </div>
+                    
+                    <!-- Music Control buttons using pure html syntax -->
+                    {% if selected_channel_id %}
+                    <div class="btn-group">
+                        <!-- Skip button -->
+                        
+                    
+                        <!-- Pause button -->
+
+                    
+                        <!-- Resume button -->
+
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body" id="queue-container">
+                    <!-- Current Track Section -->
+                    <div id="current-track-container">
+                        {% if current_track %}
+                            <div class="current-track mb-3 p-2 bg-dark rounded">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <i class="fas fa-play-circle text-success"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Now Playing:</h6>
+                                        <p class="mb-0">{{ current_track.title }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Queue List Section -->
+                    {% if not queue %}
+                        <p class="text-muted">The queue is currently empty. Search for music to add to the queue.</p>
+                    {% else %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Coming Up Next:</h6>
+                            
+                            <!-- Shuffle Queue Form -->
+
+                        </div>
+                        <!-- Draggable queue list -->
+                        <h6 class="mb-0">Click and drag to re-order:</h6>
+                        <div class="list-group" id="queue-list">
+                            {% for item in queue %}
+                                <div class="list-group-item bg-dark text-light border-secondary queue-item" 
+                                     data-id="{{ item.id }}" draggable="true">
+                                    <div class="d-flex w-100 justify-content-between align-items-start">
+                                        <div>
+                                            <div class="drag-handle me-2 d-inline-block">
+                                                <i class="fas fa-grip-vertical text-muted"></i>
+                                            </div>
+                                            <h6 class="mb-1 d-inline-block">{{ item.title }}</h6>
+                                        </div>
+                                        <span class="badge bg-secondary">{{ loop.index }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <!-- Clear Queue Form -->
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle/Right Column: Search -->
+        <div class="col-md-8">
+            <div class="card discord-card mb-4">
+                <div class="card-header">
+                    Search YouTube (Songs, Playlists, Artists) or Add URL
+                </div>
+                <div class="card-body">
+                    <!-- Properly render the search form using WTForms -->
+
+                </div>
+            </div>
+    
+            {% if playlist_details %}
+                <!-- Playlist Header -->
+                <div class="card discord-card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                {% if playlist_details.thumbnail %}
+                                <img src="{{ playlist_details.thumbnail }}" class="img-fluid rounded" alt="{{ playlist_details.title }}">
+                                {% else %}
+                                <div class="placeholder-thumbnail bg-secondary rounded d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-music fa-3x text-light"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-10">
+                                <h4>{{ playlist_details.title }}</h4>
+                                <p class="text-muted mb-2">{{ playlist_details.channel }}</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-secondary me-3">
+                                        <i class="fas fa-list-ul me-1"></i> {{ total_results }} videos
+                                    </span>
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-book-open me-1"></i> Page {{ current_page }} of {{ total_pages }}
+                                    </span>
+                                </div>
+                                <div class="mt-3">
+                                    <a href="{{ url_for('search.youtube_search_route', guild_id=guild_id) }}" class="btn btn-sm btn-outline-secondary me-2">
+                                        <i class="fas fa-arrow-left me-1"></i> Back to Search
+                                    </a>
+                                    
+                                    <!-- Add the entire playlist to queue -->
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if playlist_videos %}
+                <!-- Playlist Videos -->
+                <div class="card discord-card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Playlist Videos (Page {{ current_page }} of {{ total_pages }})</span>
+                        <div>
+                            <button type="button" id="selectAllBtn" class="btn btn-sm btn-outline-light me-2">
+                                <i class="fas fa-check-square me-1"></i> Select All
+                            </button>
+                            <button type="button" id="addSelectedToQueueBtn" class="btn btn-sm btn-primary" disabled>
+                                <i class="fas fa-plus me-1"></i> Add Selected to Queue
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Add Multiple Form with Quart-Form -->
+                        
+                        
+                        <!-- Pagination Controls -->
+                        {% if total_pages > 1 %}
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div>
+                                <span class="text-muted">Page {{ current_page }} of {{ total_pages }}</span>
+                            </div>
+                            <nav aria-label="Playlist pagination">
+                                <ul class="pagination">
+                                    <!-- Previous page button -->
+                                    {% if has_prev_page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('search.youtube_search_route', guild_id=guild_id, playlist_id=selected_playlist_id, page=current_page-1, page_token=prev_page_token) }}">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link"><i class="fas fa-chevron-left"></i> Previous</span>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    <!-- Next page button -->
+                                    {% if has_next_page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('search.youtube_search_route', guild_id=guild_id, playlist_id=selected_playlist_id, page=current_page+1, page_token=next_page_token, prev_page_token=page_token) }}">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if playlist_results %}
+                <!-- Playlist Search Results -->
+                <div class="card discord-card mb-4">
+                    <div class="card-header">
+                        Playlist Results
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cols-1 row-cols-xl-2 g-3">
+                            {% for playlist in playlist_results %}
+                                <div class="col">
+                                    <div class="card discord-card h-100">
+                                        <div class="row g-0">
+                                            <div class="col-md-4">
+                                                <img src="{{ playlist.thumbnail }}" class="img-fluid rounded-start h-100" 
+                                                     style="object-fit: cover;" alt="{{ playlist.title }}">
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">{{ playlist.title }}</h6>
+                                                    <p class="card-text"><small class="text-muted">{{ playlist.channel }}</small></p>
+                                                    <a href="{{ url_for('search.youtube_search_route', guild_id=guild_id, playlist_id=playlist.id) }}" 
+                                                       class="btn discord-btn btn-sm {% if not user_voice_channel %}disabled{% endif %}">
+                                                        <i class="fas fa-list me-1"></i> View Playlist
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if search_results %}
+                <!-- Song Results -->
+                <div class="card discord-card">
+                    <div class="card-header">
+                        Song Results
+                    </div>
+                    <div class="card-body">
+                        <div class="row row-cols-1 row-cols-xl-2 g-3">
+                            {% for video in search_results %}
+                                <div class="col">
+                                    <div class="card discord-card h-100">
+                                        <div class="row g-0">
+                                            <div class="col-md-4">
+                                                <img src="{{ video.thumbnail }}" class="img-fluid rounded-start h-100" 
+                                                     style="object-fit: cover;" alt="{{ video.title }}">
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">{{ video.title }}</h6>
+                                                    <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
+                                                    <!-- Use data attributes for JS-based form submission -->
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

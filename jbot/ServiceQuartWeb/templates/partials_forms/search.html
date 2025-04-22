@@ -1,0 +1,50 @@
+<form method="GET" action="{{ url_for('search.youtube_search_route', guild_id=guild_id) }}">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label for="channelSelect" class="form-label">Voice Channel</label>
+            {% if user_voice_channel %}
+                <!-- Hidden field for channel_id -->
+                {{ search_form.channel_id(value=user_voice_channel.id) }}
+                <div class="form-control bg-dark text-light disabled">
+                    <i class="fas fa-volume-up me-2"></i>{{ user_voice_channel.name }} 
+                    <span class="badge bg-success ms-2">You are here</span>
+                </div>
+            {% else %}
+                <!-- When user is not in a voice channel, display a disabled message -->
+                <div class="form-control bg-dark text-light disabled">
+                    <i class="fas fa-info-circle me-2"></i>Join a voice channel in Discord first
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-9">
+            <label for="query" class="form-label">Search for Songs, Playlists, Artists or Enter URL</label>
+            <div class="input-group">
+                <input type="text" 
+                       class="form-control bg-dark text-light" 
+                       id="searchQuery" 
+                       name="query" 
+                       placeholder="Search for songs, playlists, artists or paste YouTube URL..." 
+                       required 
+                       {% if not user_voice_channel %}disabled{% endif %} 
+                       value="{{ request.args.get('query', '') }}" 
+                       autocomplete="off">
+                <button type="submit" class="btn discord-btn" {% if not user_voice_channel %}disabled{% endif %}>
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
+            </div>
+            {{ search_form.search_type(value=request.args.get('search_type', 'comprehensive'), type="hidden") }}
+            {{ search_form.channel_id(value=selected_channel_id, type="hidden") }}
+            
+            <!-- Add hidden fields for playlist context if available -->
+            {% if page_token %}
+            <input type="hidden" name="page_token" value="{{ page_token }}">
+            {% endif %}
+            {% if prev_page_token %}
+            <input type="hidden" name="prev_page_token" value="{{ prev_page_token }}">
+            {% endif %}
+            {% if current_page %}
+            <input type="hidden" name="page" value="{{ current_page }}">
+            {% endif %}
+        </div>
+    </div>
+</form>

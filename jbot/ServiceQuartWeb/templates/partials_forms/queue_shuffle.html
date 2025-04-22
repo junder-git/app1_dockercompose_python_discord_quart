@@ -1,0 +1,7 @@
+<form method="POST" action="{{ url_for('server.shuffle_queue_route', guild_id=guild_id) }}">
+    {{ shuffle_queue_form.csrf_token }}
+    {{ shuffle_queue_form.channel_id(value=selected_channel_id) }}
+    <button type="submit" class="btn btn-sm btn-outline-light" title="Shuffle Queue">
+        <i class="fas fa-random"></i> Shuffle
+    </button>
+</form>
