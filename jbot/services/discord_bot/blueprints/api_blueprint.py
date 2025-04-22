@@ -5,7 +5,7 @@ Handles API server setup and API endpoints
 from aiohttp import web
 import asyncio
 import types
-import json
+import discord
 
 def apply(bot):
     """
