@@ -4,68 +4,16 @@ Handles server-specific dashboard and controls
 """
 from quart import Blueprint, render_template, redirect, url_for, request, current_app
 from .helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from quart_wtf import QuartForm
-from wtforms import StringField, HiddenField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Optional
+from .forms_blueprint import MusicControlForm, SearchForm, ShuffleQueueForm, UrlForm, ClearQueueForm, AddMultipleForm
 
 # Create blueprint
 server_blueprint = Blueprint('server', __name__)
-
-# Create forms for server dashboard
-class MusicControlForm(QuartForm):
-    """Form for music control actions"""
-    command = SelectField('Command', 
-                          choices=[
-                              ('join', 'Join'), 
-                              ('skip', 'Skip'), 
-                              ('pause', 'Pause'), 
-                              ('resume', 'Resume'), 
-                              ('stop', 'Stop')
-                          ],
-                          validators=[DataRequired()])
-    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
-    submit = SubmitField('Execute')
-
-class ShuffleQueueForm(QuartForm):
-    """Form for shuffling the queue"""
-    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
-    submit = SubmitField('Shuffle Queue')
-
-class SearchForm(QuartForm):
-    """Form for searching YouTube"""
-    # Set form properties for GET method
-    class Meta:
-        method = "GET"
-        csrf = False
-    
-    query = StringField('Search', validators=[DataRequired()])
-    search_type = SelectField('Search Type', 
-                             choices=[
-                                 ('video', 'Videos'), 
-                                 ('playlist', 'Playlists'),
-                                 ('comprehensive', 'All Types')
-                             ],
-                             default='comprehensive')
-    channel_id = HiddenField('Channel ID', validators=[Optional()])
-    submit = SubmitField('Search')
-
-class UrlForm(QuartForm):
-    """Form for adding videos by URL"""
-    url = StringField('YouTube URL', validators=[DataRequired()])
-    channel_id = HiddenField('Channel ID', validators=[DataRequired()])
-    submit = SubmitField('Add to Queue')
-
-class ClearQueueForm(QuartForm):
-    """Form for clearing the queue"""
-    guild_id = HiddenField('Guild ID', validators=[DataRequired()])
-    submit = SubmitField('Clear Queue')
 
 @server_blueprint.route('/server/<guild_id>/dashboard')
 @login_required
 async def server_dashboard_route(guild_id):
     """Server dashboard for viewing voice channels and music status"""
     discord = current_app.discord
-    discord_client = current_app.discord_client
     
     # Get guild info
     user_guilds = await discord.fetch_guilds()
@@ -98,6 +46,7 @@ async def server_dashboard_route(guild_id):
     shuffle_queue_form = ShuffleQueueForm()
     url_form = UrlForm()
     clear_queue_form = ClearQueueForm()
+    add_multiple_form = AddMultipleForm()
     
     # Set default values    
     if selected_channel_id:
@@ -105,6 +54,7 @@ async def server_dashboard_route(guild_id):
         search_form.channel_id.data = selected_channel_id
         shuffle_queue_form.channel_id.data = selected_channel_id
         url_form.channel_id.data = selected_channel_id
+        add_multiple_form.channel_id.data = selected_channel_id
     
     clear_queue_form.guild_id.data = guild_id
     
@@ -129,7 +79,8 @@ async def server_dashboard_route(guild_id):
         search_form=search_form,
         shuffle_queue_form=shuffle_queue_form,
         url_form=url_form,
-        clear_queue_form=clear_queue_form
+        clear_queue_form=clear_queue_form,
+        add_multiple_form=add_multiple_form
     )
 
 @server_blueprint.route('/server/<guild_id>/music-control', methods=['POST'])

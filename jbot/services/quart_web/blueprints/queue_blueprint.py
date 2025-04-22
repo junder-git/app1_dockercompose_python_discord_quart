@@ -3,18 +3,10 @@ Queue Blueprint for Quart Web Service
 Handles queue management operations
 """
 from quart import Blueprint, redirect, url_for, flash, request, current_app
-from .helpers import login_required, get_user_voice_channel
+from .helpers import login_required
 
 # Create blueprint
 queue_blueprint = Blueprint('queue', __name__)
-
-class AddToQueueForm:
-    """Form for adding videos to the queue (used for validation)"""
-    pass
-
-class AddMultipleForm:
-    """Form for adding multiple videos to the queue (used for validation)"""
-    pass
 
 @queue_blueprint.route('/server/<guild_id>/queue/add', methods=['POST'])
 @login_required
