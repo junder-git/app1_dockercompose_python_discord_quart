@@ -1,20 +1,24 @@
-FROM python:3.9-slim
+FROM python
 
 # Set working directory
 WORKDIR /app
 
-# Install dependencies including FFmpeg for audio processing
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
     build-essential \
+    ffmpeg \
     libffi-dev \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY services/discord_bot/requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+
+# Upgrade pip and install tools
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the client libraries and service code
 COPY clients/ /app/clients/
