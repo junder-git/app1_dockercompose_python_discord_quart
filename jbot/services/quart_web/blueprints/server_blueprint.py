@@ -105,8 +105,8 @@ async def music_control_route(guild_id):
     channel_id = form.get('channel_id')
     command = form.get('command')
 
-    # Check if the bot is already connected to the voice channel
-    bot_state = await discord_client.get_bot_state(guild_id, channel_id)
+    # Get queue and bot state
+    queue_info, bot_state = await get_queue_and_bot_state(guild_id, channel_id)
     if not bot_state.get('is_connected'):
         return jsonify({"error": "Bot is not connected to the voice channel"}), 400
 

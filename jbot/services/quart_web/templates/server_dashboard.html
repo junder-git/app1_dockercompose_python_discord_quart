@@ -29,10 +29,10 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <button type="button" class="btn btn-sm btn-success" id="botJoinBtn">
-                            <i class="fas fa-sign-in-alt me-1"></i> Join Voice Channel
+                            <i class="fas fa-sign-in-alt me-1"></i> Join
                         </button>
                         <button type="button" class="btn btn-sm btn-danger" id="botLeaveBtn">
-                            <i class="fas fa-sign-out-alt me-1"></i> Leave Voice Channel
+                            <i class="fas fa-sign-out-alt me-1"></i> Leave
                         </button>
                     </div>
                     
@@ -167,13 +167,15 @@
                             <div class="col-md-9">
                                 <label for="query" class="form-label">Search for Songs, Playlists, Artists or Enter URL</label>
                                 <div class="input-group">
-                                    {{ search_form.query(class="form-control bg-dark text-light", 
-                                                         id="searchQuery", 
-                                                         placeholder="Search for songs, playlists, artists or paste YouTube URL...",
-                                                         required=True,
-                                                         disabled=not user_voice_channel,
-                                                         value=request.args.get('query', ''),
-                                                         autocomplete="off") }}
+                                    <input type="text" 
+                                           class="form-control bg-dark text-light" 
+                                           id="searchQuery" 
+                                           name="query" 
+                                           placeholder="Search for songs, playlists, artists or paste YouTube URL..." 
+                                           required 
+                                           {% if not user_voice_channel %}disabled{% endif %} 
+                                           value="{{ request.args.get('query', '') }}" 
+                                           autocomplete="off">
                                     <button type="submit" class="btn discord-btn" {% if not user_voice_channel %}disabled{% endif %}>
                                         <i class="fas fa-search me-1"></i> Search
                                     </button>
