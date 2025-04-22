@@ -211,9 +211,32 @@ async def on_message(self, message):
         # Check if the user is in a voice channel
         if message.author.voice and message.author.voice.channel:
             voice_channel = message.author.voice.channel
+            guild_id = str(message.guild.id)
+            channel_id = str(voice_channel.id)
             
-            # Create a response with UI controls (This needs a join_and_show_controls method)
-            await self.join_and_show_controls(message.channel, voice_channel, message.guild.id)
+            # First, check if we're already in this voice channel
+            queue_id = self.get_queue_id(guild_id, channel_id)
+            already_connected = False
+            
+            if queue_id in self.voice_connections and self.voice_connections[queue_id].is_connected():
+                already_connected = True
+            
+            # Delete any existing control panel in this text channel
+            if message.channel.id in self.control_panels:
+                try:
+                    existing_message = await message.channel.fetch_message(self.control_panels[message.channel.id])
+                    await existing_message.delete()
+                    self.control_panels.pop(message.channel.id, None)
+                except (discord.NotFound, discord.HTTPException):
+                    # Message may not exist anymore
+                    pass
+            
+            if already_connected:
+                # Bot is already in user's voice channel, just refresh the control panel
+                await self.send_control_panel(message.channel, voice_channel, guild_id)
+            else:
+                # Not connected, so join and show controls (existing behavior)
+                await self.join_and_show_controls(message.channel, voice_channel, message.guild.id)
         else:
             # Clear timer usually defined at module level, assume 10 seconds if not found
             cleartimer = getattr(self, 'cleartimer', 10)
