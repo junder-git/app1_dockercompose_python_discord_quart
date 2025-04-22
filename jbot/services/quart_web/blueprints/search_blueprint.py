@@ -9,7 +9,8 @@ from .forms_blueprint import (
     ShuffleQueueForm, 
     SearchForm, 
     UrlForm, 
-    ClearQueueForm
+    ClearQueueForm,
+    AddMultipleForm
 )
 
 # Create blueprint
