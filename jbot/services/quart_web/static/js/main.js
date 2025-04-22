@@ -9,6 +9,60 @@ function getCsrfToken() {
     return inputToken || '';
 }
 
+document.getElementById('botJoinBtn').addEventListener('click', async function () {
+    const channelId = document.querySelector('[data-channel-id]').dataset.channelId;
+    const guildId = document.querySelector('[data-guild-id]').dataset.guildId;
+
+    try {
+        const response = await fetch(`/server/${guildId}/bot/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channel_id: channelId }),
+        });
+
+        if (response.ok) {
+            showToast('✅ Bot joined the voice channel.');
+        } else {
+            showToast('❌ Failed to join the voice channel.');
+        }
+    } catch (error) {
+        console.error('Error joining voice channel:', error);
+        showToast('❌ An error occurred.');
+    }
+});
+
+document.getElementById('botLeaveBtn').addEventListener('click', async function () {
+    const guildId = document.querySelector('[data-guild-id]').dataset.guildId;
+
+    try {
+        const response = await fetch(`/server/${guildId}/bot/leave`, { method: 'POST' });
+
+        if (response.ok) {
+            showToast('✅ Bot left the voice channel and cleared the queue.');
+            await refreshQueue(guildId, null); // Clear the queue view
+        } else {
+            showToast('❌ Failed to leave the voice channel.');
+        }
+    } catch (error) {
+        console.error('Error leaving voice channel:', error);
+        showToast('❌ An error occurred.');
+    }
+});
+
+async function refreshQueue(guildId, channelId) {
+    try {
+        const response = await fetch(`/server/${guildId}/queue?channel_id=${channelId}`);
+        if (response.ok) {
+            const queueHtml = await response.text();
+            document.getElementById('queue-container').innerHTML = queueHtml;
+        } else {
+            console.error('Failed to refresh queue:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error refreshing queue:', error);
+    }
+}
+
 function initAddTrackButtons() {
     document.querySelectorAll('.add-track-btn').forEach(button => {
         button.addEventListener('click', async function () {
@@ -35,6 +89,7 @@ function initAddTrackButtons() {
 
                 if (response.ok) {
                     showToast(`✅ Added "${btn.dataset.videoTitle}" to the queue.`);
+                    await refreshQueue(btn.dataset.guildId, btn.dataset.channelId);
                 } else {
                     showToast('❌ Failed to add to the queue.');
                 }

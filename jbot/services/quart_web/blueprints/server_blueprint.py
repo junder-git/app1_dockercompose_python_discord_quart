@@ -83,6 +83,19 @@ async def server_dashboard_route(guild_id):
         add_multiple_form=add_multiple_form
     )
 
+@server_blueprint.route('/server/<guild_id>/queue', methods=['GET'])
+@login_required
+async def get_queue_partial(guild_id):
+    """Return the queue HTML for the selected channel."""
+    channel_id = request.args.get('channel_id')
+    queue_info, bot_state = await get_queue_and_bot_state(guild_id, channel_id)
+
+    return await render_template(
+        '_queue_partial.html',  # Create a partial template for the queue
+        queue=queue_info.get("queue", []),
+        current_track=queue_info.get("current_track"),
+    )
+
 @server_blueprint.route('/server/<guild_id>/music/control', methods=['POST'])
 @login_required
 async def music_control_route(guild_id):
@@ -135,3 +148,25 @@ async def shuffle_queue_route(guild_id):
     
     # Return to the dashboard
     return redirect(url_for('server.server_dashboard_route', guild_id=guild_id, channel_id=channel_id))
+
+@server_blueprint.route('/server/<guild_id>/bot/join', methods=['POST'])
+@login_required
+async def bot_join_route(guild_id):
+    """Make the bot join the voice channel."""
+    discord_client = current_app.discord_client
+    form = await request.form
+    channel_id = form.get('channel_id')
+
+    await discord_client.join_voice_channel(guild_id, channel_id)
+    return jsonify({"success": True})
+
+
+@server_blueprint.route('/server/<guild_id>/bot/leave', methods=['POST'])
+@login_required
+async def bot_leave_route(guild_id):
+    """Make the bot leave the voice channel and clear the queue."""
+    discord_client = current_app.discord_client
+
+    await discord_client.leave_voice_channel(guild_id)
+    await discord_client.clear_queue(guild_id)
+    return jsonify({"success": True})

@@ -26,6 +26,15 @@
             <div class="card discord-card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Music Queue</span>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <button type="button" class="btn btn-sm btn-success" id="botJoinBtn">
+                            <i class="fas fa-sign-in-alt me-1"></i> Join Voice Channel
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" id="botLeaveBtn">
+                            <i class="fas fa-sign-out-alt me-1"></i> Leave Voice Channel
+                        </button>
+                    </div>
                     
                     <!-- Music Control buttons using proper WTForms syntax -->
                     {% if selected_channel_id %}
@@ -33,28 +42,28 @@
                         <!-- Skip button -->
                         <form method="POST" action="{{ url_for('server.music_control_route', guild_id=guild_id) }}" style="display: inline;">
                             {{ music_control_form.csrf_token }}
-                            {{ music_control_form.channel_id(value=selected_channel_id) }}
-                            {{ music_control_form.command(value="skip", type="hidden") }}
+                            <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
+                            <input type="hidden" name="command" value="skip">
                             <button type="submit" class="btn btn-sm btn-outline-light" title="Skip">
                                 <i class="fas fa-step-forward"></i>
                             </button>
                         </form>
-                        
+                    
                         <!-- Pause button -->
                         <form method="POST" action="{{ url_for('server.music_control_route', guild_id=guild_id) }}" style="display: inline;">
                             {{ music_control_form.csrf_token }}
-                            {{ music_control_form.channel_id(value=selected_channel_id) }}
-                            {{ music_control_form.command(value="pause", type="hidden") }}
+                            <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
+                            <input type="hidden" name="command" value="pause">
                             <button type="submit" class="btn btn-sm btn-outline-light" title="Pause">
                                 <i class="fas fa-pause"></i>
                             </button>
                         </form>
-                        
+                    
                         <!-- Resume button -->
                         <form method="POST" action="{{ url_for('server.music_control_route', guild_id=guild_id) }}" style="display: inline;">
                             {{ music_control_form.csrf_token }}
-                            {{ music_control_form.channel_id(value=selected_channel_id) }}
-                            {{ music_control_form.command(value="resume", type="hidden") }}
+                            <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
+                            <input type="hidden" name="command" value="resume">
                             <button type="submit" class="btn btn-sm btn-outline-light" title="Resume">
                                 <i class="fas fa-play"></i>
                             </button>
@@ -159,11 +168,12 @@
                                 <label for="query" class="form-label">Search for Songs, Playlists, Artists or Enter URL</label>
                                 <div class="input-group">
                                     {{ search_form.query(class="form-control bg-dark text-light", 
-                                         id="searchQuery", 
-                                         placeholder="Search for songs, playlists, artists or paste YouTube URL...",
-                                         required=True,
-                                         disabled=not user_voice_channel,
-                                         value=request.args.get('query', '')) }}
+                                                         id="searchQuery", 
+                                                         placeholder="Search for songs, playlists, artists or paste YouTube URL...",
+                                                         required=True,
+                                                         disabled=not user_voice_channel,
+                                                         value=request.args.get('query', ''),
+                                                         autocomplete="off") }}
                                     <button type="submit" class="btn discord-btn" {% if not user_voice_channel %}disabled{% endif %}>
                                         <i class="fas fa-search me-1"></i> Search
                                     </button>
