@@ -3,13 +3,13 @@ Enhanced URL Modal for adding songs and playlists
 """
 import os
 import discord
-from jbot.ClientYoutube.__main__ import YouTubeClient
+import ClientYoutube
 
 # Get API key for services
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 
 # Initialize shared YouTube client
-youtube_service = YouTubeClient(api_key=YOUTUBE_API_KEY)
+youtube_service = ClientYoutube.ClientYoutube(api_key=YOUTUBE_API_KEY)
 
 class EnhancedURLModal(discord.ui.Modal):
     def __init__(self, bot, guild_id, channel_id):

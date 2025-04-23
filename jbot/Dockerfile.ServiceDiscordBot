@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirementsServiceDiscordBot.txt
 
 # Copy the client libraries and service code
-COPY ClientYoutube/ /app/ClientYoutube/
+COPY ClientYoutube.py /app/ClientYoutube.py
 COPY ServiceDiscordBot/ /app/ServiceDiscordBot/
 
 # Add clients to Python path

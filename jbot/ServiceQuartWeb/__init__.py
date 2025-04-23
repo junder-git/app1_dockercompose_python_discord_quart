@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Import clients
-from jbot.ClientDiscordBot.__main__ import DiscordAPIClient
-from jbot.ClientYoutube.__main__ import YouTubeClient
+import ClientDiscordBot
+import ClientYoutube
 
 # Import core app
 from .core.app import create_app

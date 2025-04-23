@@ -15,7 +15,7 @@ from ..blueprints import (
 )
 
 # Import clients
-from jbot.ClientYoutube.__main__ import YouTubeClient
+import ClientYoutube
 
 class JBotDiscord(commands.Bot):
     """Main Discord bot class"""
@@ -37,7 +37,7 @@ class JBotDiscord(commands.Bot):
         self.api_server = None
         
         # Initialize YouTube client
-        self.youtube_client = YouTubeClient(
+        self.youtube_client = ClientYoutube.ClientYoutube(
             api_key=os.environ.get('YOUTUBE_API_KEY')
         )
         

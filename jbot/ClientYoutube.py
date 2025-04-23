@@ -650,5 +650,3 @@ class ClientYoutube:
             except Exception as e:
                 print(f"Error processing {url}: {e}")
                 return None
-
-__all__ = ['ClientYouTube']

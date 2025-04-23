@@ -3,13 +3,13 @@ Search Modal for the Discord Bot
 """
 import os
 import discord
-import jbot.ClientYoutube.__main__ as __main__
+import ClientYoutube
 
 # Get API key for services
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 
 # Initialize shared services
-youtube_service = __main__(api_key=YOUTUBE_API_KEY)
+youtube_service = ClientYoutube.ClientYoutube(api_key=YOUTUBE_API_KEY)
 
 class SearchModal(discord.ui.Modal):
     def __init__(self, bot, guild_id, channel_id):

@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirementsServiceQuartWeb.txt
 
 # Copy the client libraries and service code
 COPY ServiceQuartWeb/ /app/ServiceQuartWeb/
-COPY ClientYoutube/ /app/ClientYoutube/
+COPY ClientYoutube.py /app/ClientYoutube.py
 COPY ClientDiscordBot/ /app/ClientDiscordBot/
 
 # Add clients to Python path
