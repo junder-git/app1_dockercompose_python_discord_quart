@@ -1,6 +1,5 @@
-<form method="POST" action="{{ url_for('server.clear_queue_route', guild_id=guild_id) }}">
-    {{ clear_queue_form.csrf_token }}
-    {{ clear_queue_form.guild_id(value=guild_id) }}
+<form method="POST" action="{{ url_for('queue.clear_queue_route', guild_id=guild_id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit" class="btn btn-sm btn-danger" title="Clear Queue">
         <i class="fas fa-trash me-1"></i> Clear Queue
     </button>
