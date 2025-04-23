@@ -92,4 +92,4 @@ docker-compose down -v
 -Give option to go back?   
 
 ##### Other notes/commands
-wget https://github.com/junder-git/app1_dockercompose_discordbot_quartmanager/archive/0a58666.zip
+xxx
