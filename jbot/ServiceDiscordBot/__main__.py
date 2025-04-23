@@ -1,5 +1,5 @@
 """
-Main entry point for the Discord Bot Service
+Discord Bot Service - Main entry point
 """
 import os
 import sys
@@ -7,11 +7,14 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-# Update path to find clients
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Explicitly add the parent directory to Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Import the bot class
-from ServiceDiscordBot.core.bot import JBotDiscord
+# Import clients
+from ClientYoutube import YouTubeClient
+
+# Import core bot class
+from .core.bot import JBotDiscord
 
 # Load environment variables
 load_dotenv()
@@ -26,9 +29,9 @@ API_PORT = int(os.environ.get('DISCORD_BOT_API_PORT', 5001))
 intents = discord.Intents.default()
 intents.message_content = True
 
-def main():
+def run():
     """
-    Main function to run the Discord bot
+    Function to run the bot
     """
     # Create the bot instance
     bot = JBotDiscord(command_prefix="jbot ", intents=intents)
@@ -39,5 +42,6 @@ def main():
     # Run the bot
     bot.run(DISCORD_BOT_TOKEN)
 
+# Ensure the bot can be run as a module
 if __name__ == "__main__":
-    main()
+    run()
