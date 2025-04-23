@@ -51,7 +51,7 @@ class DiscordAPIClient:
         if self.channel_id:
             data["channel_id"] = self.channel_id
         return await self.post_request(self, "clear_queue", data)
-    async def close_session(self):
+    async def close(self):
         if self.session:
             await self.session.close()
             return None
