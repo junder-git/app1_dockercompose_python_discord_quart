@@ -69,7 +69,7 @@ async def queue_command(ctx):
     # Don't delete the queue message - it's useful information
 
 
-@commands.command(name="clear", aliases=["clearqueue"])
+@commands.command(name="clearqueue", aliases=["cq"])
 async def clear_command(ctx):
     """
     Clear the music queue.

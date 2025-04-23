@@ -4,6 +4,7 @@ Search command for Discord bot
 import discord
 from discord.ext import commands
 import asyncio
+from .play import play_next
 
 @commands.command(name="search", aliases=["find"])
 async def search_command(ctx, *, query=None):
