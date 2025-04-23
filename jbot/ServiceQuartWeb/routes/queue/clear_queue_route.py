@@ -2,7 +2,7 @@
 Clear queue route
 """
 from quart import redirect, url_for, current_app
-from ...helpers import login_required
+from ...auth import login_required
 
 @login_required
 async def clear_queue_route(guild_id):

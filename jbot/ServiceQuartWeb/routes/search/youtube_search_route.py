@@ -3,7 +3,7 @@ Search Blueprint for Quart Web Service
 Handles YouTube search functionality
 """
 from quart import Blueprint, render_template, request, redirect, url_for, current_app
-from ...helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
+from ...auth import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
 from .forms_blueprint import (
     MusicControlForm, 
     ShuffleQueueForm, 

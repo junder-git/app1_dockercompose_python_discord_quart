@@ -2,7 +2,7 @@
 Bot join route - handles joining a voice channel
 """
 from quart import redirect, url_for, current_app, flash, request
-from ...helpers import login_required
+from ...auth import login_required
 
 @login_required
 async def bot_join_route(guild_id):

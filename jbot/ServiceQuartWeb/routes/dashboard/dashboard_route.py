@@ -3,7 +3,7 @@ Dashboard route for server selection
 """
 import traceback
 from quart import render_template, redirect, url_for, session, current_app
-from ...helpers import login_required
+from ...auth import login_required
 
 @login_required
 async def dashboard_route():

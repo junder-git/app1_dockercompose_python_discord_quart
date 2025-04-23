@@ -2,7 +2,7 @@
 Route for adding a track to the queue
 """
 from quart import redirect, url_for, flash, request, current_app
-from ...helpers import login_required
+from ...auth import login_required
 from ...validators.validate_csrf import validate_csrf
 from ...validators.validate_add_to_queue import validate_add_to_queue
 

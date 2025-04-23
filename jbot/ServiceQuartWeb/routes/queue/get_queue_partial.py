@@ -2,7 +2,8 @@
 Get queue partial HTML
 """
 from quart import render_template, request
-from ...helpers import login_required, get_queue_and_bot_state
+from ...auth import login_required#
+from ...services import get_queue_and_bot_state
 
 @login_required
 async def get_queue_partial(guild_id):
