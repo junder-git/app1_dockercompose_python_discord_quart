@@ -2,7 +2,7 @@
 Bot leave route - handles leaving a voice channel
 """
 from quart import redirect, url_for, current_app, flash, request
-from ...routes.auth import login_required
+from ...routes.auth.login_required import login_required
 
 @login_required
 async def bot_leave_route(guild_id):

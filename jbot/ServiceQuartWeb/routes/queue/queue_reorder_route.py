@@ -2,7 +2,7 @@
 Route for reordering tracks in the queue
 """
 from quart import redirect, url_for, flash, request, current_app
-from ...routes.auth import login_required
+from ...routes.auth.login_required import login_required
 from ...validators.validate_csrf import validate_csrf
 
 @login_required
