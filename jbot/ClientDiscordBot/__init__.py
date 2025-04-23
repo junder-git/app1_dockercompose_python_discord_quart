@@ -14,7 +14,7 @@ from .user import UserMethods
 # Create blueprint
 discord_api_client_bp = Blueprint('discord_api_client', __name__)
 
-class DiscordBotAPI(DiscordAPIBase, 
+class DiscordAPIClient(DiscordAPIBase, 
                     GuildMethods,
                     VoiceMethods, 
                     QueueMethods, 
@@ -31,4 +31,4 @@ class DiscordBotAPI(DiscordAPIBase,
 # Factory function to create API client instance
 def create_discord_bot_api(host, port, secret_key):
     """Create and return an instance of the Discord Bot API client"""
-    return DiscordBotAPI(host, port, secret_key)
+    return DiscordAPIClient(host, port, secret_key)
