@@ -1,5 +1,5 @@
 services:
-  jbot-discord-bot:
+  service-jbot-discord-bot:
     build:
       context: .
       dockerfile: Dockerfile.ServiceDiscordBot
@@ -16,7 +16,7 @@ services:
       - jbot-network
     volumes:
       - ./ServiceDiscordBot:/app/ServiceDiscordBot
-  jbot-quart-web:
+  service-jbot-quart-web:
     build:
       context: .
       dockerfile: Dockerfile.ServiceQuartWeb
