@@ -56,7 +56,7 @@ def create_app():
     
     # Initialize API clients
     app.discord_client = DiscordAPIClient(
-        host="discord-bot",  # Docker service name
+        host="jbot-discord-bot",  # Docker service name
         port=5001,  # Port exposed in Docker
         secret_key=SECRET_KEY
     )
