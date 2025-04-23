@@ -2,13 +2,9 @@
 Server dashboard route
 """
 from quart import render_template, redirect, url_for, request, current_app
-from ...helpers import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from ...forms.music_control_form import MusicControlForm
-from ...forms.search_form import SearchForm
-from ...forms.shuffle_queue_form import ShuffleQueueForm
-from ...forms.url_form import UrlForm
-from ...forms.clear_queue_form import ClearQueueForm
-from ...forms.add_multiple_form import AddMultipleForm
+from ...auth.login_required import login_required
+from ...services import get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
+from ...validators import validate_guild_id, validate_channel_id, generate_csrf_token
 
 @login_required
 async def server_dashboard_route(guild_id):
@@ -21,6 +17,10 @@ async def server_dashboard_route(guild_id):
     Returns:
         Response: Rendered server dashboard or redirect to main dashboard
     """
+    # Validate guild ID
+    if not validate_guild_id(guild_id):
+        return redirect(url_for('dashboard.dashboard_route'))
+    
     discord = current_app.discord
     
     # Get guild info
@@ -45,26 +45,15 @@ async def server_dashboard_route(guild_id):
     if not selected_channel_id and user_voice_channel:
         selected_channel_id = user_voice_channel['id']
     
+    # Validate selected channel ID 
+    if selected_channel_id and not validate_channel_id(selected_channel_id, voice_channels):
+        selected_channel_id = None
+    
     # Get queue for selected channel (if applicable)
     queue_info, bot_state = await get_queue_and_bot_state(guild_id, selected_channel_id)
     
-    # Initialize all forms
-    music_control_form = MusicControlForm()
-    search_form = SearchForm()
-    shuffle_queue_form = ShuffleQueueForm()
-    url_form = UrlForm()
-    clear_queue_form = ClearQueueForm()
-    add_multiple_form = AddMultipleForm()
-    
-    # Set default values    
-    if selected_channel_id:
-        music_control_form.channel_id.data = selected_channel_id
-        search_form.channel_id.data = selected_channel_id
-        shuffle_queue_form.channel_id.data = selected_channel_id
-        url_form.channel_id.data = selected_channel_id
-        add_multiple_form.channel_id.data = selected_channel_id
-    
-    clear_queue_form.guild_id.data = guild_id
+    # Generate CSRF token
+    csrf_token = generate_csrf_token()
     
     # Safe attribute access
     guild_icon = getattr(guild_info, 'icon', None)
@@ -82,11 +71,5 @@ async def server_dashboard_route(guild_id):
         queue=queue_info.get("queue", []),
         current_track=queue_info.get("current_track"),
         bot_state=bot_state,
-        # Forms
-        music_control_form=music_control_form,
-        search_form=search_form,
-        shuffle_queue_form=shuffle_queue_form,
-        url_form=url_form,
-        clear_queue_form=clear_queue_form,
-        add_multiple_form=add_multiple_form
+        csrf_token=csrf_token
     )
