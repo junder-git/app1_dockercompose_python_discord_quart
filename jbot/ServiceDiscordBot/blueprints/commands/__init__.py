@@ -37,6 +37,7 @@ def apply(bot):
     bot.add_command(shuffle_command)
     bot.add_command(move_command)
     bot.add_command(search_command)
+    bot.play_next = types.MethodType(play_next, bot)
     bot.get_voice_client = types.MethodType(get_voice_client, bot)
     bot.follow_to_voice_channel = types.MethodType(follow_to_voice_channel, bot)
     bot.check_same_voice_channel = types.MethodType(check_same_voice_channel, bot)
