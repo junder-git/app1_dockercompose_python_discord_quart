@@ -2,22 +2,11 @@
 Search Blueprint for Quart Web Service
 Handles YouTube search functionality
 """
-from quart import Blueprint, render_template, request, redirect, url_for, current_app
-from ...routes.auth import login_required, get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from .forms_blueprint import (
-    MusicControlForm, 
-    ShuffleQueueForm, 
-    SearchForm, 
-    UrlForm, 
-    ClearQueueForm,
-    AddMultipleForm
-)
+from quart import render_template, request, redirect, url_for, current_app
+from ...routes.auth.login_required import login_required
+from ...services import get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
+from ...validators import validate_search_params, validate_csrf, generate_csrf_token
 
-# Create blueprint
-search_blueprint = Blueprint('search', __name__)
-
-@search_blueprint.route('/server/<guild_id>/search', methods=['GET'])
-@login_required
 async def youtube_search_route(guild_id):
     """Search YouTube for videos or display playlist details"""
     discord = current_app.discord
@@ -40,28 +29,11 @@ async def youtube_search_route(guild_id):
     guild_icon = getattr(guild_info, 'icon', None)
     guild_name = getattr(guild_info, 'name', f"Server {guild_id}")
     
-    # Initialize forms with default values where needed
-    selected_channel_id = None
-    if user_voice_channel:
-        selected_channel_id = user_voice_channel['id']
+    # Initialize context
+    selected_channel_id = user_voice_channel['id'] if user_voice_channel else None
     
-    # Create form instances with appropriate data
-    search_form = SearchForm()
-    music_control_form = MusicControlForm()
-    shuffle_queue_form = ShuffleQueueForm()
-    url_form = UrlForm()
-    clear_queue_form = ClearQueueForm()
-    add_multiple_form = AddMultipleForm()  # Add the new form
-    
-    # Set form values based on user's voice channel 
-    if selected_channel_id:
-        music_control_form.channel_id.data = selected_channel_id
-        shuffle_queue_form.channel_id.data = selected_channel_id
-        search_form.channel_id.data = selected_channel_id
-        url_form.channel_id.data = selected_channel_id
-        add_multiple_form.channel_id.data = selected_channel_id  # Set channel_id for the multiple form
-    
-    clear_queue_form.guild_id.data = guild_id
+    # Generate CSRF token
+    csrf_token = generate_csrf_token()
     
     # Default values
     search_results = []
@@ -81,9 +53,6 @@ async def youtube_search_route(guild_id):
     # Check if this is a playlist view request
     selected_playlist_id = request.args.get('playlist_id')
     if selected_playlist_id:
-        # Set playlist_id for the add_multiple_form
-        add_multiple_form.playlist_id.data = selected_playlist_id
-        
         # Get page token for pagination
         page_token = request.args.get('page_token')
         prev_page_token = request.args.get('prev_page_token')
@@ -104,47 +73,45 @@ async def youtube_search_route(guild_id):
 
     # Handle search query from GET parameters
     elif request.args.get('query'):
-        # Process the search form
+        # Process the search parameters
         query = request.args.get('query', '')
         search_type = request.args.get('search_type', 'comprehensive')
-        channel_id = request.args.get('channel_id', '')
+        channel_id = request.args.get('channel_id', selected_channel_id or '')
         
-        # Set search form values for the template
-        search_form.query.data = query
-        search_form.search_type.data = search_type
-        search_form.channel_id.data = channel_id
+        # Validate search parameters
+        search_errors = await validate_search_params({
+            'query': query, 
+            'channel_id': channel_id
+        })
         
-        # Check if query looks like a URL
-        if 'youtube.com/' in query or 'youtu.be/' in query:
-            # Process URL directly
-            url_form.url.data = query
-            url_form.channel_id.data = channel_id
-            
-            # Check if it's a playlist URL
-            playlist_id = youtube_client.extract_playlist_id(query)
-            if playlist_id:
-                return redirect(url_for('search.youtube_search_route', 
-                                      guild_id=guild_id, 
-                                      playlist_id=playlist_id))
-            
-            # If it's a video URL, extract ID and add to search results
-            video_id = youtube_client.extract_video_id(query)
-            if video_id:
-                video_details = await youtube_client.get_video_details(video_id)
-                search_results = [{
-                    'id': video_id,
-                    'title': video_details.get('title', 'Unknown Video'),
-                    'thumbnail': video_details.get('thumbnail', ''),
-                    'channel': video_details.get('channel', 'Unknown Channel'),
-                    'duration': video_details.get('duration', 0)
-                }]
-        else:
-            # Regular search
-            if search_type in ['video', 'comprehensive']:
-                search_results = await youtube_client.search_videos(query)
-            
-            if search_type in ['playlist', 'comprehensive']:
-                playlist_results = await youtube_client.search_playlists(query)
+        if not search_errors:
+            # Check if query looks like a URL
+            if 'youtube.com/' in query or 'youtu.be/' in query:
+                # Check if it's a playlist URL
+                playlist_id = youtube_client.extract_playlist_id(query)
+                if playlist_id:
+                    return redirect(url_for('search.youtube_search_route', 
+                                          guild_id=guild_id, 
+                                          playlist_id=playlist_id))
+                
+                # If it's a video URL, extract ID and add to search results
+                video_id = youtube_client.extract_video_id(query)
+                if video_id:
+                    video_details = await youtube_client.get_video_details(video_id)
+                    search_results = [{
+                        'id': video_id,
+                        'title': video_details.get('title', 'Unknown Video'),
+                        'thumbnail': video_details.get('thumbnail', ''),
+                        'channel': video_details.get('channel', 'Unknown Channel'),
+                        'duration': video_details.get('duration', 0)
+                    }]
+            else:
+                # Regular search
+                if search_type in ['video', 'comprehensive']:
+                    search_results = await youtube_client.search_videos(query)
+                
+                if search_type in ['playlist', 'comprehensive']:
+                    playlist_results = await youtube_client.search_playlists(query)
     
     # Get queue for selected channel
     queue_info, bot_state = await get_queue_and_bot_state(guild_id, selected_channel_id)
@@ -174,11 +141,5 @@ async def youtube_search_route(guild_id):
         queue=queue_info.get("queue", []),
         current_track=queue_info.get("current_track"),
         bot_state=bot_state,
-        # Forms
-        search_form=search_form,
-        music_control_form=music_control_form,
-        shuffle_queue_form=shuffle_queue_form,
-        url_form=url_form,
-        clear_queue_form=clear_queue_form,
-        add_multiple_form=add_multiple_form
+        csrf_token=csrf_token
     )

@@ -11,4 +11,4 @@ search_blueprint = Blueprint('search', __name__)
 from .youtube_search_route import youtube_search_route
 
 # Register routes with the blueprint
-search_blueprint.add_url_rule('/server/<guild_id>/search', 'youtube_search_route', youtube_search_route)
+search_blueprint.add_url_rule('/server/<guild_id>/search', 'youtube_search_route', youtube_search_route, methods=['GET'])
