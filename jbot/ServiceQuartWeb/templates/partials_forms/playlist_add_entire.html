@@ -1,5 +1,5 @@
 <form method="POST" action="{{ url_for('queue.queue_add_entire_playlist_route', guild_id=guild_id) }}" class="d-inline">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
     <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
     <input type="hidden" name="playlist_title" value="{{ playlist_details.title }}">
