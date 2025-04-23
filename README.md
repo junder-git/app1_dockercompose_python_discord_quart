@@ -90,3 +90,6 @@ docker-compose down -v
 -Commmand to add first search result of a qry to the playlist  
 -Cache last 2 songs or so?  
 -Give option to go back?   
+
+##### Other notes/commands
+wget https://github.com/junder-git/app1_dockercompose_discordbot_quartmanager/archive/0a58666.zip
