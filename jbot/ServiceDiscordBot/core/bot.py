@@ -11,9 +11,6 @@ from ..blueprints import (
     api_blueprint,
     commands_blueprint,
     events_blueprint,
-    queue_blueprint,
-    playback_blueprint,
-    voice_blueprint,
     ui_blueprint
 )
 
@@ -52,7 +49,4 @@ class JBotDiscord(commands.Bot):
         api_blueprint(self)
         commands_blueprint(self)
         events_blueprint(self)
-        queue_blueprint(self)
-        playback_blueprint(self)
-        voice_blueprint(self)
         ui_blueprint(self)
