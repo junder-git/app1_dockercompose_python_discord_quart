@@ -2,7 +2,7 @@
 Server dashboard route
 """
 from quart import render_template, redirect, url_for, request, current_app
-from ...auth.login_required import login_required
+from ...routes.auth.login_required import login_required
 from ...services import get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
 from ...validators import validate_guild_id, validate_channel_id, generate_csrf_token
 

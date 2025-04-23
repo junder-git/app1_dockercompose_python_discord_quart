@@ -2,7 +2,7 @@
 Route for adding videos by URL
 """
 from quart import redirect, url_for, flash, request, current_app
-from ...auth import login_required
+from ...routes.auth import login_required
 from ...validators.validate_csrf import validate_csrf
 
 @login_required

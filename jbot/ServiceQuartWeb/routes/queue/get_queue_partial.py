@@ -2,7 +2,7 @@
 Get queue partial HTML
 """
 from quart import render_template, request
-from ...auth import login_required#
+from ...routes.auth import login_required#
 from ...services import get_queue_and_bot_state
 
 @login_required
