@@ -5,12 +5,14 @@ from .auth import auth_blueprint
 from .dashboard import dashboard_blueprint
 from .search import search_blueprint
 from .queue import queue_blueprint
+from .server import server_blueprint
 
 __all__ = [
     'auth_blueprint',
     'dashboard_blueprint',
     'search_blueprint',
-    'queue_blueprint'
+    'queue_blueprint',
+    'server_blueprint'
 ]
 
 def register_blueprints(app):
@@ -19,3 +21,4 @@ def register_blueprints(app):
     app.register_blueprint(dashboard_blueprint)
     app.register_blueprint(search_blueprint)
     app.register_blueprint(queue_blueprint)
+    app.register_blueprint(server_blueprint)

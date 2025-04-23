@@ -23,4 +23,4 @@ async def logout_route():
     session.clear()
     
     # Redirect to the home page
-    return redirect(url_for("index.index_route"))
+    return redirect(url_for("dashboard.index_route"))

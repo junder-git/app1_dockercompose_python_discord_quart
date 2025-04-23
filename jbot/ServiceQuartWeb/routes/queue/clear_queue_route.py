@@ -21,4 +21,4 @@ async def clear_queue_route(guild_id):
     await discord_client.clear_queue(guild_id)
     
     # Return to the dashboard
-    return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
+    return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))

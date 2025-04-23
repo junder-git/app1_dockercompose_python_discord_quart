@@ -46,4 +46,4 @@ async def callback_route():
         traceback.print_exc()
         # Clear the session on error to prevent loops
         session.clear()
-        return redirect(url_for("index.index_route"))
+        return redirect(url_for("dashboard.index_route"))
