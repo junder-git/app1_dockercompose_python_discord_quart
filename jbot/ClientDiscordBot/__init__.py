@@ -22,7 +22,7 @@ class DiscordAPIClient:
             video_id = self.video.get('id')
             video_title = self.video.get('title', 'Unknown Video')
 
-            result = await self.add_to_queue(self, video_id, video_title)
+            result = await self.add_to_queue(video_id, video_title)
 
             if result.get('success'):
                 added_count += 1
@@ -50,7 +50,7 @@ class DiscordAPIClient:
         data = {"guild_id": self.guild_id}
         if self.channel_id:
             data["channel_id"] = self.channel_id
-        return await self.post_request(self, "clear_queue", data)
+        return await self.post_request("clear_queue", data)
     async def close(self):
         if self.session:
             await self.session.close()
@@ -61,10 +61,10 @@ class DiscordAPIClient:
             return aiohttp.ClientSession()
         return self.session
     async def get_guild_count(self):
-        result = await self.get_request(self, "guild_count")
+        result = await self.get_request("guild_count")
         return result.get("count", 0)   
     async def get_guild_ids(self):
-        result = await self.get_request(self, "guild_ids")
+        result = await self.get_request("guild_ids")
         return result.get("guild_ids", []) 
     def default_queue_response():
         return {
@@ -80,7 +80,7 @@ class DiscordAPIClient:
         if self.channel_id:
             params["channel_id"] = self.channel_id
 
-        result = await self.get_request(self, "get_queue", params, self.default_queue_response())
+        result = await self.get_request("get_queue", params, self.default_queue_response())
 
         if "queue" not in result:
             result["queue"] = []
@@ -96,7 +96,7 @@ class DiscordAPIClient:
         return result
     async def get_request(self, endpoint, params=None, default_response=None):
         try:
-            self.session = await self.ensure_session(self.session)
+            self.session = await self.ensure_session()
             headers = {"Authorization": f"Bearer {self.secret_key}"}
             url = f"{self.base_url}/{endpoint}"
             async with self.session.get(url, headers=headers, params=params) as response:
@@ -109,7 +109,7 @@ class DiscordAPIClient:
             return default_response or {"success": False, "error": str(e)}
     async def post_request(self, endpoint, data):
         try:
-            self.session = await self.ensure_session(self.session)
+            self.session = await self.ensure_session()
             headers = {"Authorization": f"Bearer {self.secret_key}"}
             url = f"{self.base_url}/{endpoint}"
             async with self.session.post(url, headers=headers, json=data) as response:
@@ -121,7 +121,7 @@ class DiscordAPIClient:
             print(f"Error calling bot API ({endpoint}): {e}")
             return {"success": False, "error": str(e)}
     async def public_get(self, endpoint, params=None):
-        self.session = await self.ensure_session(self.session)
+        self.session = await self.ensure_session()
         headers = {"Authorization": f"Bearer {self.secret_key}"}
 
         if '?' in endpoint and params:
@@ -135,7 +135,7 @@ class DiscordAPIClient:
 
         return await self.session.get(url, headers=headers)
     async def public_post(self, endpoint, data=None):
-        self.session = await self.ensure_session(self.session)
+        self.session = await self.ensure_session()
         headers = {"Authorization": f"Bearer {self.secret_key}"}
         url = f"{self.base_url}{endpoint}"
         return await self.session.post(url, headers=headers, json=data)
