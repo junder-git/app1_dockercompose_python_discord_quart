@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import clients
-import ClientYoutube
+import jbot.ClientYoutube.__main__ as __main__
 
 # Import core bot class
 from .core.bot import JBotDiscord

@@ -15,7 +15,7 @@ from ..blueprints import (
 )
 
 # Import clients
-from ClientYoutube import YouTubeClient
+from jbot.ClientYoutube.__main__ import YouTubeClient
 
 class JBotDiscord(commands.Bot):
     """Main Discord bot class"""

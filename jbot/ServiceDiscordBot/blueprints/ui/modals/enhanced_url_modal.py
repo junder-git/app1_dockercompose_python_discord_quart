@@ -3,7 +3,7 @@ Enhanced URL Modal for adding songs and playlists
 """
 import os
 import discord
-from ClientYoutube import YouTubeClient
+from jbot.ClientYoutube.__main__ import YouTubeClient
 
 # Get API key for services
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
