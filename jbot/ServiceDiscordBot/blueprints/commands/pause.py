@@ -35,19 +35,46 @@ async def pause_command(ctx):
         await message.delete(delay=ctx.bot.cleartimer)
         return
     
-    # If already paused
-    if voice_client.is_paused():
-        message = await ctx.send("Playback is already paused.")
-        await message.delete(delay=ctx.bot.cleartimer)
-        return
-        
-    # Pause playback
-    voice_client.pause()
-    
-    # Update control panels
-    channel_id = str(voice_client.channel.id)
-    await ctx.bot.update_control_panel(str(ctx.guild.id), channel_id)
+    # Use toggle_playback method
+    result = await toggle_playback(ctx.bot, str(ctx.guild.id), str(ctx.author.voice.channel.id))
     
     # Send response
-    message = await ctx.send("⏸️ Paused playback")
+    message = await ctx.send(result["message"])
     await message.delete(delay=ctx.bot.cleartimer)
+
+
+async def toggle_playback(bot, guild_id, channel_id):
+    """
+    Toggle playback between pause and resume
+    
+    Args:
+        bot: The Discord bot instance
+        guild_id (str): Discord guild ID
+        channel_id (str): Discord channel ID
+        
+    Returns:
+        dict: Result containing success status and message
+    """
+    voice_client, queue_id = await bot.get_voice_client(guild_id, channel_id)
+    
+    if not voice_client:
+        return {"success": False, "message": "Not connected to a voice channel"}
+    
+    if voice_client.is_playing():
+        # Pause if currently playing
+        voice_client.pause()
+        
+        # Update control panels
+        await bot.update_control_panel(guild_id, channel_id)
+        
+        return {"success": True, "message": "⏸️ Paused playback"}
+    elif voice_client.is_paused():
+        # Resume if currently paused
+        voice_client.resume()
+        
+        # Update control panels
+        await bot.update_control_panel(guild_id, channel_id)
+        
+        return {"success": True, "message": "▶️ Resumed playback"}
+    else:
+        return {"success": False, "message": "Nothing is playing to pause or resume"}
