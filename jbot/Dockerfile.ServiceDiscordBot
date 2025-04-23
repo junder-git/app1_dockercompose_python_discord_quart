@@ -28,4 +28,4 @@ COPY ServiceDiscordBot/ /app/ServiceDiscordBot/
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 # Run the service
-CMD ["python", "-u", "ServiceDiscordBot/ServiceDiscordBot.py"]
+CMD ["python", "-u", "ServiceDiscordBot"]

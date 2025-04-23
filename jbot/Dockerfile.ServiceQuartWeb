@@ -29,4 +29,4 @@ ENV PYTHONPATH="/app:${PYTHONPATH}"
 EXPOSE 80
 
 # Run the service using Hypercorn
-CMD ["hypercorn", "ServiceQuartWeb.ServiceQuartWeb:app", "--bind", "0.0.0.0:80"]
+CMD ["hypercorn", "ServiceQuartWeb:app", "--bind", "0.0.0.0:80"]
