@@ -8,8 +8,8 @@ from quart_wtf import CSRFProtect
 from dotenv import load_dotenv
 
 # Import clients
-from clients.ClientDiscord import DiscordAPIClient
-from clients.ClientYoutube import YouTubeClient
+from ClientDiscordBot import DiscordAPIClient
+from ClientYoutube import YouTubeClient
 
 def create_app():
     """Create and configure the Quart application"""
