@@ -8,8 +8,8 @@ from quart_wtf import CSRFProtect
 from dotenv import load_dotenv
 
 # Import clients
-from ClientDiscordBot import DiscordAPIClient
-from ClientYoutube import YouTubeClient
+import ClientDiscordBot
+import ClientYoutube
 
 def create_app():
     """Create and configure the Quart application"""
@@ -55,13 +55,13 @@ def create_app():
     app.discord = discord
     
     # Initialize API clients
-    app.discord_client = DiscordAPIClient(
+    app.discord_client = ClientDiscordBot(
         host="jbot-discord-bot",  # Docker service name
         port=5001,  # Port exposed in Docker
         secret_key=SECRET_KEY
     )
     
-    app.youtube_client = YouTubeClient(api_key=YOUTUBE_API_KEY)
+    app.youtube_client = ClientYoutube(api_key=YOUTUBE_API_KEY)
     
     # Register all route blueprints
     from ..routes import register_blueprints

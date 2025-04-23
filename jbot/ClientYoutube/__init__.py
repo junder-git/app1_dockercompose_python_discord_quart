@@ -10,7 +10,7 @@ import aiohttp
 from datetime import datetime, timedelta
 import yt_dlp
 
-class YouTubeClient:
+class ClientYoutube:
     """Client for YouTube API interactions"""
     
     def __init__(self, api_key=None):
@@ -651,4 +651,4 @@ class YouTubeClient:
                 print(f"Error processing {url}: {e}")
                 return None
 
-__all__ = ['YouTubeClient']
+__all__ = ['ClientYouTube']
