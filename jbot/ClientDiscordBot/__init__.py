@@ -94,15 +94,10 @@ class ClientDiscordBotBase:
             await self.session.close()
             self.session = None
 
-class ClientDiscordBot(ClientDiscordBotBase, 
-                    GuildMethods,
-                    VoiceMethods, 
-                    QueueMethods, 
-                    PlaybackMethods,
-                    UserMethods):
+class ClientDiscordBot(ClientDiscordBotBase, GuildMethods, VoiceMethods, QueueMethods, PlaybackMethods, UserMethods):
     pass
 
 # Factory function to create API client instance
 def create_discord_bot_api(host, port, secret_key):
     """Create and return an instance of the Discord Bot API client"""
-    return ClientDiscordBotBase(host, port, secret_key)
+    return ClientDiscordBot(host, port, secret_key)
