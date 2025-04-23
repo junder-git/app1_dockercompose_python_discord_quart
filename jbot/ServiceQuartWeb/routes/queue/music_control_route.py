@@ -2,8 +2,10 @@
 Music control route for pause, play, skip commands
 """
 from quart import request, jsonify, current_app
-from ...routes.auth import login_required, get_queue_and_bot_state
+from ...routes.auth.login_required import login_required
+from ...services import get_queue_and_bot_state
 
+#
 @login_required
 async def music_control_route(guild_id):
     """

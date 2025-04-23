@@ -15,7 +15,6 @@ csrf = CSRFProtect()
 from .login_route import login_route
 from .logout_route import logout_route
 from .callback_route import callback_route
-from .login_required import login_required
 
 # Register routes with the blueprint
 auth_blueprint.add_url_rule("/login", "login_route", login_route)
