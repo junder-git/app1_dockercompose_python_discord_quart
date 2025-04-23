@@ -36,71 +36,27 @@
                         </button>
                     </div>
                     
-                    <!-- Music Control buttons using pure html syntax -->
+                    <!-- Music Control buttons using form partials -->
                     {% if selected_channel_id %}
                     <div class="btn-group">
                         <!-- Skip button -->
-                        
+                        {% include 'partials_forms/skip.html' %}
                     
                         <!-- Pause button -->
-
+                        {% include 'partials_forms/pause.html' %}
                     
                         <!-- Resume button -->
-
+                        {% include 'partials_forms/resume.html' %}
                     </div>
                     {% endif %}
                 </div>
                 <div class="card-body" id="queue-container">
-                    <!-- Current Track Section -->
-                    <div id="current-track-container">
-                        {% if current_track %}
-                            <div class="current-track mb-3 p-2 bg-dark rounded">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-2">
-                                        <i class="fas fa-play-circle text-success"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Now Playing:</h6>
-                                        <p class="mb-0">{{ current_track.title }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Queue List Section -->
-                    {% if not queue %}
-                        <p class="text-muted">The queue is currently empty. Search for music to add to the queue.</p>
-                    {% else %}
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">Coming Up Next:</h6>
-                            
-                            <!-- Shuffle Queue Form -->
-
-                        </div>
-                        <!-- Draggable queue list -->
-                        <h6 class="mb-0">Click and drag to re-order:</h6>
-                        <div class="list-group" id="queue-list">
-                            {% for item in queue %}
-                                <div class="list-group-item bg-dark text-light border-secondary queue-item" 
-                                     data-id="{{ item.id }}" draggable="true">
-                                    <div class="d-flex w-100 justify-content-between align-items-start">
-                                        <div>
-                                            <div class="drag-handle me-2 d-inline-block">
-                                                <i class="fas fa-grip-vertical text-muted"></i>
-                                            </div>
-                                            <h6 class="mb-1 d-inline-block">{{ item.title }}</h6>
-                                        </div>
-                                        <span class="badge bg-secondary">{{ loop.index }}</span>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    <!-- Include queue partial -->
+                    {% include 'partials_other/_queue_partial.html' %}
                 </div>
                 <div class="card-footer">
                     <!-- Clear Queue Form -->
-
+                    {% include 'partials_forms/queue_clear.html' %}
                 </div>
             </div>
         </div>
@@ -112,8 +68,8 @@
                     Search YouTube (Songs, Playlists, Artists) or Add URL
                 </div>
                 <div class="card-body">
-                    <!-- Properly render the search form using WTForms -->
-
+                    <!-- Search form -->
+                    {% include 'partials_forms/search.html' %}
                 </div>
             </div>
     
@@ -148,7 +104,7 @@
                                     </a>
                                     
                                     <!-- Add the entire playlist to queue -->
-
+                                    {% include 'partials_forms/playlist_add_entire.html' %}
                                 </div>
                             </div>
                         </div>
@@ -172,7 +128,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Add Multiple Form with Quart-Form -->
-                        
+                        {% include 'partials_forms/playlist_add_multiple.html' %}
                         
                         <!-- Pagination Controls -->
                         {% if total_pages > 1 %}
@@ -270,8 +226,8 @@
                                                 <div class="card-body">
                                                     <h6 class="card-title">{{ video.title }}</h6>
                                                     <p class="card-text"><small class="text-muted">{{ video.channel }}</small></p>
-                                                    <!-- Use data attributes for JS-based form submission -->
-
+                                                    <!-- Add to Queue button -->
+                                                    {% include 'partials_forms/button_add_to_queue.html' %}
                                                 </div>
                                             </div>
                                         </div>
@@ -285,4 +241,12 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Your existing JavaScript
+    });
+</script>
 {% endblock %}

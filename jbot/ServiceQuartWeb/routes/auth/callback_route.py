@@ -1,55 +1,16 @@
 """
-Auth Blueprint for Quart Web Service
-Handles authentication-related routes
+Callback route for Discord OAuth2
 """
-from quart import Blueprint, session, current_app, redirect, url_for
 import traceback
-from quart_wtf import CSRFProtect
+from quart import session, current_app, redirect, url_for
 
-# Create blueprint
-auth_blueprint = Blueprint('auth', __name__)
-
-# Get CSRF protection
-csrf = CSRFProtect()
-
-@auth_blueprint.route("/login")
-async def login_route():
-    """Login route - redirects to Discord OAuth"""
-    # Import discord from current app
-    discord = current_app.discord
-    
-    # Clear any existing session data to ensure a fresh login
-    session.clear()
-    
-    # Make sure we're requesting all the scopes we need
-    scope = ["identify", "guilds"]
-    authorization_url = await discord.create_session(scope=scope)
-    
-    return authorization_url
-
-@auth_blueprint.route("/logout")
-async def logout_route():
-    """Logout route - clears session and revokes Discord token"""
-    discord = current_app.discord
-    
-    # Revoke the token with Discord if possible
-    if discord.authorized:
-        try:
-            await discord.revoke()
-        except:
-            pass
-    
-    # Clear the session
-    session.clear()
-    
-    # Redirect to the home page
-    return redirect(url_for("index.index_route"))
-
-# The callback route is exempt from CSRF protection
-@auth_blueprint.route("/callback")
-@csrf.exempt
 async def callback_route():
-    """Callback route for Discord OAuth"""
+    """
+    Callback route for Discord OAuth
+    
+    Returns:
+        Response: Redirect to dashboard or home page
+    """
     discord = current_app.discord
     
     try:

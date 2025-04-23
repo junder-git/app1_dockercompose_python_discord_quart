@@ -1,18 +1,18 @@
 """
-Dashboard Blueprint for Quart Web Service
-Handles the main dashboard for server selection
+Dashboard route for server selection
 """
-from quart import Blueprint, render_template, redirect, url_for, session, current_app
 import traceback
+from quart import render_template, redirect, url_for, session, current_app
 from ...helpers import login_required
 
-# Create blueprint
-dashboard_blueprint = Blueprint('dashboard', __name__)
-
-@dashboard_blueprint.route("/dashboard")
 @login_required
 async def dashboard_route():
-    """Main dashboard page listing servers"""
+    """
+    Main dashboard page listing servers
+    
+    Returns:
+        Response: Rendered dashboard template or redirect to login
+    """
     try:
         # Import from current app context
         discord = current_app.discord
@@ -68,7 +68,7 @@ async def dashboard_route():
         }
         
         return await render_template(
-            "dashboard.html", 
+            "servers.html", 
             guild_count=guild_count, 
             matching=same_guilds, 
             user=user, 
