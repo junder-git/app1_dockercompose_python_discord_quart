@@ -1,14 +1,24 @@
 import yt_dlp
-async def extract_audio_url(self, video_id):
+
+async def extract_audio_url(self, video_id_or_url):
     """
     Extract direct audio URL for a YouTube video
     
     Args:
-        video_id (str): YouTube video ID
+        video_id_or_url (str): YouTube video ID or URL
         
     Returns:
         str: Direct audio URL
     """
+    # Check if input is a URL or just a video ID
+    if video_id_or_url.startswith(('http://', 'https://')):
+        video_id = self.extract_video_id(video_id_or_url)
+        if not video_id:
+            print(f"Warning: Could not extract video ID from URL: {video_id_or_url}")
+            return None
+    else:
+        video_id = video_id_or_url
+    
     ydl_opts = {
         'format': 'bestaudio/best',
         'noplaylist': True,
@@ -32,11 +42,13 @@ async def extract_audio_url(self, video_id):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             audio_url = info.get('url')
+            if not audio_url:
+                print(f"Warning: No audio URL found for video ID: {video_id}")
             return audio_url
     except Exception as e:
         print(f"Error extracting audio URL for {video_id}: {e}")
         return None
-    
+
 def get_ffmpeg_options(self, quality='medium'):
     """
     Get FFmpeg options for audio playback
@@ -64,6 +76,9 @@ async def process_youtube_url(self, url):
     """
     Process a YouTube URL, handling both individual videos and playlists
     
+    Args:
+        url (str): YouTube URL or search query
+        
     Returns:
     - For single video: {'type': 'video', 'info': video_info}
     - For playlist: {'type': 'playlist', 'info': playlist_info, 'entries': playlist_entries}
@@ -81,11 +96,7 @@ async def process_youtube_url(self, url):
     }
     
     # Check if the input looks like a URL
-    def is_url(string):
-        return string.startswith(('http://', 'https://'))
-    
-    # If not a URL, treat as a search query
-    if not is_url(url):
+    if not url.startswith(('http://', 'https://')):
         url = f"ytsearch1:{url}"
     
     # Use yt-dlp to extract information
@@ -95,7 +106,7 @@ async def process_youtube_url(self, url):
             info = ydl.extract_info(url, download=False)
             
             # Check if it's a playlist
-            if 'entries' in info:
+            if info and 'entries' in info:
                 # Validate it's actually a playlist (some YouTube URLs might look like playlists)
                 entries = [entry for entry in info['entries'] if entry]
                 
@@ -114,6 +125,7 @@ async def process_youtube_url(self, url):
                 }
             
             # If no valid info found
+            print(f"Warning: Could not process YouTube URL: {url}")
             return None
         
         except Exception as e:

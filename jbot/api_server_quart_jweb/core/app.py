@@ -51,8 +51,8 @@ def create_app():
     csrf = CSRFProtect(app)
     
     # Initialize Discord OAuth
-    discord = DiscordOAuth2Session(app)
-    app.discord = discord
+    discord_client = DiscordOAuth2Session(app)
+    app.discord_client = discord_client
     
     # Initialize API clients
     app.discord_client = create_api_client_discord(
@@ -61,7 +61,7 @@ def create_app():
         secret_key=SECRET_KEY
     )
     
-    app.youtube_client = ClientYouTube(api_key=YOUTUBE_API_KEY)
+    app.youtube_client = ClientYouTube(YOUTUBE_API_KEY)
     
     # Register all route blueprints
     from ..routes import register_blueprints

@@ -9,8 +9,8 @@ from ...validators import validate_search_params, validate_csrf, generate_csrf_t
 
 async def youtube_search_route(guild_id):
     """Search YouTube for videos or display playlist details"""
-    discord = current_app.discord
     discord_client = current_app.discord_client
+    discord=discord_client
     youtube_client = current_app.youtube_client
     
     # Get user's voice channel

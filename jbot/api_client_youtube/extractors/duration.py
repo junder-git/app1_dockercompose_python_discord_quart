@@ -11,6 +11,9 @@ def parse_duration(duration_str):
     Returns:
         int: Duration in seconds
     """
+    if not duration_str:
+        return 0
+        
     hours = 0
     minutes = 0
     seconds = 0
@@ -32,7 +35,7 @@ def parse_duration(duration_str):
     
     return hours * 3600 + minutes * 60 + seconds
 
-def format_duration(self, seconds):
+def format_duration(seconds):
     """
     Format duration in seconds to a readable string (MM:SS or HH:MM:SS)
     
@@ -42,14 +45,16 @@ def format_duration(self, seconds):
     Returns:
         str: Formatted duration string
     """
-    if seconds is None:
+    if seconds is None or seconds <= 0:
         return "00:00"
+    
+    # Ensure we're working with an integer
+    seconds = int(seconds)
         
-    minutes, seconds = divmod(int(seconds), 60)
+    minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     
     if hours > 0:
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     else:
         return f"{minutes:02d}:{seconds:02d}"
-
