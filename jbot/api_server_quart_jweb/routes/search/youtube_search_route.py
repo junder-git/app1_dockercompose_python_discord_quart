@@ -5,7 +5,7 @@ Handles YouTube search functionality
 from quart import render_template, request, redirect, url_for, current_app
 from ...routes.auth.login_required import login_required
 from ...services import get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from ...validators import validate_search_params, validate_csrf, generate_csrf_token
+from ...validators import validate_search_params
 
 async def youtube_search_route(guild_id):
     """Search YouTube for videos or display playlist details"""
@@ -29,9 +29,6 @@ async def youtube_search_route(guild_id):
     
     # Initialize context
     selected_channel_id = user_voice_channel['id'] if user_voice_channel else None
-    
-    # Generate CSRF token
-    csrf_token = generate_csrf_token()
     
     # Default values
     search_results = []
@@ -138,6 +135,5 @@ async def youtube_search_route(guild_id):
         has_prev_page=has_prev_page,
         queue=queue_info.get("queue", []),
         current_track=queue_info.get("current_track"),
-        bot_state=bot_state,
-        csrf_token=csrf_token
+        bot_state=bot_state
     )
