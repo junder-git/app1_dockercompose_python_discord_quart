@@ -61,7 +61,7 @@ async def dashboard_route():
                 
         # Pass config for bot invite link
         config = {
-            "current_app.discord_oauth_ID": current_app.config["current_app.discord_oauth_ID"]
+            "DISCORD_CLIENT_ID": current_app.config["DISCORD_CLIENT_ID"]
         }
         
         return await render_template(
