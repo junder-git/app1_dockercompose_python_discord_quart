@@ -3,7 +3,7 @@ aiohttp>=3.8.0
 hypercorn>=0.14.3
 quart-discord>=2.1.4
 quart-wtf==0.0.1
-quart==0.18.0
+quart==0.18.3
+quart-wtforms
 werkzeug==2.2.3
-wtforms>=3.0.0
 yt-dlp>=2023.3.4
