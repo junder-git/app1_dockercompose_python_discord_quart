@@ -1,7 +1,10 @@
-<button type="button" class="btn btn-sm btn-primary add-track-btn"
-data-guild-id="{{ guild_id }}"
-data-channel-id="{{ selected_channel_id }}"
-data-video-id="{{ video.id }}"
-data-video-title="{{ video.title }}">
-<i class="fas fa-plus me-1"></i> Add to Queue
-</button>
+<!-- Replace button_add_to_queue.html with this -->
+<form method="POST" action="{{ url_for('queue.queue_add_route', guild_id=guild_id) }}" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
+    <input type="hidden" name="video_id" value="{{ video.id }}">
+    <input type="hidden" name="video_title" value="{{ video.title }}">
+    <button type="submit" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus me-1"></i> Add to Queue
+    </button>
+</form>

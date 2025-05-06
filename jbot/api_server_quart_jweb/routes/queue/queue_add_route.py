@@ -24,7 +24,7 @@ async def queue_add_route(guild_id):
     is_valid, errors = await validate_add_to_queue(form)
     if not is_valid:
         for error in errors:
-            flash(error, "error")
+            await flash(error, "error")
         return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
     
     # Get validated data
@@ -45,7 +45,7 @@ async def queue_add_route(guild_id):
         user_voice_state = await current_app.discord_api_client.get_user_voice_state(guild_id, user_id)
         
         if not user_voice_state or not user_voice_state.get('channel_id'):
-            flash("You need to join a voice channel before adding music", "warning")
+            await flash("You need to join a voice channel before adding music", "warning")
             return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
         
         # Check 2: Get the current queue to see if the bot is connected
@@ -53,23 +53,23 @@ async def queue_add_route(guild_id):
         
         # If bot is not connected to the channel, tell user to use Discord command
         if not queue_info.get('is_connected', False):
-            flash("Bot is not connected to your voice channel. Type 'jbot' in a Discord text channel first to connect the bot.", "warning")
+            await flash("Bot is not connected to your voice channel. Type 'jbot' in a Discord text channel first to connect the bot.", "warning")
             return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
         
         # Check 3: Make sure bot and user are in the same channel
         if user_voice_state.get('channel_id') != channel_id:
-            flash("You must be in the same voice channel as the bot to add music", "warning")
+            await flash("You must be in the same voice channel as the bot to add music", "warning")
             return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
         
         # Now add to queue using the Discord bot API
         result = await current_app.discord_api_client.add_to_queue(guild_id, channel_id, video_id, video_title)
         
         if result.get('success'):
-            flash(f"Added '{video_title}' to queue", "success")
+            await flash(f"Added '{video_title}' to queue", "success")
         else:
-            flash(f"Error adding to queue: {result.get('error', 'Unknown error')}", "error")
+            await flash(f"Error adding to queue: {result.get('error', 'Unknown error')}", "error")
     except Exception as e:
-        flash(f"Error adding to queue: {str(e)}", "error")
+        await flash(f"Error adding to queue: {str(e)}", "error")
     
     # Redirect back to the search page with the same parameters
     redirect_params = {'guild_id': guild_id}
