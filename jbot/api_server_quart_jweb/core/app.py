@@ -2,14 +2,17 @@
 Core application setup for Quart Web Service
 """
 import os
-from quart import Quart
+from quart import Quart, render_template
 from quart_discord import DiscordOAuth2Session
-from quart_wtf import CSRFProtect
+from quart_wtf import CSRFProtect, CSRFError
 from dotenv import load_dotenv
 
 # Import clients
 from api_client_discord.__main__ import create_api_client_discord
 from api_client_youtube.__main__ import ClientYouTube
+
+# Create CSRF object without binding to app
+csrf = CSRFProtect()
 
 def create_app():
     """Create and configure the Quart application"""
@@ -36,6 +39,8 @@ def create_app():
         DISCORD_CLIENT_SECRET=DISCORD_CLIENT_SECRET,
         DISCORD_REDIRECT_URI=DISCORD_REDIRECT_URI,
         SESSION_COOKIE_SAMESITE='Lax',  # Important for OAuth redirect
+        SESSION_COOKIE_HTTPONLY=True,  # Prevent JavaScript access to session cookie
+        SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
         MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max upload size
         WTF_CSRF_ENABLED=True,
         WTF_CSRF_CHECK_DEFAULT=True,
@@ -47,10 +52,16 @@ def create_app():
         WTF_CSRF_SECRET_KEY=SECRET_KEY
     )
     
-    # Initialize CSRF protection
-    csrf = CSRFProtect(app)
-    csrf.exempt('auth.callback_route')
-    app.csrf=csrf
+    # Initialize CSRF protection with the app
+    csrf.init_app(app)
+    
+    # Add CSRF error handler
+    @app.errorhandler(CSRFError)
+    async def handle_csrf_error(e):
+        print(f"CSRF Error: {e.description}")
+        return await render_template('error.html', 
+                                   error_title="Security Error",
+                                   error_message="CSRF token validation failed. Please try again."), 400
     
     # Initialize Discord OAuth
     discord_oauth = DiscordOAuth2Session(app)
@@ -69,12 +80,15 @@ def create_app():
     from ..routes import register_blueprints
     register_blueprints(app)
     
+    # Exemption for OAuth callback - this is needed
+    from ..routes.auth.callback_route import callback_route
+    csrf.exempt(callback_route)
+    
+    # Clean up on app exit
     @app.teardown_appcontext
     async def shutdown_session(exception=None):
         """Clean up resources when the app shuts down"""
-        # The discord_oauth object doesn't have a close method
-        # We should check if discord_api_client has one though
-        if hasattr(app, 'discord_api_client') and hasattr(app.discord_api_client, 'close'):
+        if hasattr(app, 'discord_api_client'):
             await app.discord_api_client.close()
         
         if hasattr(app, 'youtube_client'):

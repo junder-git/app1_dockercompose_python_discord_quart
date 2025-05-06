@@ -1,7 +1,7 @@
 """
 Bot join route - handles joining a voice channel
 """
-from quart import redirect, url_for, current_app, flash, request
+from quart import redirect, url_for, current_app, flash, request, session
 from ...routes.auth.login_required import login_required
 
 @login_required
@@ -15,18 +15,26 @@ async def bot_join_route(guild_id):
     Returns:
         Response: Redirect to server dashboard
     """
+    # Print debugging info
+    form = await request.form
+    print(f"Form data received: {form}")
+    print(f"CSRF token in form: {form.get('csrf_token')}")
+    print(f"Session keys: {list(session.keys())}")
     
     # Get form data
-    form = await request.form
     channel_id = form.get('channel_id')
     
     if not channel_id:
         flash("Missing channel ID", "error")
         return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))
     
-    # Get user's voice channel
-    user = await current_app.discord_oauth.fetch_user()
-    user_id = str(user.id)
+    # Get user ID from session
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("User not authenticated", "error")
+        return redirect(url_for('auth.login_route'))
+    
+    # Get user voice state
     user_voice_state = await current_app.discord_api_client.get_user_voice_state(guild_id, user_id)
     
     # If user is not in the selected voice channel, show error
