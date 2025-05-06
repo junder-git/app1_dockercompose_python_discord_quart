@@ -28,12 +28,10 @@
                     <span>Music Queue</span>
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <button type="button" class="btn btn-sm btn-success" id="botJoinBtn">
-                            <i class="fas fa-sign-in-alt me-1"></i> Join
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger" id="botLeaveBtn">
-                            <i class="fas fa-sign-out-alt me-1"></i> Leave
-                        </button>
+                        <!-- Join button -->
+                        {% include 'partials_forms/join.html' %}
+                        <!-- Leave button -->
+                        {% include 'partials_forms/leave.html' %}
                     </div>
                     
                     <!-- Music Control buttons using form partials -->

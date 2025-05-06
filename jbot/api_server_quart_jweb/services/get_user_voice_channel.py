@@ -15,11 +15,10 @@ async def get_user_voice_channel(guild_id, user_id):
     Returns:
         dict: Voice channel information including id and name, or None if not in a channel
     """
-    discord_client = current_app.discord_client
     
     try:
         # Try to get user voice state from bot API
-        voice_state = await discord_client.get_user_voice_state(guild_id, user_id)
+        voice_state = await current_app.discord_api_client.get_user_voice_state(guild_id, user_id)
         print(f"Voice state from bot API: {voice_state}")
         if voice_state and 'channel_id' in voice_state:
             channel_id = voice_state['channel_id']

@@ -15,8 +15,5 @@ async def index_route():
         # Redirect to dashboard if already logged in
         return redirect(url_for('dashboard.dashboard_route'))
     
-    # Get Discord instance
-    discord = current_app.discord
-    
     # Render the index template
-    return await render_template('index.html', authorized=await discord.authorized)
+    return await render_template('index.html', authorized=await current_app.discord_oauth.authorized)

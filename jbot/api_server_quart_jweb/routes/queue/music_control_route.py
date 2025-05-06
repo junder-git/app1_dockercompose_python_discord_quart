@@ -17,7 +17,6 @@ async def music_control_route(guild_id):
     Returns:
         Response: JSON result of the command
     """
-    discord_client = current_app.discord_client
     form = await request.form
     channel_id = form.get('channel_id')
     command = form.get('command')
@@ -29,11 +28,11 @@ async def music_control_route(guild_id):
 
     # Execute the command
     if command == "pause":
-        await discord_client.pause(guild_id, channel_id)
+        await current_app.discord_api_client.pause(guild_id, channel_id)
     elif command == "resume":
-        await discord_client.resume(guild_id, channel_id)
+        await current_app.discord_api_client.resume(guild_id, channel_id)
     elif command == "skip":
-        await discord_client.skip(guild_id, channel_id)
+        await current_app.discord_api_client.skip(guild_id, channel_id)
     else:
         return jsonify({"error": "Invalid command"}), 400
 

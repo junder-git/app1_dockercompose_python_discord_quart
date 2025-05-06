@@ -3,7 +3,6 @@ Route for reordering tracks in the queue
 """
 from quart import redirect, url_for, flash, request, current_app
 from ...routes.auth.login_required import login_required
-from ...validators.validate_csrf import validate_csrf
 
 @login_required
 async def queue_reorder_route(guild_id):
@@ -16,9 +15,6 @@ async def queue_reorder_route(guild_id):
     Returns:
         Response: Redirect to server dashboard
     """
-    await validate_csrf()
-    
-    discord_client = current_app.discord_client
     
     # Get form data
     form = await request.form
@@ -37,7 +33,7 @@ async def queue_reorder_route(guild_id):
         new_index = int(new_index)
         
         # Reorder the queue using the Discord bot API
-        result = await discord_client.reorder_queue(guild_id, channel_id, old_index, new_index)
+        result = await current_app.discord_api_client.reorder_queue(guild_id, channel_id, old_index, new_index)
         
         if result.get('success'):
             flash(f"Track moved from position {old_index+1} to {new_index+1}", "success")

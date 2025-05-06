@@ -9,12 +9,10 @@ from ...validators import validate_search_params, validate_csrf, generate_csrf_t
 
 async def youtube_search_route(guild_id):
     """Search YouTube for videos or display playlist details"""
-    discord_client = current_app.discord_client
-    discord=discord_client
     youtube_client = current_app.youtube_client
     
     # Get user's voice channel
-    user = await discord.fetch_user()
+    user = await current_app.discord_oauth.fetch_user()
     user_id = str(user.id)
     user_voice_channel = await get_user_voice_channel(guild_id, user_id)
     
@@ -22,7 +20,7 @@ async def youtube_search_route(guild_id):
     voice_channels = await get_voice_channels(guild_id)
     
     # Get guild info
-    user_guilds = await discord.fetch_guilds()
+    user_guilds = await current_app.discord_oauth.fetch_guilds()
     guild_info = next((g for g in user_guilds if str(g.id) == guild_id), None)
     
     # Safe attribute access

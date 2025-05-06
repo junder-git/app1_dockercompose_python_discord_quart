@@ -14,9 +14,6 @@ async def dashboard_route():
         Response: Rendered dashboard template or redirect to login
     """
     try:
-        # Import from current app context
-        discord = current_app.discord
-        discord_client = current_app.discord_client
         
         # First, verify we have the necessary session data
         if 'user_id' not in session:
@@ -27,8 +24,8 @@ async def dashboard_route():
         guild_count = 0
         guild_ids = []
         try:
-            guild_count = await discord_client.get_guild_count()
-            guild_ids = await discord_client.get_guild_ids()
+            guild_count = await current_app.discord_api_client.get_guild_count()
+            guild_ids = await current_app.discord_api_client.get_guild_ids()
             print(f"Bot guild count: {guild_count}")
             print(f"Bot guild IDs: {guild_ids}")
         except Exception as e:
@@ -36,10 +33,10 @@ async def dashboard_route():
             # Continue anyway, showing guilds without bot presence
         
         # Fetch user
-        user = await discord.fetch_user()
+        user = await current_app.discord_oauth.fetch_user()
         
         # Fetch user guilds
-        user_guilds = await discord.fetch_guilds()
+        user_guilds = await current_app.discord_oauth.fetch_guilds()
         print(f"User has {len(user_guilds)} guilds")
         
         # Print user guild IDs for debugging
@@ -64,7 +61,7 @@ async def dashboard_route():
                 
         # Pass config for bot invite link
         config = {
-            "DISCORD_CLIENT_ID": current_app.config["DISCORD_CLIENT_ID"]
+            "current_app.discord_oauth_ID": current_app.config["current_app.discord_oauth_ID"]
         }
         
         return await render_template(

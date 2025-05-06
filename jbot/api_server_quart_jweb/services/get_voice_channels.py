@@ -15,10 +15,9 @@ async def get_voice_channels(guild_id):
     Returns:
         list: List of voice channel objects
     """
-    discord_client = current_app.discord_client
     try:
         # First try to get voice channels from bot API
-        response = await discord_client.get('/api/voice_channels')
+        response = await current_app.discord_api_client.get('/api/voice_channels')
         if response.status == 200:
             data = await response.json()
             channels = data.get('channels', [])

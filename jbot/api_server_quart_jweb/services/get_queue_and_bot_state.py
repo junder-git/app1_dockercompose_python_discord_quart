@@ -26,10 +26,9 @@ async def get_queue_and_bot_state(guild_id, channel_id):
             'voice_channel_name': None
         }
     
-    discord_client = current_app.discord_client
     
     try:
-        queue_info = await discord_client.get_queue(guild_id, channel_id)
+        queue_info = await current_app.discord_api_client.get_queue(guild_id, channel_id)
         
         # Get voice channels to find the channel name
         voice_channels = await get_voice_channels(guild_id)

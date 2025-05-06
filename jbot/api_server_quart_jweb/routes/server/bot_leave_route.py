@@ -15,7 +15,6 @@ async def bot_leave_route(guild_id):
     Returns:
         Response: Redirect to server dashboard
     """
-    discord_client = current_app.discord_client
     
     # Get form data
     form = await request.form
@@ -26,7 +25,7 @@ async def bot_leave_route(guild_id):
         return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Tell the bot to leave the channel
-    result = await discord_client.leave_voice_channel(guild_id, channel_id)
+    result = await current_app.discord_api_client.leave_voice_channel(guild_id, channel_id)
     
     if result.get('success'):
         flash("Disconnected from voice channel", "success")

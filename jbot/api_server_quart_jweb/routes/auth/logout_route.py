@@ -1,21 +1,20 @@
 """
-Logout route for Discord authentication
+Logout route for current_app.discord_oauth authentication
 """
 from quart import session, current_app, redirect, url_for
 
 async def logout_route():
     """
-    Logout route - clears session and revokes Discord token
+    Logout route - clears session and revokes current_app.discord_oauth token
     
     Returns:
         Response: Redirect to home page
     """
-    discord = current_app.discord
     
-    # Revoke the token with Discord if possible
-    if discord.authorized:
+    # Revoke the token with current_app.discord_oauth if possible
+    if current_app.discord_oauth.authorized:
         try:
-            await discord.revoke()
+            await current_app.discord_oauth.revoke()
         except:
             pass
     

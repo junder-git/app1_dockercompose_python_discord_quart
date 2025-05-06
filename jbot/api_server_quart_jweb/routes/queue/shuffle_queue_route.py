@@ -15,7 +15,6 @@ async def shuffle_queue_route(guild_id):
     Returns:
         Response: Redirect to server dashboard
     """
-    discord_client = current_app.discord_client
     form = await request.form
     channel_id = form.get('channel_id')
     
@@ -24,7 +23,7 @@ async def shuffle_queue_route(guild_id):
         return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Shuffle the queue
-    result = await discord_client.shuffle_queue(guild_id, channel_id)
+    result = await current_app.discord_api_client.shuffle_queue(guild_id, channel_id)
     
     if result.get('success'):
         flash("Queue shuffled successfully", "success")

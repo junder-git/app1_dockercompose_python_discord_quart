@@ -1,32 +1,31 @@
 """
-Callback route for Discord OAuth2
+Callback route for current_app.discord_oauth OAuth2
 """
 import traceback
 from quart import session, current_app, redirect, url_for
 
 async def callback_route():
     """
-    Callback route for Discord OAuth
+    Callback route for current_app.discord_oauth OAuth
     
     Returns:
         Response: Redirect to dashboard or home page
     """
-    discord = current_app.discord
     
     try:
         # Complete the OAuth flow
-        data = await discord.callback()
+        data = await current_app.discord_oauth.callback()
         
         # Get the user
-        user = await discord.fetch_user()
+        user = await current_app.discord_oauth.fetch_user()
         
         # Store user information in session
         session['user_id'] = user.id
         session['username'] = user.name
         
         # Also store the access token for further API calls
-        if hasattr(discord, 'token'):
-            session['discord_token'] = discord.token
+        if hasattr(current_app.discord_oauth, 'token'):
+            session['current_app.discord_oauth_token'] = current_app.discord_oauth.token
         
         # Print debug information
         print(f"OAuth callback successful for user: {user.name} ({user.id})")
@@ -34,7 +33,7 @@ async def callback_route():
         
         # Fetch user guilds to verify API access is working
         try:
-            guilds = await discord.fetch_guilds()
+            guilds = await current_app.discord_oauth.fetch_guilds()
             print(f"Successfully fetched {len(guilds)} guilds for user")
         except Exception as e:
             print(f"Error fetching guilds: {e}")

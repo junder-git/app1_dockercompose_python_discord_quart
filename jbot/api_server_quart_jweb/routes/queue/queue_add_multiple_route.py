@@ -3,7 +3,6 @@ Route for adding multiple tracks to the queue
 """
 from quart import redirect, url_for, flash, request, current_app
 from ...routes.auth.login_required import login_required
-from ...validators.validate_csrf import validate_csrf
 from ...validators.validate_add_to_queue import validate_add_multiple
 
 @login_required
@@ -17,10 +16,6 @@ async def queue_add_multiple_route(guild_id):
     Returns:
         Response: Redirect to appropriate page
     """
-    await validate_csrf()
-    
-    discord = current_app.discord
-    discord_client = current_app.discord_client
     
     # Get form data
     form = await request.form
@@ -46,9 +41,9 @@ async def queue_add_multiple_route(guild_id):
             return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
     
     # Get user's current voice channel to verify they're in voice
-    user = await discord.fetch_user()
+    user = await current_app.discord_oauth.fetch_user()
     user_id = str(user.id)
-    user_voice_state = await discord_client.get_user_voice_state(guild_id, user_id)
+    user_voice_state = await current_app.discord_api_client.get_user_voice_state(guild_id, user_id)
     
     # Verify the user is actually in a voice channel
     if not user_voice_state or not user_voice_state.get('channel_id'):
@@ -56,7 +51,7 @@ async def queue_add_multiple_route(guild_id):
         return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
     
     # Check if the bot is connected via the queue info
-    queue_info = await discord_client.get_queue(guild_id, channel_id)
+    queue_info = await current_app.discord_api_client.get_queue(guild_id, channel_id)
     if not queue_info.get('is_connected', False):
         flash("Bot is not connected to your voice channel. Type 'jbot' in a Discord text channel first to connect the bot.", "warning")
         return redirect(url_for('server.server_dashboard_route', guild_id=guild_id))
@@ -73,7 +68,7 @@ async def queue_add_multiple_route(guild_id):
     
     # Add videos to queue
     try:
-        result = await discord_client.add_multiple_to_queue(guild_id, channel_id, videos)
+        result = await current_app.discord_api_client.add_multiple_to_queue(guild_id, channel_id, videos)
         
         if result.get('success'):
             flash(f"Added {result.get('added_count', 0)} videos to queue", "success")

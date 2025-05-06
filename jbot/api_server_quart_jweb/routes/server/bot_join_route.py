@@ -15,8 +15,6 @@ async def bot_join_route(guild_id):
     Returns:
         Response: Redirect to server dashboard
     """
-    discord = current_app.discord
-    discord_client = current_app.discord_client
     
     # Get form data
     form = await request.form
@@ -27,9 +25,9 @@ async def bot_join_route(guild_id):
         return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Get user's voice channel
-    user = await discord.fetch_user()
+    user = await current_app.discord_api_client.fetch_user()
     user_id = str(user.id)
-    user_voice_state = await discord_client.get_user_voice_state(guild_id, user_id)
+    user_voice_state = await current_app.discord_api_client.get_user_voice_state(guild_id, user_id)
     
     # If user is not in the selected voice channel, show error
     if not user_voice_state or user_voice_state.get('channel_id') != channel_id:
@@ -37,7 +35,7 @@ async def bot_join_route(guild_id):
         return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Tell the bot to join the channel
-    result = await discord_client.join_voice_channel(guild_id, channel_id)
+    result = await current_app.discord_api_client.join_voice_channel(guild_id, channel_id)
     
     if result.get('success'):
         flash("Connected to voice channel", "success")

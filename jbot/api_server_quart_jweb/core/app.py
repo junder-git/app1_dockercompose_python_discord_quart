@@ -51,11 +51,11 @@ def create_app():
     csrf = CSRFProtect(app)
     
     # Initialize Discord OAuth
-    discord_client = DiscordOAuth2Session(app)
-    app.discord_client = discord_client
+    discord_oauth = DiscordOAuth2Session(app)
+    app.discord_oauth = discord_oauth
     
     # Initialize API clients
-    app.discord_client = create_api_client_discord(
+    app.discord_api_client = create_api_client_discord(
         host="jbot-discord-bot",  # Docker service name
         port=5001,  # Port exposed in Docker
         secret_key=SECRET_KEY

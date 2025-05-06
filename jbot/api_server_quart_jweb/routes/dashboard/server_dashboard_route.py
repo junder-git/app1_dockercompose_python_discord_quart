@@ -12,7 +12,7 @@ async def server_dashboard_route(guild_id):
     Server dashboard for viewing voice channels and music status
     
     Args:
-        guild_id (str): The Discord guild ID
+        guild_id (str): The current_app.discord_oauth guild ID
         
     Returns:
         Response: Rendered server dashboard or redirect to main dashboard
@@ -21,10 +21,8 @@ async def server_dashboard_route(guild_id):
     if not validate_guild_id(guild_id):
         return redirect(url_for('dashboard.dashboard_route'))
     
-    discord = current_app.discord
-    
     # Get guild info
-    user_guilds = await discord.fetch_guilds()
+    user_guilds = await current_app.discord_oauth.fetch_guilds()
     guild_info = next((g for g in user_guilds if str(g.id) == guild_id), None)
     
     if not guild_info:
@@ -34,7 +32,7 @@ async def server_dashboard_route(guild_id):
     voice_channels = await get_voice_channels(guild_id)
     
     # Get user's voice channel
-    user = await discord.fetch_user()
+    user = await current_app.discord_oauth.fetch_user()
     user_id = str(user.id)
     user_voice_channel = await get_user_voice_channel(guild_id, user_id)
     
