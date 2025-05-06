@@ -1,6 +1,6 @@
 <!-- Bot Join Form -->
 <form method="POST" action="{{ url_for('server.bot_join_route', guild_id=guild_id) }}" class="me-2">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
     <button type="submit" class="btn btn-sm btn-success" id="botJoinBtn" {% if not user_voice_channel %}disabled{% endif %}>
         <i class="fas fa-sign-in-alt me-1"></i> Join

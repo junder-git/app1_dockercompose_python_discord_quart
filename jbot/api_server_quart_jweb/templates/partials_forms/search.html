@@ -1,5 +1,5 @@
 <form method="GET" action="{{ url_for('search.youtube_search_route', guild_id=guild_id) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row g-3">
         <div class="col-md-3">
             <label for="channelSelect" class="form-label">Voice Channel</label>

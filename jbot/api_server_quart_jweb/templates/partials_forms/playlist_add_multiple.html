@@ -1,7 +1,7 @@
 <form id="addMultipleForm" method="POST" action="{{ url_for('queue.queue_add_multiple_route', guild_id=guild_id) }}">
     
     <!-- Add hidden fields for pagination context -->
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="playlist_id" value="{{ selected_playlist_id }}">
     <input type="hidden" name="page_token" value="{{ page_token or '' }}">
     <input type="hidden" name="prev_page_token" value="{{ prev_page_token or '' }}">

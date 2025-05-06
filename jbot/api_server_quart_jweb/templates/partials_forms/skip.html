@@ -1,5 +1,5 @@
 <form method="POST" action="{{ url_for('queue.music_control_route', guild_id=guild_id) }}" style="display: inline;">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
     <input type="hidden" name="command" value="skip">
     <button type="submit" class="btn btn-sm btn-outline-light" title="Skip">
