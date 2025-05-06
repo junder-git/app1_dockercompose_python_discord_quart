@@ -49,6 +49,7 @@ def create_app():
     
     # Initialize CSRF protection
     csrf = CSRFProtect(app)
+    app.csrf=csrf
     
     # Initialize Discord OAuth
     discord_oauth = DiscordOAuth2Session(app)
@@ -67,12 +68,11 @@ def create_app():
     from ..routes import register_blueprints
     register_blueprints(app)
     
-    # Clean up on app exit
     @app.teardown_appcontext
     async def shutdown_session(exception=None):
         """Clean up resources when the app shuts down"""
-        if hasattr(app, 'discord_client'):
-            await app.discord_client.close()
+        if hasattr(app, 'discord_oauth'):  # Changed from discord_client
+            await app.discord_oauth.close()
         
         if hasattr(app, 'youtube_client'):
             app.youtube_client.clear_cache()
