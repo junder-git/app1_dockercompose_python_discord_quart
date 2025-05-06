@@ -49,6 +49,7 @@ def create_app():
     
     # Initialize CSRF protection
     csrf = CSRFProtect(app)
+    csrf.exempt('auth.callback_route')
     app.csrf=csrf
     
     # Initialize Discord OAuth
@@ -71,7 +72,9 @@ def create_app():
     @app.teardown_appcontext
     async def shutdown_session(exception=None):
         """Clean up resources when the app shuts down"""
-        if hasattr(app, 'discord_api_client'):  # Changed from discord_client
+        # The discord_oauth object doesn't have a close method
+        # We should check if discord_api_client has one though
+        if hasattr(app, 'discord_api_client') and hasattr(app.discord_api_client, 'close'):
             await app.discord_api_client.close()
         
         if hasattr(app, 'youtube_client'):

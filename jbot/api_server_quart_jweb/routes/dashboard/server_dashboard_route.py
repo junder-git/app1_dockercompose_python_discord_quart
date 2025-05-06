@@ -4,7 +4,7 @@ Server dashboard route
 from quart import render_template, redirect, url_for, request, current_app
 from ...routes.auth.login_required import login_required
 from ...services import get_voice_channels, get_user_voice_channel, get_queue_and_bot_state
-from ...validators import validate_guild_id, validate_channel_id, generate_csrf_token
+from ...validators import validate_guild_id, validate_channel_id
 
 @login_required
 async def server_dashboard_route(guild_id):
@@ -50,8 +50,6 @@ async def server_dashboard_route(guild_id):
     # Get queue for selected channel (if applicable)
     queue_info, bot_state = await get_queue_and_bot_state(guild_id, selected_channel_id)
     
-    # Generate CSRF token
-    csrf_token = generate_csrf_token()
     
     # Safe attribute access
     guild_icon = getattr(guild_info, 'icon', None)
@@ -68,6 +66,5 @@ async def server_dashboard_route(guild_id):
         user_voice_channel=user_voice_channel,
         queue=queue_info.get("queue", []),
         current_track=queue_info.get("current_track"),
-        bot_state=bot_state,
-        csrf_token=csrf_token
+        bot_state=bot_state
     )

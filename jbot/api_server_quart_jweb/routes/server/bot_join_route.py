@@ -25,7 +25,7 @@ async def bot_join_route(guild_id):
         return redirect(url_for('dashboard.server_dashboard_route', guild_id=guild_id))
     
     # Get user's voice channel
-    user = await current_app.discord_api_client.fetch_user()
+    user = await current_app.discord_oauth.fetch_user()
     user_id = str(user.id)
     user_voice_state = await current_app.discord_api_client.get_user_voice_state(guild_id, user_id)
     
