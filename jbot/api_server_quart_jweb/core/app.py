@@ -71,8 +71,8 @@ def create_app():
     @app.teardown_appcontext
     async def shutdown_session(exception=None):
         """Clean up resources when the app shuts down"""
-        if hasattr(app, 'discord_oauth'):  # Changed from discord_client
-            await app.discord_oauth.close()
+        if hasattr(app, 'discord_api_client'):  # Changed from discord_client
+            await app.discord_api_client.close()
         
         if hasattr(app, 'youtube_client'):
             app.youtube_client.clear_cache()
