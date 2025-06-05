@@ -1,3 +1,5 @@
+// Enhanced main.js with all functionality and no external dependencies
+
 // Function to show toast notifications
 function showToast(msg) {
     const toast = document.createElement("div");
@@ -22,6 +24,10 @@ async function refreshQueue(guildId, channelId) {
         if (response.ok) {
             const queueHtml = await response.text();
             document.getElementById('queue-container').innerHTML = queueHtml;
+            
+            // Re-initialize drag and drop and other functionality after refresh
+            initializeDragAndDrop();
+            initializeQueueButtons();
         } else {
             console.error('Failed to refresh queue:', response.statusText);
         }
@@ -30,9 +36,244 @@ async function refreshQueue(guildId, channelId) {
     }
 }
 
-// Add this to static/js/main.js
+// Initialize drag and drop functionality for queue reordering
+function initializeDragAndDrop() {
+    const queueItems = document.querySelectorAll('.queue-item');
+    
+    queueItems.forEach((item, index) => {
+        item.setAttribute('draggable', 'true');
+        item.dataset.index = index;
+        
+        // Drag start
+        item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', index);
+            item.classList.add('dragging');
+            console.log('Drag started for item:', index);
+        });
+        
+        // Drag end
+        item.addEventListener('dragend', (e) => {
+            item.classList.remove('dragging');
+            // Remove all dragover classes
+            queueItems.forEach(qi => qi.classList.remove('dragover'));
+        });
+        
+        // Drag over
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            item.classList.add('dragover');
+        });
+        
+        // Drag leave
+        item.addEventListener('dragleave', (e) => {
+            item.classList.remove('dragover');
+        });
+        
+        // Drop
+        item.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            item.classList.remove('dragover');
+            
+            const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            const targetIndex = parseInt(item.dataset.index);
+            
+            if (draggedIndex !== targetIndex) {
+                console.log(`Moving item from ${draggedIndex} to ${targetIndex}`);
+                await reorderQueueItem(draggedIndex, targetIndex);
+            }
+        });
+    });
+}
 
-document.addEventListener('DOMContentLoaded', function() {
+// Function to reorder queue items
+async function reorderQueueItem(oldIndex, newIndex) {
+    const guildId = document.querySelector('.container-fluid').dataset.guildId;
+    const channelId = document.querySelector('.container-fluid').dataset.channelId;
+    
+    if (!guildId || !channelId) {
+        showToast("Missing guild or channel information");
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
+        formData.append('channel_id', channelId);
+        formData.append('old_index', oldIndex);
+        formData.append('new_index', newIndex);
+        
+        const response = await fetch(`/server/${guildId}/queue/reorder`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            // Refresh the queue to show new order
+            await refreshQueue(guildId, channelId);
+            showToast("Queue reordered successfully");
+        } else {
+            showToast("Failed to reorder queue");
+        }
+    } catch (error) {
+        console.error('Error reordering queue:', error);
+        showToast("Error reordering queue");
+    }
+}
+
+// Function to move item to top of queue
+async function moveToTop(currentIndex) {
+    if (currentIndex === 0) {
+        showToast("Track is already at the top");
+        return;
+    }
+    
+    const guildId = document.querySelector('.container-fluid').dataset.guildId;
+    const channelId = document.querySelector('.container-fluid').dataset.channelId;
+    
+    if (!guildId || !channelId) {
+        showToast("Missing guild or channel information");
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
+        formData.append('channel_id', channelId);
+        formData.append('old_index', currentIndex);
+        formData.append('new_index', 0);
+        
+        const response = await fetch(`/server/${guildId}/queue/reorder`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            await refreshQueue(guildId, channelId);
+            showToast("Track moved to top");
+        } else {
+            showToast("Failed to move track");
+        }
+    } catch (error) {
+        console.error('Error moving track to top:', error);
+        showToast("Error moving track");
+    }
+}
+
+// Function to remove item from queue (placeholder for now)
+async function removeFromQueue(index) {
+    showToast("Remove functionality coming soon - you can clear the entire queue for now");
+}
+
+// Initialize queue button functionality
+function initializeQueueButtons() {
+    // Move to top buttons
+    const moveToTopBtns = document.querySelectorAll('.move-to-top-btn');
+    moveToTopBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const index = parseInt(this.dataset.index);
+            if (!isNaN(index)) {
+                moveToTop(index);
+            }
+        });
+    });
+    
+    // Remove from queue buttons
+    const removeFromQueueBtns = document.querySelectorAll('.remove-from-queue-btn');
+    removeFromQueueBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const index = parseInt(this.dataset.index);
+            if (!isNaN(index)) {
+                removeFromQueue(index);
+            }
+        });
+    });
+}
+
+// Function to preserve search context when adding to queue
+function addToQueueWithContext(videoId, videoTitle) {
+    const guildId = document.querySelector('.container-fluid').dataset.guildId;
+    const channelId = document.querySelector('.container-fluid').dataset.channelId;
+    
+    // Get current search context
+    const searchQuery = document.getElementById('searchQuery')?.value || '';
+    const playlistId = document.querySelector('input[name="playlist_id"]')?.value || '';
+    const pageToken = document.querySelector('input[name="page_token"]')?.value || '';
+    
+    // Create form dynamically
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/server/${guildId}/queue/add`;
+    
+    // Add CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Add channel ID
+    const channelInput = document.createElement('input');
+    channelInput.type = 'hidden';
+    channelInput.name = 'channel_id';
+    channelInput.value = channelId;
+    form.appendChild(channelInput);
+    
+    // Add video ID and title
+    const videoIdInput = document.createElement('input');
+    videoIdInput.type = 'hidden';
+    videoIdInput.name = 'video_id';
+    videoIdInput.value = videoId;
+    form.appendChild(videoIdInput);
+    
+    const videoTitleInput = document.createElement('input');
+    videoTitleInput.type = 'hidden';
+    videoTitleInput.name = 'video_title';
+    videoTitleInput.value = videoTitle;
+    form.appendChild(videoTitleInput);
+    
+    // Preserve search context
+    if (searchQuery) {
+        const queryInput = document.createElement('input');
+        queryInput.type = 'hidden';
+        queryInput.name = 'query';
+        queryInput.value = searchQuery;
+        form.appendChild(queryInput);
+    }
+    
+    if (playlistId) {
+        const playlistInput = document.createElement('input');
+        playlistInput.type = 'hidden';
+        playlistInput.name = 'playlist_id';
+        playlistInput.value = playlistId;
+        form.appendChild(playlistInput);
+    }
+    
+    if (pageToken) {
+        const pageInput = document.createElement('input');
+        pageInput.type = 'hidden';
+        pageInput.name = 'page_token';
+        pageInput.value = pageToken;
+        form.appendChild(pageInput);
+    }
+    
+    // Submit form
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Initialize dashboard functionality
+function initializeDashboard() {
+    console.log('Initializing dashboard...');
+    
+    // Initialize drag and drop for queue
+    initializeDragAndDrop();
+    
+    // Initialize queue buttons
+    initializeQueueButtons();
+    
     // Handle bot join button click
     const botJoinBtn = document.getElementById('botJoinBtn');
     if (botJoinBtn) {
@@ -45,12 +286,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Create form dynamically
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = `/server/${guildId}/bot/join`;
             
-            // Add CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -58,14 +297,12 @@ document.addEventListener('DOMContentLoaded', function() {
             csrfInput.value = csrfToken;
             form.appendChild(csrfInput);
             
-            // Add channel ID
             const channelInput = document.createElement('input');
             channelInput.type = 'hidden';
             channelInput.name = 'channel_id';
             channelInput.value = channelId;
             form.appendChild(channelInput);
             
-            // Submit form
             document.body.appendChild(form);
             form.submit();
         });
@@ -83,12 +320,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Create form dynamically
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = `/server/${guildId}/bot/leave`;
             
-            // Add CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -96,65 +331,28 @@ document.addEventListener('DOMContentLoaded', function() {
             csrfInput.value = csrfToken;
             form.appendChild(csrfInput);
             
-            // Add channel ID
             const channelInput = document.createElement('input');
             channelInput.type = 'hidden';
             channelInput.name = 'channel_id';
             channelInput.value = channelId;
             form.appendChild(channelInput);
             
-            // Submit form
             document.body.appendChild(form);
             form.submit();
         });
     }
     
-    // Handle Add Track buttons
+    // Handle Add Track buttons with context preservation
     const addTrackBtns = document.querySelectorAll('.add-track-btn');
     addTrackBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const guildId = this.dataset.guildId;
-            const channelId = this.dataset.channelId;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
             const videoId = this.dataset.videoId;
             const videoTitle = this.dataset.videoTitle;
             
-            // Create form dynamically
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/server/${guildId}/queue/add`;
-            
-            // Add CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrf_token';
-            csrfInput.value = csrfToken;
-            form.appendChild(csrfInput);
-            
-            // Add channel ID
-            const channelInput = document.createElement('input');
-            channelInput.type = 'hidden';
-            channelInput.name = 'channel_id';
-            channelInput.value = channelId;
-            form.appendChild(channelInput);
-            
-            // Add video ID
-            const videoIdInput = document.createElement('input');
-            videoIdInput.type = 'hidden';
-            videoIdInput.name = 'video_id';
-            videoIdInput.value = videoId;
-            form.appendChild(videoIdInput);
-            
-            // Add video title
-            const videoTitleInput = document.createElement('input');
-            videoTitleInput.type = 'hidden';
-            videoTitleInput.name = 'video_title';
-            videoTitleInput.value = videoTitle;
-            form.appendChild(videoTitleInput);
-            
-            // Submit form
-            document.body.appendChild(form);
-            form.submit();
+            // Use the context-preserving function
+            addToQueueWithContext(videoId, videoTitle);
         });
     });
     
@@ -164,10 +362,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     videoCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            // Count selected checkboxes
             const selectedCount = document.querySelectorAll('.video-checkbox:checked').length;
             
-            // Update add selected button state
             if (addSelectedToQueueBtn) {
                 if (selectedCount > 0) {
                     addSelectedToQueueBtn.disabled = false;
@@ -191,7 +387,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 cb.checked = anyUnchecked;
             });
             
-            // Trigger change event on first checkbox to update UI
             if (checkboxes.length > 0) {
                 checkboxes[0].dispatchEvent(new Event('change'));
             }
@@ -206,12 +401,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const playlistId = document.querySelector('input[name="playlist_id"]').value;
             const pageToken = document.querySelector('input[name="page_token"]').value;
             
-            // Create form
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = `/server/${guildId}/queue/add_multiple`;
             
-            // Add CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -219,7 +412,6 @@ document.addEventListener('DOMContentLoaded', function() {
             csrfInput.value = csrfToken;
             form.appendChild(csrfInput);
             
-            // Add other required fields
             const channelInput = document.createElement('input');
             channelInput.type = 'hidden';
             channelInput.name = 'channel_id';
@@ -238,7 +430,6 @@ document.addEventListener('DOMContentLoaded', function() {
             pageTokenInput.value = pageToken;
             form.appendChild(pageTokenInput);
             
-            // Add selected videos
             const selectedCheckboxes = document.querySelectorAll('.video-checkbox:checked');
             selectedCheckboxes.forEach((cb, index) => {
                 const videoIdInput = document.createElement('input');
@@ -254,7 +445,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.appendChild(videoTitleInput);
             });
             
-            // Submit form
             document.body.appendChild(form);
             form.submit();
         });
@@ -269,6 +459,26 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshQueue(guildId, channelId);
         }, 10000);
     }
+    
+    console.log('Dashboard initialization complete');
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing dashboard...');
+    initializeDashboard();
 });
 
-initializeDashboard();
+// Also call initialize function for cases where script loads after DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+} else {
+    initializeDashboard();
+}
+
+// Make functions globally available
+window.moveToTop = moveToTop;
+window.removeFromQueue = removeFromQueue;
+window.refreshQueue = refreshQueue;
+window.showToast = showToast;
+window.initializeDashboard = initializeDashboard;

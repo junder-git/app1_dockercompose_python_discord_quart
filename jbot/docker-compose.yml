@@ -12,10 +12,13 @@ services:
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
       - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - YOUTUBE_USERNAME=${YOUTUBE_USERNAME}
+      - YOUTUBE_PASSWORD=${YOUTUBE_PASSWORD}
     networks:
       - jbot-network
     volumes:
       - ./api_server_discord_jbot:/app/api_server_discord_jbot
+      - ./auth:/app/auth
   service-jbot-quart-web:
     build:
       context: .

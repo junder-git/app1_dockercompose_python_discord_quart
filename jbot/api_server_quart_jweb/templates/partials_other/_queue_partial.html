@@ -1,13 +1,21 @@
+<!-- Clean _queue_partial.html with NO CSS or JavaScript -->
 <div id="current-track-container">
     {% if current_track %}
-        <div class="current-track mb-3 p-2 bg-dark rounded">
+        <div class="current-track mb-3 p-3 bg-dark rounded">
             <div class="d-flex align-items-center">
-                <div class="me-2">
-                    <i class="fas fa-play-circle text-success"></i>
+                <div class="me-3">
+                    <i class="fas fa-play-circle text-success fa-lg"></i>
                 </div>
-                <div>
-                    <h6 class="mb-0">Now Playing:</h6>
-                    <p class="mb-0">{{ current_track.title }}</p>
+                <div class="track-info">
+                    <h6 class="mb-0 text-success">Now Playing:</h6>
+                    <p class="mb-0 track-title">{{ current_track.title }}</p>
+                    <small class="text-muted">
+                        <i class="fab fa-youtube me-1"></i>
+                        <a href="https://www.youtube.com/watch?v={{ current_track.id }}" 
+                           target="_blank" class="text-muted text-decoration-none">
+                            Watch on YouTube
+                        </a>
+                    </small>
                 </div>
             </div>
         </div>
@@ -15,25 +23,113 @@
 </div>
 
 {% if not queue %}
-    <p class="text-muted">The queue is currently empty. Search for music to add to the queue.</p>
-{% else %}
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0">Coming Up Next:</h6>
+    <div class="empty-queue text-center py-4">
+        <i class="fas fa-music fa-3x text-muted mb-3"></i>
+        <p class="text-muted mb-0">The queue is currently empty.</p>
+        <small class="text-muted">Search for music to add to the queue.</small>
     </div>
-    <div class="list-group" id="queue-list">
+{% else %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">
+            <i class="fas fa-list-ol me-2"></i>
+            Coming Up Next:
+        </h6>
+        <span class="badge bg-secondary">
+            {{ queue|length }} track{% if queue|length != 1 %}s{% endif %}
+        </span>
+    </div>
+    
+    <div class="queue-list" id="queue-list">
         {% for item in queue %}
             <div class="list-group-item bg-dark text-light border-secondary queue-item" 
-                 data-id="{{ item.id }}" draggable="true">
-                <div class="d-flex w-100 justify-content-between align-items-start">
-                    <div>
-                        <div class="drag-handle me-2 d-inline-block">
-                            <i class="fas fa-grip-vertical text-muted"></i>
-                        </div>
-                        <h6 class="mb-1 d-inline-block">{{ item.title }}</h6>
+                 data-id="{{ item.id }}" 
+                 data-index="{{ loop.index0 }}"
+                 draggable="true"
+                 tabindex="0"
+                 role="listitem"
+                 aria-label="Queue item {{ loop.index }}: {{ item.title }}">
+                
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div class="drag-handle me-2" 
+                         title="Drag to reorder"
+                         aria-label="Drag handle for {{ item.title }}">
+                        <i class="fas fa-grip-vertical text-muted"></i>
                     </div>
-                    <span class="badge bg-secondary">{{ loop.index }}</span>
+                    
+                    <div class="track-position me-2">
+                        <span class="badge bg-secondary">{{ loop.index }}</span>
+                    </div>
+                    
+                    <div class="track-info">
+                        <h6 class="mb-1 track-title" title="{{ item.title }}">
+                            {{ item.title }}
+                        </h6>
+                        <small class="text-muted">
+                            <i class="fab fa-youtube me-1"></i>
+                            <a href="https://www.youtube.com/watch?v={{ item.id }}" 
+                               target="_blank" 
+                               class="text-muted text-decoration-none">
+                                Watch on YouTube
+                            </a>
+                        </small>
+                    </div>
+                    
+                    <div class="track-actions ms-2">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" 
+                                    class="btn btn-outline-light btn-sm move-to-top-btn"
+                                    title="Move to top"
+                                    data-index="{{ loop.index0 }}"
+                                    aria-label="Move {{ item.title }} to top of queue">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            
+                            <button type="button" 
+                                    class="btn btn-outline-danger btn-sm remove-from-queue-btn"
+                                    title="Remove from queue"
+                                    data-index="{{ loop.index0 }}"
+                                    aria-label="Remove {{ item.title }} from queue">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="drag-progress" style="display: none;">
+                    <div class="progress" style="height: 2px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         {% endfor %}
+    </div>
+    
+    <div class="queue-stats mt-3 p-2 bg-secondary bg-opacity-25 rounded">
+        <div class="row text-center">
+            <div class="col-4">
+                <small class="text-muted d-block">Total Tracks</small>
+                <strong>{{ queue|length }}</strong>
+            </div>
+            <div class="col-4">
+                <small class="text-muted d-block">Estimated Time</small>
+                <strong>
+                    {% set total_duration = 0 %}
+                    {% for item in queue %}
+                        {% if item.duration is defined and item.duration %}
+                            {% set total_duration = total_duration + item.duration %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if total_duration > 0 %}
+                        {{ (total_duration // 60) }}:{{ '%02d' | format(total_duration % 60) }}
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                </strong>
+            </div>
+            <div class="col-4">
+                <small class="text-muted d-block">Queue Status</small>
+                <strong class="text-success">Active</strong>
+            </div>
+        </div>
     </div>
 {% endif %}
