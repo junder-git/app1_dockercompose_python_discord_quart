@@ -3,7 +3,8 @@ Updated queue_add_route.py with search context preservation
 """
 from quart import redirect, url_for, flash, request, current_app, render_template
 from ...routes.auth.login_required import login_required
-from ...validators.validate_add_to_queue import validate_add_to_queue
+from ...validators import validate_add_to_queue, validate_add_multiple
+from ...services import get_queue_and_bot_state, get_user_voice_channel, get_voice_channels
 
 @login_required
 async def queue_add_route(guild_id):
