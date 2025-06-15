@@ -1,3 +1,1 @@
-from api_client_youtube.core.service import YouTubeService as ClientYouTube
-
-__all__ = ['ClientYouTube']
+print("This is my youtube client package and its modules")

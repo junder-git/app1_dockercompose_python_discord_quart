@@ -3,13 +3,7 @@ Discord API Client Blueprint
 Provides a modular interface to communicate with the Discord bot API
 """
 from quart import Blueprint
-
-from .core.api_base import DiscordAPIBase
-from .methods.guild import GuildMethods
-from .methods.voice import VoiceMethods
-from .methods.queue import QueueMethods
-from .methods.playback import PlaybackMethods
-from .methods.user import UserMethods
+from . import *
 
 # Create blueprint
 discord_api_client_bp = Blueprint('discord_api_client', __name__)

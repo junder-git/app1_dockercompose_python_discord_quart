@@ -2,19 +2,12 @@
 Discord Bot Service - Main entry point
 """
 import os
-import sys
 import discord
-from discord.ext import commands
 from dotenv import load_dotenv
+from . import *
 
 # Explicitly add the parent directory to Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-# Import clients
-from api_client_youtube.__main__ import ClientYouTube
-
-# Import core bot class
-from .core.bot import JBotDiscord
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Load environment variables
 load_dotenv()
