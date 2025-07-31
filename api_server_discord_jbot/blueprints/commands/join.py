@@ -1,25 +1,37 @@
-"""
-Join command for Discord bot - includes voice channel connection functionality
-"""
 import discord
 import asyncio
 
+class Silence(discord.AudioSource):
+    def read(self):
+        return b'\x00' * 3840  # 20ms of silence
+    def is_opus(self):
+        return False
+
 async def get_voice_client(bot, guild_id, channel_id, connect=False):
     """
-    Get or create a voice client for the specified channel
+    Get or create a voice client for the specified channel.
+    If not connected, it will connect and play a silence stream to stabilize the session.
     """
     queue_id = bot.get_queue_id(guild_id, channel_id)
 
-    # Check for existing connection or in-progress connection
+    # Cooldown check to avoid repeated join attempts
+    bot.voice_join_cooldowns = getattr(bot, 'voice_join_cooldowns', {})
+    now = asyncio.get_event_loop().time()
+    last_attempt = bot.voice_join_cooldowns.get(queue_id, 0)
+    if now - last_attempt < 5:
+        print(f"[{queue_id}] Cooldown active. Skipping join.")
+        return None, queue_id
+    bot.voice_join_cooldowns[queue_id] = now
+
+    # If already connected or connecting, don't reconnect
     if queue_id in bot.voice_connections:
         vc = bot.voice_connections[queue_id]
         if vc.is_connected():
             return vc, queue_id
         elif vc.is_connecting():
-            print(f"[{queue_id}] Already attempting connection.")
+            print(f"[{queue_id}] Already attempting to connect.")
             return None, queue_id
 
-    # Proceed to connect if requested
     if connect:
         guild = bot.get_guild(int(guild_id))
         if not guild:
@@ -32,9 +44,17 @@ async def get_voice_client(bot, guild_id, channel_id, connect=False):
             return None, queue_id
 
         try:
+            print(f"[{queue_id}] Connecting to voice...")
             voice_client = await voice_channel.connect()
             bot.voice_connections[queue_id] = voice_client
+
+            # ✅ Immediately play silence to keep connection alive
+            if not voice_client.is_playing():
+                voice_client.play(Silence())
+                print(f"[{queue_id}] Playing silence to stabilize connection.")
+
             return voice_client, queue_id
+
         except Exception as e:
             print(f"[{queue_id}] Error connecting to voice channel: {e}")
             import traceback
