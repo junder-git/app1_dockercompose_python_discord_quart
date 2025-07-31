@@ -16,13 +16,13 @@ def apply_slash_commands(bot):
     @discord.app_commands.describe(actions="Type 'join' to join voice, 'leave' to leave, or enter a song/URL to play")
 
     @discord.app_commands.choices(actions=[
-        discord.app_commands.Choice(name='apple', value="join"),
-        discord.app_commands.Choice(name='banana', value="leave"),
+        discord.app_commands.Choice(name='join', value=1),
+        discord.app_commands.Choice(name='leave', value=2),
     ])
 
     async def jai_command(interaction: discord.Interaction, actions: discord.app_commands.Choice[int]):
         """JAI command with action parameter"""
-        print(f"JAI command called by {interaction.user} with action: {actions}")
+        print(f"JAI command called by {interaction.user} with action: {actions.name}")
         # Check if user is in a voice channel (required for all operations)
         if not interaction.user.voice:
             await interaction.response.send_message(
@@ -33,7 +33,7 @@ def apply_slash_commands(bot):
         # Defer the response to avoid timeout
         await interaction.response.defer(ephemeral=True)
         user_voice_channel = interaction.user.voice.channel
-        action_lower = actions.lower().strip()
+        action_lower = actions.name.lower().strip()
         try:
             # Check if bot is currently connected to a voice channel in this guild
             voice_client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
