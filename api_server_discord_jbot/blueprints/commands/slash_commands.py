@@ -95,7 +95,7 @@ async def join_and_show_controls(bot, interaction, voice_channel):
             return
         
         from .join import get_voice_client
-        get_voice_client(bot, interaction.guild, interaction.channel, connect=True)
+        await get_voice_client(bot, interaction.guild.id, interaction.user.voice.channel.id, connect=True)
               
         # Create a view with a button to navigate to the jai channel
         view = discord.ui.View(timeout=8)

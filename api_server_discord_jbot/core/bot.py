@@ -8,7 +8,6 @@ from discord.ext import commands
 
 # Import blueprint registration
 from ..blueprints import (
-    api_blueprint,
     commands_blueprint,
     events_blueprint,
     ui_blueprint
