@@ -74,7 +74,6 @@ class JBotDiscord(commands.Bot):
         and UI components for the bot
         """
         # Apply each blueprint in order
-        api_blueprint(self)      # API endpoint handlers (includes setup_hook)
         commands_blueprint(self)  # Text and slash commands
         events_blueprint(self)    # Bot lifecycle and event handlers
         ui_blueprint(self)        # User interface components
