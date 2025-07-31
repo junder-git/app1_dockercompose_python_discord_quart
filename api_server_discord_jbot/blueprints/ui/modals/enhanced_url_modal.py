@@ -16,20 +16,19 @@ youtube_service = ClientYouTube(api_key=YOUTUBE_API_KEY)
 class PlaylistSelectionView(discord.ui.View):
     """View for playlist selection after detecting a playlist URL"""
     
-    def __init__(self, bot, guild_id, channel_id, playlist_info, entries, modal_interaction):
+    def __init__(self, bot, guild_id, channel_id, playlist_info, entries):
         super().__init__(timeout=300)  # 5 minute timeout
         self.bot = bot
         self.guild_id = guild_id
         self.channel_id = channel_id
         self.playlist_info = playlist_info
         self.entries = entries
-        self.modal_interaction = modal_interaction
         
         # Add dropdown for quick selection
         self.add_quick_select_dropdown()
         
         # Add custom input for advanced selection
-        self.add_item(CustomSelectionButton(bot, guild_id, channel_id, playlist_info, entries, modal_interaction))
+        self.add_item(CustomSelectionButton(bot, guild_id, channel_id, playlist_info, entries))
     
     def add_quick_select_dropdown(self):
         """Add dropdown for common playlist selection options"""
@@ -74,25 +73,16 @@ class PlaylistSelectionView(discord.ui.View):
             select.add_option(label="Random 20", value="random-20", description="Add 20 random tracks")
         
         async def select_callback(interaction):
-            if interaction.user != self.modal_interaction.user:
-                await interaction.response.send_message("Only the person who added the URL can make this selection.", ephemeral=True)
-                return
-            
             await interaction.response.defer()
             selection = interaction.data['values'][0]
             
             # Process the selection
-            await self.process_playlist_with_selection(selection)
-            
-            # Disable the view
-            for item in self.children:
-                item.disabled = True
-            await interaction.edit_original_response(view=self)
+            await self.process_playlist_with_selection(selection, interaction)
         
         select.callback = select_callback
         self.add_item(select)
     
-    async def process_playlist_with_selection(self, selection):
+    async def process_playlist_with_selection(self, selection, interaction):
         """Process playlist with the given selection"""
         try:
             # Parse selection
@@ -127,7 +117,7 @@ class PlaylistSelectionView(discord.ui.View):
             else:
                 selection_summary = f"{len(selected_indices)} selected tracks"
             
-            # Update the message to show processing
+            # Update the selection message to show processing
             playlist_title = self.playlist_info.get('title', 'Unnamed Playlist')[:90]
             
             embed = discord.Embed(
@@ -136,10 +126,13 @@ class PlaylistSelectionView(discord.ui.View):
                 color=discord.Color.orange()
             )
             
-            await self.modal_interaction.edit_original_response(embed=embed, view=None)
+            await interaction.edit_original_response(embed=embed, view=None)
+            
+            # Disable main control panel buttons during processing
+            await self.disable_main_control_panel()
             
             # Process the playlist
-            await self.add_tracks_to_queue(selected_indices, playlist_title)
+            await self.add_tracks_to_queue(selected_indices, playlist_title, interaction)
             
         except Exception as e:
             print(f"Error processing playlist selection: {e}")
@@ -148,13 +141,20 @@ class PlaylistSelectionView(discord.ui.View):
                 description="Failed to process playlist selection.",
                 color=discord.Color.red()
             )
-            await self.modal_interaction.edit_original_response(embed=embed, view=None)
+            await interaction.edit_original_response(embed=embed, view=None)
             
-            # Reset to original menu after 8 seconds on error
-            await asyncio.sleep(8)
-            await self.reset_to_original_menu()
+            # Restore main control panel after error
+            await asyncio.sleep(3)
+            await self.restore_main_control_panel()
+            
+            # Delete this selection message
+            await asyncio.sleep(2)
+            try:
+                await interaction.delete_original_response()
+            except:
+                pass
     
-    async def add_tracks_to_queue(self, selected_indices, playlist_title):
+    async def add_tracks_to_queue(self, selected_indices, playlist_title, interaction):
         """Add selected tracks to the queue"""
         queue_id = self.bot.get_queue_id(self.guild_id, self.channel_id)
         self.bot.playlist_processing[queue_id] = False
@@ -204,7 +204,7 @@ class PlaylistSelectionView(discord.ui.View):
                             description=f"**{playlist_title}**\nProgress: {progress}/{total_selected} tracks...",
                             color=discord.Color.orange()
                         )
-                        await self.modal_interaction.edit_original_response(embed=embed)
+                        await interaction.edit_original_response(embed=embed)
                     except:
                         pass
             
@@ -226,11 +226,19 @@ class PlaylistSelectionView(discord.ui.View):
                 result_text += "⏹️ Process interrupted"
             
             embed.description = result_text
-            await self.modal_interaction.edit_original_response(embed=embed)
+            await interaction.edit_original_response(embed=embed)
             
-            # Reset to original menu after 8 seconds
-            await asyncio.sleep(8)
-            await self.reset_to_original_menu()
+            # Wait a moment then clean up
+            await asyncio.sleep(5)
+            
+            # Restore main control panel
+            await self.restore_main_control_panel()
+            
+            # Delete this selection message
+            try:
+                await interaction.delete_original_response()
+            except:
+                pass
             
         except Exception as e:
             print(f"Error in add_tracks_to_queue: {e}")
@@ -239,70 +247,59 @@ class PlaylistSelectionView(discord.ui.View):
                 description="An error occurred while adding tracks to the queue.",
                 color=discord.Color.red()
             )
-            await self.modal_interaction.edit_original_response(embed=embed)
+            await interaction.edit_original_response(embed=embed)
             
-            # Reset to original menu after 8 seconds even on error
-            await asyncio.sleep(8)
-            await self.reset_to_original_menu()
+            # Restore main control panel after error
+            await asyncio.sleep(3)
+            await self.restore_main_control_panel()
+            
+            # Delete this selection message
+            await asyncio.sleep(2)
+            try:
+                await interaction.delete_original_response()
+            except:
+                pass
     
-    async def reset_to_original_menu(self):
-        """Reset the interaction back to the original control panel menu"""
+    async def disable_main_control_panel(self):
+        """Disable the main control panel buttons by replacing with DJ-ing message"""
         try:
-            # Get the original control panel embed and view
-            queue_id = self.bot.get_queue_id(self.guild_id, self.channel_id)
-            
             # Get guild and voice channel
             guild = self.bot.get_guild(int(self.guild_id))
-            if not guild:
-                return
-            
             voice_channel = guild.get_channel(int(self.channel_id))
-            if not voice_channel:
-                return
             
-            # Create the original control panel embed
+            # Create DJ-ing embed
             embed = discord.Embed(
-                title="🎵 Music Control Panel",
-                description=f"Connected to **{voice_channel.name}**",
-                color=discord.Color.blurple()
+                title="🎧 DJ is Working...",
+                description=f"Connected to **{voice_channel.name}**\n\n🎵 Adding tracks to your queue...\n\n*Please wait while I process your selection*",
+                color=discord.Color.orange()
             )
             
-            # Add queue info if there are songs
-            if self.bot.music_queues[queue_id]:
-                queue_text = "\n".join(
-                    f"{i+1}. {track['title']}" 
-                    for i, track in enumerate(self.bot.music_queues[queue_id][:5])
-                )
-                if len(self.bot.music_queues[queue_id]) > 5:
-                    queue_text += f"\n... and {len(self.bot.music_queues[queue_id]) - 5} more"
-                embed.add_field(name="Queue", value=queue_text, inline=False)
-            else:
-                embed.add_field(name="Queue", value="Empty", inline=False)
-            
-            # Add currently playing info
-            current_track = self.bot.currently_playing.get(queue_id)
-            if current_track:
-                embed.add_field(
-                    name="Now Playing",
-                    value=f"[{current_track['title']}](https://www.youtube.com/watch?v={current_track['id']})",
-                    inline=False
-                )
-            
-            # Import and create the original MusicControlView
-            from ..components.music_control_view import MusicControlView
-            view = MusicControlView(self.bot, self.guild_id, self.channel_id)
-            
-            # Update the original message
-            await self.modal_interaction.edit_original_response(embed=embed, view=view)
-            
+            # Update all control panels with DJ-ing message and no buttons
+            for text_channel_id, message_id in list(self.bot.control_panels.items()):
+                try:
+                    text_channel = guild.get_channel(text_channel_id)
+                    if text_channel:
+                        message = await text_channel.fetch_message(message_id)
+                        await message.edit(embed=embed, view=None)
+                except Exception as e:
+                    print(f"Error updating control panel to DJ mode: {e}")
+                    
         except Exception as e:
-            print(f"Error resetting to original menu: {e}")
+            print(f"Error disabling main control panel: {e}")
+    
+    async def restore_main_control_panel(self):
+        """Restore the main control panel with all buttons"""
+        try:
+            # Update the control panel to show current state with buttons restored
+            await self.bot.update_control_panel(self.guild_id, self.channel_id)
+        except Exception as e:
+            print(f"Error restoring main control panel: {e}")
 
 
 class CustomSelectionButton(discord.ui.Button):
     """Button to open custom selection modal"""
     
-    def __init__(self, bot, guild_id, channel_id, playlist_info, entries, modal_interaction):
+    def __init__(self, bot, guild_id, channel_id, playlist_info, entries):
         super().__init__(
             label="Custom Selection",
             style=discord.ButtonStyle.secondary,
@@ -313,17 +310,12 @@ class CustomSelectionButton(discord.ui.Button):
         self.channel_id = channel_id
         self.playlist_info = playlist_info
         self.entries = entries
-        self.modal_interaction = modal_interaction
     
     async def callback(self, interaction):
-        if interaction.user != self.modal_interaction.user:
-            await interaction.response.send_message("Only the person who added the URL can make this selection.", ephemeral=True)
-            return
-        
         # Show custom selection modal
         custom_modal = CustomPlaylistSelectionModal(
             self.bot, self.guild_id, self.channel_id, 
-            self.playlist_info, self.entries, self.modal_interaction
+            self.playlist_info, self.entries
         )
         await interaction.response.send_modal(custom_modal)
 
@@ -331,14 +323,13 @@ class CustomSelectionButton(discord.ui.Button):
 class CustomPlaylistSelectionModal(discord.ui.Modal):
     """Modal for custom playlist selection input"""
     
-    def __init__(self, bot, guild_id, channel_id, playlist_info, entries, original_interaction):
+    def __init__(self, bot, guild_id, channel_id, playlist_info, entries):
         super().__init__(title="Custom Playlist Selection")
         self.bot = bot
         self.guild_id = guild_id
         self.channel_id = channel_id
         self.playlist_info = playlist_info
         self.entries = entries
-        self.original_interaction = original_interaction
         
         self.selection_input = discord.ui.TextInput(
             label="Track Selection",
@@ -396,12 +387,45 @@ class CustomPlaylistSelectionModal(discord.ui.Modal):
             if len(selected_indices) > max_tracks:
                 selected_indices = selected_indices[:max_tracks]
             
-            # Process the selection
+            if not selected_indices:
+                embed = discord.Embed(
+                    title="❌ Invalid Selection",
+                    description="No valid tracks selected. Please check your input format.",
+                    color=discord.Color.red()
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
+            
+            # Create selection summary
+            if len(selected_indices) == 1:
+                selection_summary = f"track #{selected_indices[0]+1}"
+            elif len(selected_indices) == len(self.entries):
+                selection_summary = f"all {len(self.entries)} tracks"
+            else:
+                selection_summary = f"{len(selected_indices)} selected tracks"
+            
+            # Show confirmation and start processing
+            playlist_title = self.playlist_info.get('title', 'Unnamed Playlist')[:90]
+            
+            embed = discord.Embed(
+                title="🔄 Processing Custom Selection",
+                description=f"**{playlist_title}**\nAdding {selection_summary}...",
+                color=discord.Color.orange()
+            )
+            
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            
+            # Create a view to process the selection
             view = PlaylistSelectionView(
                 self.bot, self.guild_id, self.channel_id,
-                self.playlist_info, self.entries, self.original_interaction
+                self.playlist_info, self.entries
             )
-            await view.process_playlist_with_selection(','.join(str(i+1) for i in selected_indices))
+            
+            # Disable main control panel during processing
+            await view.disable_main_control_panel()
+            
+            # Process the tracks
+            await view.add_tracks_to_queue(selected_indices, playlist_title, interaction)
             
         except Exception as e:
             print(f"Error in custom selection: {e}")
@@ -410,7 +434,17 @@ class CustomPlaylistSelectionModal(discord.ui.Modal):
                 description="Failed to process custom selection.",
                 color=discord.Color.red()
             )
-            await self.original_interaction.edit_original_response(embed=embed)
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            
+            # Restore main control panel on error
+            try:
+                view = PlaylistSelectionView(
+                    self.bot, self.guild_id, self.channel_id,
+                    self.playlist_info, self.entries
+                )
+                await view.restore_main_control_panel()
+            except:
+                pass
 
 
 class EnhancedURLModal(discord.ui.Modal):
@@ -484,7 +518,8 @@ class EnhancedURLModal(discord.ui.Modal):
         
         return None
 
-    async def on_submit(self, interaction):
+    async def on_submit(self, interaction):  
+        # Defer the modal response immediately
         await interaction.response.defer(ephemeral=True)
         
         try:
@@ -505,24 +540,18 @@ class EnhancedURLModal(discord.ui.Modal):
                 )
                 return
             
-            # Show processing message
-            embed = discord.Embed(
-                title="🔄 Processing URL",
-                description="Analyzing the YouTube URL...",
-                color=discord.Color.orange()
-            )
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            # Disable main control panel during processing
+            await self.disable_main_control_panel("🔄 Analyzing URL...")
             
             # Process URL
             result = await youtube_service.process_youtube_url(url)
             
             if not result:
-                embed = discord.Embed(
-                    title="❌ Error",
-                    description="Could not process the URL. The video/playlist might be private, deleted, or region-locked.",
-                    color=discord.Color.red()
+                await self.restore_main_control_panel()
+                await interaction.followup.send(
+                    "❌ Could not process the URL. The video/playlist might be private, deleted, or region-locked.", 
+                    ephemeral=True
                 )
-                await interaction.edit_original_response(embed=embed)
                 return
             
             if result['type'] == 'video':
@@ -535,20 +564,19 @@ class EnhancedURLModal(discord.ui.Modal):
             
         except Exception as e:
             print(f"Error processing URL: {e}")
-            embed = discord.Embed(
-                title="❌ Error",
-                description=f"An error occurred: {str(e)}",
-                color=discord.Color.red()
+            await self.restore_main_control_panel()
+            await interaction.followup.send(
+                f"❌ An error occurred: {str(e)}", 
+                ephemeral=True
             )
-            try:
-                await interaction.edit_original_response(embed=embed)
-            except:
-                await interaction.followup.send(embed=embed, ephemeral=True)
 
     async def handle_single_video(self, interaction, result):
         """Handle single video URL"""
         try:
             video_info = result['info']
+            
+            # Update main panel status
+            await self.disable_main_control_panel(f"🔄 Adding: {video_info['title'][:50]}...")
             
             # Add to queue
             queue_result = await self.bot.add_to_queue(
@@ -559,37 +587,32 @@ class EnhancedURLModal(discord.ui.Modal):
             )
             
             if queue_result['success']:
-                embed = discord.Embed(
-                    title="✅ Video Added",
-                    description=f"**{video_info['title'][:90]}**",
-                    color=discord.Color.green()
+                # Show success briefly
+                await self.disable_main_control_panel(f"✅ Added: {video_info['title'][:50]}")
+                await asyncio.sleep(3)
+                
+                # Restore control panel
+                await self.restore_main_control_panel()
+                
+                # Send ephemeral confirmation
+                await interaction.followup.send(
+                    f"✅ **{video_info['title']}** added to queue!", 
+                    ephemeral=True
                 )
             else:
-                embed = discord.Embed(
-                    title="❌ Failed",
-                    description=f"Could not add video: {queue_result.get('message', 'Unknown error')}",
-                    color=discord.Color.red()
+                await self.restore_main_control_panel()
+                await interaction.followup.send(
+                    f"❌ Could not add video: {queue_result.get('message', 'Unknown error')}", 
+                    ephemeral=True
                 )
-            
-            await interaction.edit_original_response(embed=embed)
-            
-            # Reset to original menu after 8 seconds if successful
-            if queue_result['success']:
-                await asyncio.sleep(8)
-                await self.reset_to_original_menu(interaction)
             
         except Exception as e:
             print(f"Error handling single video: {e}")
-            embed = discord.Embed(
-                title="❌ Error",
-                description="Failed to process video.",
-                color=discord.Color.red()
+            await self.restore_main_control_panel()
+            await interaction.followup.send(
+                "❌ Failed to process video.", 
+                ephemeral=True
             )
-            await interaction.edit_original_response(embed=embed)
-            
-            # Reset to original menu after 8 seconds even on error
-            await asyncio.sleep(8)
-            await self.reset_to_original_menu(interaction)
 
     async def handle_playlist(self, interaction, result):
         """Handle playlist URL - show selection interface"""
@@ -598,15 +621,17 @@ class EnhancedURLModal(discord.ui.Modal):
             entries = result['entries']
             
             if not entries:
-                embed = discord.Embed(
-                    title="❌ Empty Playlist",
-                    description="The playlist is empty or could not be accessed.",
-                    color=discord.Color.red()
+                await self.restore_main_control_panel()
+                await interaction.followup.send(
+                    "❌ The playlist is empty or could not be accessed.", 
+                    ephemeral=True
                 )
-                await interaction.edit_original_response(embed=embed)
                 return
             
-            # Create playlist selection interface
+            # Restore main control panel first
+            await self.restore_main_control_panel()
+            
+            # Create playlist selection interface as a separate message
             playlist_title = playlist_info.get('title', 'Unnamed Playlist')
             
             embed = discord.Embed(
@@ -633,73 +658,51 @@ class EnhancedURLModal(discord.ui.Modal):
             # Create selection view
             view = PlaylistSelectionView(
                 self.bot, self.guild_id, self.channel_id,
-                playlist_info, entries, interaction
+                playlist_info, entries
             )
             
-            await interaction.edit_original_response(embed=embed, view=view)
+            # Send as followup message
+            await interaction.followup.send(embed=embed, view=view, ephemeral=True)
             
         except Exception as e:
             print(f"Error handling playlist: {e}")
-            embed = discord.Embed(
-                title="❌ Error",
-                description="Failed to process playlist.",
-                color=discord.Color.red()
+            await self.restore_main_control_panel()
+            await interaction.followup.send(
+                "❌ Failed to process playlist.", 
+                ephemeral=True
             )
-            await interaction.edit_original_response(embed=embed)
-            
-            # Reset to original menu after 8 seconds on error
-            await asyncio.sleep(8)
-            await self.reset_to_original_menu(interaction)
     
-    async def reset_to_original_menu(self, interaction):
-        """Reset the interaction back to the original control panel menu"""
+    async def disable_main_control_panel(self, status_message):
+        """Disable the main control panel buttons by replacing with DJ-ing message"""
         try:
-            # Get the original control panel embed and view
-            queue_id = self.bot.get_queue_id(self.guild_id, self.channel_id)
-            
             # Get guild and voice channel
             guild = self.bot.get_guild(int(self.guild_id))
-            if not guild:
-                return
-            
             voice_channel = guild.get_channel(int(self.channel_id))
-            if not voice_channel:
-                return
             
-            # Create the original control panel embed
+            # Create DJ-ing embed
             embed = discord.Embed(
-                title="🎵 Music Control Panel",
-                description=f"Connected to **{voice_channel.name}**",
-                color=discord.Color.blurple()
+                title="🎧 DJ is Working...",
+                description=f"Connected to **{voice_channel.name}**\n\n{status_message}\n\n*Please wait...*",
+                color=discord.Color.orange()
             )
             
-            # Add queue info if there are songs
-            if self.bot.music_queues[queue_id]:
-                queue_text = "\n".join(
-                    f"{i+1}. {track['title']}" 
-                    for i, track in enumerate(self.bot.music_queues[queue_id][:5])
-                )
-                if len(self.bot.music_queues[queue_id]) > 5:
-                    queue_text += f"\n... and {len(self.bot.music_queues[queue_id]) - 5} more"
-                embed.add_field(name="Queue", value=queue_text, inline=False)
-            else:
-                embed.add_field(name="Queue", value="Empty", inline=False)
-            
-            # Add currently playing info
-            current_track = self.bot.currently_playing.get(queue_id)
-            if current_track:
-                embed.add_field(
-                    name="Now Playing",
-                    value=f"[{current_track['title']}](https://www.youtube.com/watch?v={current_track['id']})",
-                    inline=False
-                )
-            
-            # Import and create the original MusicControlView
-            from ..components.music_control_view import MusicControlView
-            view = MusicControlView(self.bot, self.guild_id, self.channel_id)
-            
-            # Update the original message
-            await interaction.edit_original_response(embed=embed, view=view)
-            
+            # Update all control panels with DJ-ing message and no buttons
+            for text_channel_id, message_id in list(self.bot.control_panels.items()):
+                try:
+                    text_channel = guild.get_channel(text_channel_id)
+                    if text_channel:
+                        message = await text_channel.fetch_message(message_id)
+                        await message.edit(embed=embed, view=None)
+                except Exception as e:
+                    print(f"Error updating control panel to DJ mode: {e}")
+                    
         except Exception as e:
-            print(f"Error resetting to original menu: {e}")
+            print(f"Error disabling main control panel: {e}")
+    
+    async def restore_main_control_panel(self):
+        """Restore the main control panel with all buttons"""
+        try:
+            # Update the control panel to show current state with buttons restored
+            await self.bot.update_control_panel(self.guild_id, self.channel_id)
+        except Exception as e:
+            print(f"Error restoring main control panel: {e}")
