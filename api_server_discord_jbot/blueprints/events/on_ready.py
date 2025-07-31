@@ -17,6 +17,16 @@ async def on_ready(self):
     print(f"Commands available for sync: {len(self.tree.get_commands())}")
     for cmd in self.tree.get_commands():
         print(f"  - {cmd.name}: {cmd.description}")
+
+    # 🔽 Clear globals commands cache
+    try:
+        print("Clearing global commands...")
+        self.tree.clear_commands()
+        await self.tree.sync()
+        print("✅ Global commands cleared.")
+    except Exception as e:
+        print(f"❌ Failed to clear global commands: {e}")
+
     
     if len(self.tree.get_commands()) > 0:
         print("Syncing slash commands to guilds...")
