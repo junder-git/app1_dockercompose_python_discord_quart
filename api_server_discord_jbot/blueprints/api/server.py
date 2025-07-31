@@ -6,9 +6,31 @@ from .handlers import get_api_handlers
 
 async def setup_hook(self):
     """Called when the bot starts up"""
+    print("Setup hook called!")
+    
     # Start the API server
     await self.start_api_server()
     print("API server started")
+    
+    # Load slash commands if they were registered
+    if hasattr(self, '_slash_commands_setup'):
+        try:
+            await self._slash_commands_setup(self)
+            print("Slash commands loaded successfully")
+        except Exception as e:
+            print(f"Error loading slash commands: {e}")
+            import traceback
+            traceback.print_exc()
+    else:
+        print("No slash commands setup function found")
+    
+    # List all commands in tree
+    print(f"Commands in tree: {len(self.tree.get_commands())}")
+    for cmd in self.tree.get_commands():
+        print(f"  - Command: {cmd.name} | Description: {cmd.description}")
+    
+    # Don't sync here - wait for on_ready when guilds are available
+    print("Waiting for bot to be ready to sync commands to guilds...")
 
 async def start_api_server(self):
     """

@@ -74,40 +74,7 @@ class JBotDiscord(commands.Bot):
         and UI components for the bot
         """
         # Apply each blueprint in order
-        api_blueprint(self)      # API endpoint handlers
+        api_blueprint(self)      # API endpoint handlers (includes setup_hook)
         commands_blueprint(self)  # Text and slash commands
         events_blueprint(self)    # Bot lifecycle and event handlers
         ui_blueprint(self)        # User interface components
-    
-    async def setup_hook(self):
-        """Called when the bot starts up"""
-        # Start the API server (if the method exists from blueprints)
-        if hasattr(self, 'start_api_server'):
-            await self.start_api_server()
-            print("API server started")
-        
-        # Load slash commands if they were registered
-        if hasattr(self, '_slash_commands_setup'):
-            try:
-                await self._slash_commands_setup(self)
-                print("Slash commands loaded successfully")
-            except Exception as e:
-                print(f"Error loading slash commands: {e}")
-        else:
-            print("No slash commands setup function found")
-        
-        # List all commands before syncing
-        print(f"Commands in tree before sync: {len(self.tree.get_commands())}")
-        for cmd in self.tree.get_commands():
-            print(f"  - {cmd.name}: {cmd.description}")
-        
-        # Sync slash commands
-        try:
-            synced = await self.tree.sync()
-            print(f"Successfully synced {len(synced)} command(s)")
-            for cmd in synced:
-                print(f"  - Synced: {cmd.name}")
-        except Exception as e:
-            print(f"Failed to sync commands: {e}")
-            import traceback
-            traceback.print_exc()
