@@ -68,26 +68,6 @@ def apply_slash_commands(bot):
                     return
                 
                 await leave_voice_channel(bot, interaction, voice_client)
-                
-            else:
-                # DEFAULT: SEARCH & PLAY ACTION 
-                # Anything that's not "join" or "leave" becomes a search query
-                query = action  # The action IS the query
-                print(f"Treating '{action}' as search query")
-                
-                if not is_connected:
-                    # Join and play
-                    await join_and_play(bot, interaction, user_voice_channel, query)
-                else:
-                    # Just play (if user is in same channel)
-                    if interaction.user.voice.channel != voice_client.channel:
-                        await interaction.followup.send(
-                            f"❌ I'm connected to **{voice_client.channel.name}**. Join that channel to add songs.",
-                            ephemeral=True
-                        )
-                        return
-                    
-                    await play_query(bot, interaction, user_voice_channel, query)
             
         except Exception as e:
             print(f"Error in JAI command: {e}")
@@ -113,10 +93,7 @@ async def join_and_show_controls(bot, interaction, voice_channel):
                 ephemeral=True
             )
             return
-        
-        # Join voice channel and show controls
-        await bot.join_and_show_controls(jai_channel, voice_channel, interaction.guild.id)
-        
+              
         # Create a view with a button to navigate to the jai channel
         view = discord.ui.View(timeout=8)
         nav_button = discord.ui.Button(
@@ -143,57 +120,6 @@ async def join_and_show_controls(bot, interaction, voice_channel):
         import traceback
         traceback.print_exc()
 
-async def join_and_play(bot, interaction, voice_channel, query):
-    """Join voice channel and immediately play the query"""
-    try:
-        # Find or create jai channel
-        jai_channel = await get_or_create_jai_channel(interaction.guild)
-        if not jai_channel:
-            await interaction.followup.send(
-                "❌ Could not access or create the 'jai' text channel. Check bot permissions.",
-                ephemeral=True
-            )
-            return
-        
-        # Join voice channel and show controls
-        await bot.join_and_show_controls(jai_channel, voice_channel, interaction.guild.id)
-        
-        # Now play the query
-        success_message = await process_and_play_query(bot, interaction, voice_channel, query)
-        
-        # Create a view with a button to navigate to the jai channel
-        view = discord.ui.View(timeout=8)
-        nav_button = discord.ui.Button(
-            label="Go to JAI Channel",
-            style=discord.ButtonStyle.primary,
-            emoji="🎵",
-            url=f"https://discord.com/channels/{interaction.guild.id}/{jai_channel.id}"
-        )
-        view.add_item(nav_button)
-        
-        if success_message:
-            message = await interaction.followup.send(
-                f"{interaction.user.mention} ✅ Joined **{voice_channel.name}** and {success_message}\n"
-                f"Click the button below to access music controls:",
-                view=view,
-                ephemeral=True
-            )
-        else:
-            message = await interaction.followup.send(
-                f"{interaction.user.mention} ✅ Joined **{voice_channel.name}** but failed to play the requested content.\n"
-                f"Click the button below to access music controls:",
-                view=view,
-                ephemeral=True
-            )
-        
-        # Start countdown and cleanup
-        await countdown_and_cleanup(message, 8)
-        
-    except Exception as e:
-        print(f"Error in join_and_play: {e}")
-        import traceback
-        traceback.print_exc()
-
 async def leave_voice_channel(bot, interaction, voice_client):
     """Leave the voice channel"""
     try:
@@ -213,130 +139,6 @@ async def leave_voice_channel(bot, interaction, voice_client):
         print(f"Error in leave_voice_channel: {e}")
         import traceback
         traceback.print_exc()
-
-async def play_query(bot, interaction, voice_channel, query):
-    """Play a query in the already connected voice channel"""
-    try:
-        success_message = await process_and_play_query(bot, interaction, voice_channel, query)
-        
-        if success_message:
-            await interaction.followup.send(
-                f"{interaction.user.mention} ✅ {success_message}",
-                ephemeral=True
-            )
-        else:
-            await interaction.followup.send(
-                f"{interaction.user.mention} ❌ Failed to play the requested content. Please check your query and try again.",
-                ephemeral=True
-            )
-            
-    except Exception as e:
-        print(f"Error in play_query: {e}")
-        import traceback
-        traceback.print_exc()
-
-async def process_and_play_query(bot, interaction, voice_channel, query):
-    """Process and play a query, return success message or None if failed"""
-    try:
-        # Check if the query is a URL
-        is_url = query.startswith("http") and ("youtube.com" in query or "youtu.be" in query)
-        
-        if is_url:
-            # Process URL directly
-            try:
-                # Normalize the URL
-                url = bot.youtube_client.normalize_playlist_url(query)
-                
-                # Process the URL
-                result = await bot.youtube_client.process_youtube_url(url)
-                
-                if not result:
-                    return None
-                
-                # Handle different URL types
-                if result['type'] == 'video':
-                    # Single video
-                    video_info = result['info']
-                    
-                    # Add to queue
-                    from .search import add_to_queue
-                    queue_result = await add_to_queue(
-                        bot,
-                        str(interaction.guild.id), 
-                        str(voice_channel.id), 
-                        video_info['id'], 
-                        video_info['title']
-                    )
-                    
-                    if queue_result["success"]:
-                        return f"added to queue: **{video_info['title']}**"
-                    else:
-                        return None
-                        
-                elif result['type'] == 'playlist':
-                    # Playlist - add first 10 tracks for slash command
-                    entries = result['entries'][:10]  # Limit to first 10 for slash command
-                    
-                    added_count = 0
-                    for entry in entries:
-                        try:
-                            from .search import add_to_queue
-                            queue_result = await add_to_queue(
-                                bot,
-                                str(interaction.guild.id), 
-                                str(voice_channel.id), 
-                                entry['id'], 
-                                entry['title']
-                            )
-                            
-                            if queue_result["success"]:
-                                added_count += 1
-                        except Exception as e:
-                            print(f"Error adding track {entry['title']}: {e}")
-                    
-                    if added_count > 0:
-                        return f"added **{added_count}** tracks from playlist to queue"
-                    else:
-                        return None
-                    
-            except Exception as e:
-                print(f"Error processing URL: {e}")
-                return None
-                
-        else:
-            # Treat as a search query
-            try:
-                # Search for videos
-                search_results = await bot.youtube_client.search_videos(query)
-                
-                if not search_results:
-                    return None
-                
-                # Get the first result
-                video = search_results[0]
-                
-                # Add to queue
-                from .search import add_to_queue
-                result = await add_to_queue(
-                    bot,
-                    str(interaction.guild.id), 
-                    str(voice_channel.id), 
-                    video['id'], 
-                    video['title']
-                )
-                
-                if result["success"]:
-                    return f"found and added: **{video['title']}**"
-                else:
-                    return None
-                    
-            except Exception as e:
-                print(f"Error searching for videos: {e}")
-                return None
-        
-    except Exception as e:
-        print(f"Error in process_and_play_query: {e}")
-        return None
 
 async def countdown_and_cleanup(message, seconds):
     """Show countdown and then delete the message - fixed for webhook messages"""
