@@ -7,40 +7,40 @@ import asyncio
 async def get_voice_client(bot, guild_id, channel_id, connect=False):
     """
     Get or create a voice client for the specified channel
-    
-    Args:
-        bot: The Discord bot instance
-        guild_id (str): Discord guild ID
-        channel_id (str): Discord channel ID
-        connect (bool, optional): Whether to connect if not already connected
-        
-    Returns:
-        tuple: (voice_client, queue_id) tuple
     """
     queue_id = bot.get_queue_id(guild_id, channel_id)
-    
-    # Return existing connection if available
-    if queue_id in bot.voice_connections and bot.voice_connections[queue_id].is_connected():
-        return bot.voice_connections[queue_id], queue_id
-    
-    # Connect if requested and not already connected
+
+    # Check for existing connection or in-progress connection
+    if queue_id in bot.voice_connections:
+        vc = bot.voice_connections[queue_id]
+        if vc.is_connected():
+            return vc, queue_id
+        elif vc.is_connecting():
+            print(f"[{queue_id}] Already attempting connection.")
+            return None, queue_id
+
+    # Proceed to connect if requested
     if connect:
         guild = bot.get_guild(int(guild_id))
         if not guild:
+            print(f"[{queue_id}] Guild not found.")
             return None, queue_id
-            
+
         voice_channel = guild.get_channel(int(channel_id))
         if not voice_channel:
+            print(f"[{queue_id}] Voice channel not found.")
             return None, queue_id
-            
+
         try:
             voice_client = await voice_channel.connect()
             bot.voice_connections[queue_id] = voice_client
             return voice_client, queue_id
         except Exception as e:
-            print(f"Error connecting to voice channel: {e}")
+            print(f"[{queue_id}] Error connecting to voice channel: {e}")
+            import traceback
+            traceback.print_exc()
             return None, queue_id
-    
+
     return None, queue_id
 
 

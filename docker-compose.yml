@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.api_server_discord_jbot
     container_name: jbot-discord-bot
+    network_mode: host  # enables Discord voice to work
     environment:
       - PYTHONUNBUFFERED=1
       - SECRET_KEY=${SECRET_KEY}
@@ -14,11 +15,6 @@ services:
       - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
       - YOUTUBE_USERNAME=${YOUTUBE_USERNAME}
       - YOUTUBE_PASSWORD=${YOUTUBE_PASSWORD}
-    networks:
-      - jbot-network
     volumes:
       - ./api_server_discord_jbot:/app/api_server_discord_jbot
       - ./auth:/app/auth
-networks:
-  jbot-network:
-    driver: bridge
