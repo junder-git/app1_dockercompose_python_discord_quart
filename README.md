@@ -1,3 +1,5 @@
+https://stackoverflow.com/questions/79664160/discord-py-bot-keeps-reconnected-and-disconnecting-from-voice-channels
+
 # JBot - Discord Bot & Quart Website Manager
 
 ## Setup & Installation Guide

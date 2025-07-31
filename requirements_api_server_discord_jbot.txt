@@ -1,6 +1,6 @@
 async-timeout>=4.0.2
 python-dotenv==1.0.0
-discord.py[voice]>=2.0.0
+discord.py[voice]>=2.5.2
 aiohttp>=3.8.0
 pynacl>=1.4.0
 yt-dlp>=2023.3.4
