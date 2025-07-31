@@ -93,6 +93,9 @@ async def join_and_show_controls(bot, interaction, voice_channel):
                 ephemeral=True
             )
             return
+        
+        from .join import get_voice_client
+        get_voice_client(bot, interaction.guild, interaction.channel, connect=True)
               
         # Create a view with a button to navigate to the jai channel
         view = discord.ui.View(timeout=8)
@@ -128,7 +131,7 @@ async def leave_voice_channel(bot, interaction, voice_client):
         
         # Disconnect from voice channel
         from .leave import disconnect_from_voice
-        result = await disconnect_from_voice(bot, str(interaction.guild.id), channel_id, preserve_queue=False)
+        await disconnect_from_voice(bot, str(interaction.guild.id), channel_id, preserve_queue=False)
         
         await interaction.followup.send(
             f"{interaction.user.mention} ✅ Left **{voice_channel_name}** and cleared the queue.",

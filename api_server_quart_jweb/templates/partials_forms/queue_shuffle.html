@@ -1,6 +1,0 @@
-<form method="POST" action="{{ url_for('queue.shuffle_queue_route', guild_id=guild_id) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn btn-sm btn-outline-light" title="Shuffle Queue">
-        <i class="fas fa-random"></i> Shuffle
-    </button>
-</form>

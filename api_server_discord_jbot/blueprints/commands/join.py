@@ -2,33 +2,7 @@
 Join command for Discord bot - includes voice channel connection functionality
 """
 import discord
-from discord.ext import commands
 import asyncio
-
-@commands.command(name="join", aliases=["j"])
-async def join_command(ctx):
-    """
-    Make the bot join your voice channel.
-    
-    Usage:
-    !join
-    """
-    # Delete command message after a short delay
-    asyncio.create_task(ctx.message.delete(delay=ctx.bot.cleartimer))
-    
-    # Check if user is in a voice channel
-    if not ctx.author.voice:
-        message = await ctx.send("You need to be in a voice channel to use this command.")
-        await message.delete(delay=ctx.bot.cleartimer)
-        return
-    
-    voice_channel = ctx.author.voice.channel
-    
-    # Join the voice channel and show controls
-    await ctx.bot.join_and_show_controls(ctx.channel, voice_channel, ctx.guild.id)
-
-
-# Core voice functionality - can be called by API handlers or commands
 
 async def get_voice_client(bot, guild_id, channel_id, connect=False):
     """

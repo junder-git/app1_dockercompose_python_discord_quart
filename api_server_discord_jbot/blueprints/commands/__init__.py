@@ -2,12 +2,10 @@
 Commands Blueprint for Discord Bot
 Handles Discord slash commands and message commands
 """
-import discord
-from discord.ext import commands
 import types
 # Music commands
 from .play import play_command, play_next
-from .join import join_command, get_voice_client, follow_to_voice_channel, check_same_voice_channel
+from .join import get_voice_client, follow_to_voice_channel, check_same_voice_channel
 from .leave import leave_command, disconnect_from_voice
 from .pause import pause_command, toggle_playback
 from .resume import resume_command
@@ -27,7 +25,6 @@ def apply(bot):
     # Register all command handlers
     # Register commands with the bot
     bot.add_command(play_command)
-    bot.add_command(join_command)
     bot.add_command(leave_command)
     bot.add_command(pause_command)
     bot.add_command(resume_command)

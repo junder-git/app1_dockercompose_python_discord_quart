@@ -1,8 +1,0 @@
-    <!-- Bot Leave Form -->
-    <form method="POST" action="{{ url_for('server.bot_leave_route', guild_id=guild_id) }}" class="me-2">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="channel_id" value="{{ selected_channel_id }}">
-        <button type="submit" class="btn btn-sm btn-danger" id="botLeaveBtn" {% if not bot_state.connected %}disabled{% endif %}>
-            <i class="fas fa-sign-out-alt me-1"></i> Leave
-        </button>
-    </form>

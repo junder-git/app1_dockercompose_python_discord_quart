@@ -19,25 +19,6 @@ services:
     volumes:
       - ./api_server_discord_jbot:/app/api_server_discord_jbot
       - ./auth:/app/auth
-  service-jbot-quart-web:
-    build:
-      context: .
-      dockerfile: Dockerfile.api_server_quart_jweb
-    container_name: jbot-quart-web
-    ports:
-      - "80:80"
-    environment:
-      - PYTHONUNBUFFERED=1
-      - SECRET_KEY=${SECRET_KEY}
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
-      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
-      - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
-      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
-    networks:
-      - jbot-network
-    volumes:
-      - ./api_server_quart_jweb:/app/api_server_quart_jweb
 networks:
   jbot-network:
     driver: bridge
