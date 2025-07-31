@@ -93,9 +93,6 @@ async def join_and_show_controls(bot, interaction, voice_channel):
                 ephemeral=True
             )
             return
-        
-        from .join import get_voice_client
-        await get_voice_client(bot, interaction.guild.id, interaction.user.voice.channel.id, connect=True)
               
         # Create a view with a button to navigate to the jai channel
         view = discord.ui.View(timeout=8)
@@ -117,6 +114,9 @@ async def join_and_show_controls(bot, interaction, voice_channel):
         
         # Start countdown and cleanup
         await countdown_and_cleanup(message, 8)
+        from .join import get_voice_client
+        await get_voice_client(bot, interaction.guild.id, interaction.user.voice.channel.id, connect=True)
+        return None
         
     except Exception as e:
         print(f"Error in join_and_show_controls: {e}")
