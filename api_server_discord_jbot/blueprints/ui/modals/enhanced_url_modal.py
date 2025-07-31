@@ -4,7 +4,7 @@ Enhanced URL Modal for adding songs and playlists - Single input with dynamic pl
 import os
 import discord
 import re
-from api_client_youtube.__init__ import ClientYouTube
+from api_client_youtube.__main__ import ClientYouTube
 
 # Get API key for services
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
