@@ -15,6 +15,7 @@ from .skip import skip_command, skip_track
 from .stop import stop_command, stop_playback
 from .queue import queue_command, clear_command, shuffle_command, move_command, clear_queue, shuffle_queue, reorder_queue
 from .search import search_command, add_to_queue
+from .slash_commands import apply_slash_commands
 
 def apply(bot):
     """
@@ -24,7 +25,7 @@ def apply(bot):
         bot: The Discord bot instance
     """
     # Register all command handlers
-        # Register commands with the bot
+    # Register commands with the bot
     bot.add_command(play_command)
     bot.add_command(join_command)
     bot.add_command(leave_command)
@@ -50,4 +51,5 @@ def apply(bot):
     bot.reorder_queue = types.MethodType(reorder_queue, bot)
     bot.add_to_queue = types.MethodType(add_to_queue, bot)
 
-    
+    # Apply slash commands
+    apply_slash_commands(bot)

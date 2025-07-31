@@ -26,8 +26,8 @@ def run():
     """
     Function to run the bot
     """
-    # Create the bot instance
-    bot = JBotDiscord(command_prefix="jbot ", intents=intents)
+    # Create the bot instance with new prefix
+    bot = JBotDiscord(command_prefix="jai ", intents=intents)
 
     # Apply all blueprints
     bot.apply_blueprints()

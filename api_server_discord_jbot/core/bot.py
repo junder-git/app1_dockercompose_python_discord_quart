@@ -78,3 +78,17 @@ class JBotDiscord(commands.Bot):
         commands_blueprint(self)  # Text and slash commands
         events_blueprint(self)    # Bot lifecycle and event handlers
         ui_blueprint(self)        # User interface components
+    
+    async def setup_hook(self):
+        """Called when the bot starts up"""
+        # Start the API server (if the method exists from blueprints)
+        if hasattr(self, 'start_api_server'):
+            await self.start_api_server()
+            print("API server started")
+        
+        # Sync slash commands
+        try:
+            synced = await self.tree.sync()
+            print(f"Synced {len(synced)} command(s)")
+        except Exception as e:
+            print(f"Failed to sync commands: {e}")
