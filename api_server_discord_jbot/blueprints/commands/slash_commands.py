@@ -8,6 +8,7 @@ import asyncio
 class SlashCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        print(f"SlashCommands cog initialized with bot: {bot.user}")
 
     @discord.app_commands.command(name="jai", description="Smart music bot control - join/leave/play based on context")
     @discord.app_commands.describe(query="Optional: Song name, artist, or YouTube URL to play (leave empty to join/leave)")
@@ -19,6 +20,7 @@ class SlashCommands(commands.Cog):
         - If joined + no query: Leave voice channel
         - If joined + has query: Play the query
         """
+        print(f"JAI slash command called by {interaction.user} with query: {query}")
         # Check if user is in a voice channel (required for all operations)
         if not interaction.user.voice:
             await interaction.response.send_message(
@@ -359,9 +361,15 @@ class SlashCommands(commands.Cog):
 
 # Function to add the cog to the bot
 async def setup(bot):
-    await bot.add_cog(SlashCommands(bot))
+    print(f"Setting up SlashCommands cog for bot: {bot.user}")
+    cog = SlashCommands(bot)
+    await bot.add_cog(cog)
+    print("SlashCommands cog added successfully")
 
 # For registering with the bot
 def apply_slash_commands(bot):
     """Apply slash commands to the bot"""
-    asyncio.create_task(setup(bot))
+    print("Applying slash commands to bot")
+    # Store the setup function to be called later when the event loop is running
+    bot._slash_commands_setup = setup
+    print("Slash commands setup function stored")

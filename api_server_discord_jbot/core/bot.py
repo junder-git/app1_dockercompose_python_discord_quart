@@ -86,9 +86,28 @@ class JBotDiscord(commands.Bot):
             await self.start_api_server()
             print("API server started")
         
+        # Load slash commands if they were registered
+        if hasattr(self, '_slash_commands_setup'):
+            try:
+                await self._slash_commands_setup(self)
+                print("Slash commands loaded successfully")
+            except Exception as e:
+                print(f"Error loading slash commands: {e}")
+        else:
+            print("No slash commands setup function found")
+        
+        # List all commands before syncing
+        print(f"Commands in tree before sync: {len(self.tree.get_commands())}")
+        for cmd in self.tree.get_commands():
+            print(f"  - {cmd.name}: {cmd.description}")
+        
         # Sync slash commands
         try:
             synced = await self.tree.sync()
-            print(f"Synced {len(synced)} command(s)")
+            print(f"Successfully synced {len(synced)} command(s)")
+            for cmd in synced:
+                print(f"  - Synced: {cmd.name}")
         except Exception as e:
             print(f"Failed to sync commands: {e}")
+            import traceback
+            traceback.print_exc()
