@@ -12,18 +12,7 @@ async def setup_hook(self):
     await self.start_api_server()
     print("API server started")
     
-    # Load slash commands if they were registered
-    if hasattr(self, '_slash_commands_setup'):
-        try:
-            await self._slash_commands_setup(self)
-            print("Slash commands loaded successfully")
-        except Exception as e:
-            print(f"Error loading slash commands: {e}")
-            import traceback
-            traceback.print_exc()
-    else:
-        print("No slash commands setup function found")
-    
+    # The slash commands should already be loaded by the blueprint
     # List all commands in tree
     print(f"Commands in tree: {len(self.tree.get_commands())}")
     for cmd in self.tree.get_commands():
