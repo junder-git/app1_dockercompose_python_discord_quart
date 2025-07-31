@@ -149,6 +149,10 @@ class PlaylistSelectionView(discord.ui.View):
                 color=discord.Color.red()
             )
             await self.modal_interaction.edit_original_response(embed=embed, view=None)
+            
+            # Reset to original menu after 8 seconds on error
+            await asyncio.sleep(8)
+            await self.reset_to_original_menu()
     
     async def add_tracks_to_queue(self, selected_indices, playlist_title):
         """Add selected tracks to the queue"""
@@ -294,6 +298,7 @@ class PlaylistSelectionView(discord.ui.View):
         except Exception as e:
             print(f"Error resetting to original menu: {e}")
 
+
 class CustomSelectionButton(discord.ui.Button):
     """Button to open custom selection modal"""
     
@@ -321,6 +326,7 @@ class CustomSelectionButton(discord.ui.Button):
             self.playlist_info, self.entries, self.modal_interaction
         )
         await interaction.response.send_modal(custom_modal)
+
 
 class CustomPlaylistSelectionModal(discord.ui.Modal):
     """Modal for custom playlist selection input"""
@@ -406,58 +412,8 @@ class CustomPlaylistSelectionModal(discord.ui.Modal):
             )
             await self.original_interaction.edit_original_response(embed=embed)
 
-    async def reset_to_original_menu(self, interaction):
-        """Reset the interaction back to the original control panel menu"""
-        try:
-            # Get the original control panel embed and view
-            queue_id = self.bot.get_queue_id(self.guild_id, self.channel_id)
-            
-            # Get guild and voice channel
-            guild = self.bot.get_guild(int(self.guild_id))
-            if not guild:
-                return
-            
-            voice_channel = guild.get_channel(int(self.channel_id))
-            if not voice_channel:
-                return
-            
-            # Create the original control panel embed
-            embed = discord.Embed(
-                title="🎵 Music Control Panel",
-                description=f"Connected to **{voice_channel.name}**",
-                color=discord.Color.blurple()
-            )
-            
-            # Add queue info if there are songs
-            if self.bot.music_queues[queue_id]:
-                queue_text = "\n".join(
-                    f"{i+1}. {track['title']}" 
-                    for i, track in enumerate(self.bot.music_queues[queue_id][:5])
-                )
-                if len(self.bot.music_queues[queue_id]) > 5:
-                    queue_text += f"\n... and {len(self.bot.music_queues[queue_id]) - 5} more"
-                embed.add_field(name="Queue", value=queue_text, inline=False)
-            else:
-                embed.add_field(name="Queue", value="Empty", inline=False)
-            
-            # Add currently playing info
-            current_track = self.bot.currently_playing.get(queue_id)
-            if current_track:
-                embed.add_field(
-                    name="Now Playing",
-                    value=f"[{current_track['title']}](https://www.youtube.com/watch?v={current_track['id']})",
-                    inline=False
-                )
-            
-            # Import and create the original MusicControlView
-            from ..components.music_control_view import MusicControlView
-            view = MusicControlView(self.bot, self.guild_id, self.channel_id)
-            
-            # Update the original message
-            await interaction.edit_original_response(embed=embed, view=view)
-            
-        except Exception as e:
-            print(f"Error resetting to original menu: {e}")
+
+class EnhancedURLModal(discord.ui.Modal):
     def __init__(self, bot, guild_id, channel_id):
         super().__init__(title="Add YouTube URL")
         self.bot = bot
