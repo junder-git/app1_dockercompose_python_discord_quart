@@ -117,14 +117,17 @@ async def join_and_show_controls(bot, interaction, voice_channel):
         
         # ALSO send a public message to the original channel for visibility
         try:
-            public_message = await interaction.channel.send(
-                f"🎵 {interaction.user.mention} summoned JAI to **{voice_channel.name}**! "
-                f"Controls are in {jai_channel.mention}"
-            )
-            
-            # Delete public message after a delay
-            cleartimer = getattr(bot, 'cleartimer', 10)
-            await public_message.delete(delay=cleartimer)
+            # Get the actual channel object from the bot
+            channel = bot.get_channel(interaction.channel_id)
+            if channel:
+                public_message = await channel.send(
+                    f"🎵 {interaction.user.mention} summoned JAI to **{voice_channel.name}**! "
+                    f"Controls are in {jai_channel.mention}"
+                )
+                
+                # Delete public message after a delay
+                cleartimer = getattr(bot, 'cleartimer', 10)
+                await public_message.delete(delay=cleartimer)
         except Exception as e:
             print(f"Could not send public message: {e}")
         
@@ -147,13 +150,16 @@ async def leave_voice_channel(bot, interaction, voice_client):
         
         # Send public message to the original channel
         try:
-            public_message = await interaction.channel.send(
-                f"👋 {interaction.user.mention} dismissed JAI from **{voice_channel_name}**"
-            )
-            
-            # Delete public message after a delay
-            cleartimer = getattr(bot, 'cleartimer', 10)
-            await public_message.delete(delay=cleartimer)
+            # Get the actual channel object from the bot
+            channel = bot.get_channel(interaction.channel_id)
+            if channel:
+                public_message = await channel.send(
+                    f"👋 {interaction.user.mention} dismissed JAI from **{voice_channel_name}**"
+                )
+                
+                # Delete public message after a delay
+                cleartimer = getattr(bot, 'cleartimer', 10)
+                await public_message.delete(delay=cleartimer)
         except Exception as e:
             print(f"Could not send public leave message: {e}")
         
