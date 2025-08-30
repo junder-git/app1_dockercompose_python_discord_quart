@@ -86,7 +86,7 @@ def apply_slash_commands(bot):
 Function to join a voice channel and show controls
 """
 
-async def join_and_show_controls(self, text_channel, voice_channel, guild_id=discord.Interaction.guild.id):
+async def join_and_show_controls(self, text_channel, voice_channel, guild_id=discord.Interaction.guild_id):
     """
     Join a voice channel and show controls in the text channel
     
