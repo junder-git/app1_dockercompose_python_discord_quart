@@ -130,9 +130,9 @@ async def join_and_show_controls(self, text_channel, voice_channel, guild_id=dis
     except Exception as e:
         print(f"Error joining voice channel: {e}")
         # Get cleartimer or default to 10 seconds
-        cleartimer = getattr(self, 'cleartimer', 10)
-        error_message = await text_channel.send(f"❌ Error: {str(e)}")
-        await error_message.delete(delay=cleartimer)
+        #cleartimer = getattr(self, 'cleartimer', 10)
+        #error_message = await text_channel.send(f"❌ Error: {str(e)}")
+        #await error_message.delete(delay=cleartimer)
 
 async def leave_voice_channel(bot, interaction, voice_client):
     """Leave the voice channel"""
