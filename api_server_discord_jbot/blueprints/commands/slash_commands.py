@@ -82,63 +82,80 @@ def apply_slash_commands(bot):
     bot.tree.add_command(jai_command)
     print("JAI command added to tree successfully")
 
-"""
-Function to join a voice channel and show controls
-"""
-
-async def join_and_show_controls(self, text_channel, voice_channel, guild_id=discord.Interaction.guild_id):
-    """
-    Join a voice channel and show controls in the text channel
-    
-    Args:
-        text_channel: Discord text channel to send controls to
-        voice_channel: Discord voice channel to join
-        guild_id: ID of the Discord guild
-    """
+async def join_and_show_controls(bot, interaction, voice_channel):
+    """Join voice channel and show controls in jai text channel"""
     try:
-        # Check if we're already in this voice channel
-        queue_id = self.get_queue_id(str(guild_id), str(voice_channel.id))
+        # Find or create jai channel
+        jai_channel = await get_or_create_jai_channel(interaction.guild)
+        if not jai_channel:
+            await interaction.followup.send(
+                "❌ Could not access or create the 'jai' text channel. Check bot permissions.",
+                ephemeral=True
+            )
+            return
         
-        # If already connected to a different channel, disconnect first
-        for existing_queue_id, voice_client in list(self.voice_connections.items()):
-            if existing_queue_id.startswith(f"{guild_id}_") and voice_client.is_connected():
-                # Preserve queue if we're moving channels
-                if existing_queue_id != queue_id and queue_id in self.currently_playing:
-                    current_track = self.currently_playing.get(queue_id)
-                    if current_track:
-                        self.music_queues[queue_id].insert(0, current_track)
-                
-                await voice_client.disconnect(force=True)
-                self.voice_connections.pop(existing_queue_id, None)
-                break
+        from .join import get_voice_client
+        await get_voice_client(bot, interaction.guild.id, interaction.user.voice.channel.id, connect=True)
+              
+        # Create a view with a button to navigate to the jai channel
+        view = discord.ui.View(timeout=8)
+        nav_button = discord.ui.Button(
+            label="Go to JAI Channel",
+            style=discord.ButtonStyle.primary,
+            emoji="🎵",
+            url=f"https://discord.com/channels/{interaction.guild.id}/{jai_channel.id}"
+        )
+        view.add_item(nav_button)
         
-        # Join the voice channel if not already connected
-        if queue_id not in self.voice_connections or not self.voice_connections[queue_id].is_connected():
-            voice_client = await voice_channel.connect()
-            self.voice_connections[queue_id] = voice_client
+        # Send initial ephemeral message
+        ephemeral_message = await interaction.followup.send(
+            f"{interaction.user.mention} ✅ Joined **{voice_channel.name}** and posted controls in {jai_channel.mention}!\n"
+            f"Click the button below to go directly to the music controls:",
+            view=view,
+            ephemeral=True
+        )
+        
+        # ALSO send a public message to the original channel for visibility
+        try:
+            public_message = await interaction.channel.send(
+                f"🎵 {interaction.user.mention} summoned JAI to **{voice_channel.name}**! "
+                f"Controls are in {jai_channel.mention}"
+            )
             
-            # Get cleartimer or default to 10 seconds
-            cleartimer = getattr(self, 'cleartimer', 10)
-            
-            # Send confirmation message to the original text channel
-            join_message = await text_channel.send(f"🎵 Joined **{voice_channel.name}** and posted controls!")
-            await join_message.delete(delay=cleartimer)
+            # Delete public message after a delay
+            cleartimer = getattr(bot, 'cleartimer', 10)
+            await public_message.delete(delay=cleartimer)
+        except Exception as e:
+            print(f"Could not send public message: {e}")
         
-        # Create and send control panel
-        await self.send_control_panel(text_channel, voice_channel, str(guild_id))
+        # Call the bot's method to create control panel in the jai channel
+        await bot.join_and_show_controls(jai_channel, voice_channel, interaction.guild.id)
+        
+        # Start countdown and cleanup for ephemeral message
+        await countdown_and_cleanup(ephemeral_message, 8)
         
     except Exception as e:
-        print(f"Error joining voice channel: {e}")
-        # Get cleartimer or default to 10 seconds
-        #cleartimer = getattr(self, 'cleartimer', 10)
-        #error_message = await text_channel.send(f"❌ Error: {str(e)}")
-        #await error_message.delete(delay=cleartimer)
+        print(f"Error in join_and_show_controls: {e}")
+        import traceback
+        traceback.print_exc()
 
 async def leave_voice_channel(bot, interaction, voice_client):
     """Leave the voice channel"""
     try:
         channel_id = str(voice_client.channel.id)
         voice_channel_name = voice_client.channel.name
+        
+        # Send public message to the original channel
+        try:
+            public_message = await interaction.channel.send(
+                f"👋 {interaction.user.mention} dismissed JAI from **{voice_channel_name}**"
+            )
+            
+            # Delete public message after a delay
+            cleartimer = getattr(bot, 'cleartimer', 10)
+            await public_message.delete(delay=cleartimer)
+        except Exception as e:
+            print(f"Could not send public leave message: {e}")
         
         # Disconnect from voice channel
         from .leave import disconnect_from_voice
